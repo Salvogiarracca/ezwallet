@@ -6,13 +6,14 @@ Version: V1 - description of EZWallet in CURRENT form (as received by teachers)
 
  
 | Version number | Change |
-| ----------------- |:-----------|
-| 1.0 | ? | 
+| :-----------------: |:-----------:|
+| 1.1 | 2 | 
 
 
 # Contents
 
 - [Informal description](#informal-description)
+- [Business model](#business-model)
 - [Stakeholders](#stakeholders)
 - [Context Diagram and interfaces](#context-diagram-and-interfaces)
 	+ [Context Diagram](#context-diagram)
@@ -33,16 +34,20 @@ Version: V1 - description of EZWallet in CURRENT form (as received by teachers)
 # Informal description
 EZWallet (read EaSy Wallet) is a software application designed to help individuals and families keep track of their expenses. Users can enter and categorize their expenses, allowing them to quickly see where their money is going. EZWallet is a powerful tool for those looking to take control of their finances and make informed decisions about their spending.
 
+# Business Model
+This application is being developed as an open-source project. The project aims to become a self-hosted solution for users who want to manage their expenses without relying on any commercial product that may be more at risk of potential data leaks or, without the user knowing, may sell their information online. 
+
+The user who sets up the application has full rights on transactions and categories created and can grant more privileges to normal users. Normal users can login and track their expense, eventually inside a group composed by other individuals.
+
+The community behind the project is composed of developers that work on the application in their free time. To support them a small bank account has been setted up to accept donations by users.
 
 
 # Stakeholders
 
-
 | Stakeholder name  | Description | 
 | :----------------- |:-----------|
 | User | Someone who will use the application to keep track of his expenses | 
-| Administrator | User with more privileges |
-| COO | Person who guide the company's operations based on an analysis of the system |
+| Administrator | Developer who has special privileges over the functions performed by the application (currently the system doesn't distinguish between roles so it isn't an actor) |
 
 # Context Diagram and interfaces
 
@@ -55,50 +60,35 @@ EZWallet
 
 User
 
-Administrator
-
 ## Interfaces
-\<describe here each interface in the context diagram>
-
-\<GUIs will be described graphically in a separate document>
 
 | Actor | Logical Interface | Physical Interface  |
 | ------------- |:-------------| -----|
 | User | Smartphone | GUI (tdb + key functions: managing transactions and categories) |
-| Administrator | PC | GUI (tbd + all functions + management of users) |
 
 # Stories and personas
-\<A Persona is a realistic impersonation of an actor. Define here a few personas and describe in plain text how a persona interacts with the system>
 
-\<Persona is-an-instance-of actor>
+Persona 1 (P1): female, 23 y.o., student, low income, not married. <br>
+Interacts with the application through a web browser on her phone.
 
-\<stories will be formalized later as scenarios in use cases>
+Persona 2 (P2): male, 51 y.o., worker, high income, married. <br>
+Interacts with the application through a web browser on his laptop.
 
-## Persona 1: female, 23 y.o., student, low income, not married
-Story: wants to keep track of common expenses with housemates (electrical/internet bills, food, cleaning products…) to correctly split expenses
+Persona 3 (P3): male, old age, retired, low income, married. <br>
+Interacts with the application through a web browser on his desktop computer.
 
-## Persona 2: male, 51 y.o., worker, high income, married
-Story: wants to track household expenses with his wife and children, such as rent, school tuition, food, electrical bills, etc.
+Persona 4 (P4): female, 28 y.o., worker, medium income, not married.<br>
+Interacts with the application through a web browser on her phone.
 
-## Persona 3: male, old age, retired, low income, married
-Story: wants to keep track of how his pension is used during the month in order to have the needed amount for medicines
+Persona 5 (P5): other, young age, part-time worker, low income, not married.<br>
+Interacts with the application through a web browser on its phone.
 
-## Persona 4: female, 28 y.o., worker, medium income, not married.
-Story: wants to keep track of travel expenses with a group of friends.
-
-## Persona 5: other, young age, part-time worker, low income, not married
-Story: wants to keep track of expenses to keep paying its school
-
-## Persona 6: male, young age, worker, medium income, not married
-Story: wants to keep track of expenses related to his ski hobby
+Persona 6 (P6): male, young age, worker, medium income, not married.<br>
+Interacts with the application through a web browser on his phone.
 
 # Functional and non functional requirements
 
 ## Functional Requirements
-
-\<In the form DO SOMETHING, or VERB NOUN, describe high level capabilities of the system>
-
-\<they match to high level use cases>
 
 | ID        | Description  |
 | ------------- |:-------------| 
@@ -109,9 +99,7 @@ Story: wants to keep track of expenses related to his ski hobby
 
 ## Non Functional Requirements
 
-\<Describe constraints on functional requirements>
-
-| ID        | Type (efficiency, reliability, ..)           | Description  | Refers to |
+| ID | Type (efficiency, reliability, ..) | Description | Refers to |
 | ------------- |:-------------| :-----| :-----|
 | NFR1 | Usability | Core functions for users should be used with no training, only with previous experience with smartphones | FR1, FR2, FR4 |
 | NFR2 | Availability | Max. Server downtime 1 hr / year | FR1, FR2, FR3, FR4 |
@@ -130,15 +118,95 @@ Story: wants to keep track of expenses related to his ski hobby
 
 \<next describe here each use case in the UCD>
 ### UC1: Login
-| Actors Involved        |  |
+| User       |  |
 | ------------- |:-------------| 
 |  Precondition   | User must have an account |
 |  Post condition | User is authorized |
-|  Nominal Scenario | User wants to be authorized |
+|  Nominal Scenario | Scenario 1.1  |
 |  Variants     | - |
 |  Exceptions     | User is already logged in; User’s account doesn't exist; Wrong credentials |
 
-##### Scenario 1.1 
+| Scenario 1.1 | |
+| ------------- |:-------------| 
+|  Precondition     | User must have an account |
+|  Post condition     | User is authorized |
+| Step        | Description  |
+|  1 | User asks to login |  
+|  2 | System asks email and password |
+|  3 | User enters email and password |
+|  4 | System checks, account name and password correct |
+|  5 | Server sends two cookies to the client that contain an access and a refresh token respectively: <br> - Access token has an expiration time of one hour <br> - Refresh token has an expiration time of seven days |
+
+### UC2: Register
+| User        |  |
+| ------------- |:-------------| 
+|  Precondition   | User must not have an account |
+|  Post condition | Account is created |
+|  Nominal Scenario | Scenario 2.1  |
+|  Variants     | - |
+|  Exceptions     | User is already registered; Account not created |
+
+| Scenario 2.1 | |
+| ------------- |:-------------| 
+|  Precondition     | User must not have an account |
+|  Post condition     | Account is created |
+| Step        | Description  |
+|  1 | User asks to sign up |  
+|  2 | System asks for email, checks if email is available |
+|  3 | System asks for password and username |
+
+### UC3: Logout
+| User        |  |
+| ------------- |:-------------| 
+|  Precondition   | User must have an account and must be logged in |
+|  Post condition | User is logged out |
+|  Nominal Scenario | Scenario 3.1  |
+|  Variants     | - |
+|  Exceptions     | User already logged out; User’s session expired (7 days); User not found |
+
+| Scenario 3.1 | |
+| ------------- |:-------------| 
+|  Precondition     | User must have an account and must be logged in |
+|  Post condition     | User is logged out |
+| Step        | Description  |
+|  1 | User asks to log out |  
+|  2 | User’s device checks if access and refresh tokens exist |
+|  3 | System checks if refresh token exists |
+|  4 | System erases access and refresh tokens from user’s account |
+
+### UC4: Create a transaction
+| User        |  |
+| ------------- |:-------------| 
+|  Precondition   | User must be logged in |
+|  Post condition | Transaction created |
+|  Nominal Scenario | Scenario 4.1  |
+|  Variants     | - |
+|  Exceptions     | User not authorized |
+
+| Scenario 4.1 | |
+| ------------- |:-------------| 
+|  Precondition | User must be logged in |
+|  Post condition | Transaction created |
+| Step        | Description  |
+|  1 | User enters name, amount, and type |  
+|  2 | System creates new transaction |
+
+### UC5: Delete a transaction
+| User        |  |
+| ------------- |:-------------| 
+|  Precondition   | User must be logged in |
+|  Post condition | Transaction deleted |
+|  Nominal Scenario | Scenario 5.1  |
+|  Variants     | - |
+|  Exceptions     | User not authorized  |
+
+| Scenario 5.1 | |
+| ------------- |:-------------| 
+|  Precondition | User must be logged in |
+|  Post condition | Transaction deleted |
+| Step        | Description  |
+|  1 | User enters transaction |  
+|  2 | System deletes transaction |
 
 \<describe here scenarios instances of UC1>
 
@@ -147,29 +215,6 @@ Story: wants to keep track of expenses related to his ski hobby
 \<a scenario is a more formal description of a story>
 
 \<only relevant scenarios should be described>
-
-| Scenario 1.1 | |
-| ------------- |:-------------| 
-|  Precondition     | User must have an account |
-|  Post condition     | User is authorized |
-| Step#        | Description  |
-|  1 | User asks to login |  
-|  2 | System asks email and password |
-|  3 | User enters email and password |
-|  4 | System checks, account name and password correct, user is authorized |
-|  5 | Post condition: user is authorized |
-
-##### Scenario 1.2
-
-##### Scenario 1.x
-
-### Use case 2, UC2
-..
-
-### Use case x, UCx
-..
-
-
 
 # Glossary
 
