@@ -124,7 +124,7 @@ Interacts with the application through a web browser on his phone.
 |  Post condition | User is authorized |
 |  Nominal Scenario | Scenario 1.1  |
 |  Variants     | - |
-|  Exceptions     | User is already logged in; User’s account doesn't exist; Wrong credentials; Connection to the DB fails |
+|  Exceptions     | - User is already logged in<br> - User’s account doesn't exist<br> - Wrong credentials<br> -  Connection to the DB fails |
 | Post condition (exception case) | User not authorized |
 
 | Scenario 1.1 | |
@@ -145,7 +145,7 @@ Interacts with the application through a web browser on his phone.
 |  Post condition | Account is created |
 |  Nominal Scenario | Scenario 2.1  |
 |  Variants     | - |
-|  Exceptions     | User is already registered; Connection to the DB fails |
+|  Exceptions     | - User is already registered<br> - Connection to the DB fails |
 | Post condition (exception case) | Account not created |
 
 
@@ -167,7 +167,7 @@ Interacts with the application through a web browser on his phone.
 |  Post condition | User is logged out |
 |  Nominal Scenario | Scenario 3.1  |
 |  Variants     | - |
-|  Exceptions     | User already logged out; User’s session expired (7 days); User not found; Connection to the DB fails |
+|  Exceptions     | - User already logged out<br> - User’s session expired (7 days)<br> - User not found<br> - Connection to the DB fails |
 | Post condition (exception case) | Log out action not performed |
 
 | Scenario 3.1 | |
@@ -187,7 +187,7 @@ Interacts with the application through a web browser on his phone.
 |  Post condition | Transaction created |
 |  Nominal Scenario | Scenario 4.1  |
 |  Variants     | - |
-|  Exceptions     | User not authorized; Transaction already exists; Connection to the DB fails |
+|  Exceptions     | - User not authorized<br> - Transaction already exists<br> - Connection to the DB fails |
 | Post condition (exception case) | Transaction not created |
 
 | Scenario 4.1 | |
@@ -207,7 +207,7 @@ Interacts with the application through a web browser on his phone.
 |  Post condition | Transaction deleted |
 |  Nominal Scenario | Scenario 5.1  |
 |  Variants     | - |
-|  Exceptions     | User not authorized; Transaction doesn't exist; Connection to the DB fails |
+|  Exceptions     | - User not authorized<br> - Transaction doesn't exist<br> - Connection to the DB fails |
 | Post condition (exception case) | Transaction not deleted |
 
 | Scenario 5.1 | |
@@ -227,7 +227,7 @@ Interacts with the application through a web browser on his phone.
 |  Post condition | Transaction data are retrieved |
 |  Nominal Scenario | Scenario 6.1  |
 |  Variants     | - |
-|  Exceptions     | User not authorized; Connection to the DB fails |
+|  Exceptions     | - User not authorized<br> - Connection to the DB fails |
 | Post condition (exception case) | Transaction's list not retrieved |
 
 | Scenario 6.1 | |
@@ -245,7 +245,7 @@ Interacts with the application through a web browser on his phone.
 |  Post condition | Category created |
 |  Nominal Scenario | Scenario 7.1  |
 |  Variants     | - |
-|  Exceptions     | User not authorized; Category already exists; Connection to the DB fails |
+|  Exceptions     | - User not authorized<br> - Category already exists<br> - Connection to the DB fails |
 | Post condition (exception case) | Category not created |
 
 | Scenario 7.1 | |
@@ -266,7 +266,7 @@ Interacts with the application through a web browser on his phone.
 |  Post condition | Categories are retrieved |
 |  Nominal Scenario | Scenario 8.1  |
 |  Variants     | - |
-|  Exceptions     | User not authorized; Connection to the DB fails |
+|  Exceptions     | - User not authorized<br> - Connection to the DB fails |
 | Post condition (exception case) | Categories not retrieved |
 
 | Scenario 8.1 | |
@@ -284,7 +284,7 @@ Interacts with the application through a web browser on his phone.
 |  Post condition | List of transactions retrieved |
 |  Nominal Scenario | Scenario 9.1  |
 |  Variants     | - |
-|  Exceptions     | User not authorized; Connection to the DB fails |
+|  Exceptions     | - User not authorized<br> - Connection to the DB fails |
 | Post condition (exception case) | Transactions not retrieved |
 
 | Scenario 9.1 | |
@@ -302,7 +302,7 @@ Interacts with the application through a web browser on his phone.
 |  Post condition | List of users retrieved |
 |  Nominal Scenario | Scenario 10.1  |
 |  Variants     | - |
-|  Exceptions     | User not authorized; Connection to the DB fails |
+|  Exceptions     | - User not authorized<br> - Connection to the DB fails |
 | Post condition (exception case) | List of users not retrieved |
 
 | Scenario 10.1 | |
@@ -320,7 +320,7 @@ Interacts with the application through a web browser on his phone.
 |  Post condition | Information about the user retrieved |
 |  Nominal Scenario | Scenario 11.1  |
 |  Variants     | - |
-|  Exceptions     | User not authorized; Connection to the DB fails |
+|  Exceptions     | - User not authorized<br> - Connection to the DB fails |
 | Post condition (exception case) | User informations not retrieved |
 
 | Scenario 11.1 | |
