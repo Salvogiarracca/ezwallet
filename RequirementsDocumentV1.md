@@ -124,17 +124,18 @@ Interacts with the application through a web browser on his phone.
 |  Post condition | User is authorized |
 |  Nominal Scenario | Scenario 1.1  |
 |  Variants     | - |
-|  Exceptions     | User is already logged in; User’s account doesn't exist; Wrong credentials |
+|  Exceptions     | User is already logged in; User’s account doesn't exist; Wrong credentials; Connection to the DB fails |
+| Post condition (exception case) | User not authorized |
 
 | Scenario 1.1 | |
 | ------------- |:-------------| 
 |  Precondition     | User must have an account |
 |  Post condition     | User is authorized |
-| Step        | Description  |
+| # Step        | Description  |
 |  1 | User asks to login |  
 |  2 | System asks email and password |
 |  3 | User enters email and password |
-|  4 | System checks, account name and password correct |
+|  4 | System checks if account name and password are correct |
 |  5 | Server sends two cookies to the client that contain an access and a refresh token respectively: <br> - Access token has an expiration time of one hour <br> - Refresh token has an expiration time of seven days |
 
 ### UC2: Register
@@ -144,31 +145,36 @@ Interacts with the application through a web browser on his phone.
 |  Post condition | Account is created |
 |  Nominal Scenario | Scenario 2.1  |
 |  Variants     | - |
-|  Exceptions     | User is already registered; Account not created |
+|  Exceptions     | User is already registered; Connection to the DB fails |
+| Post condition (exception case) | Account not created |
+
 
 | Scenario 2.1 | |
 | ------------- |:-------------| 
 |  Precondition     | User must not have an account |
 |  Post condition     | Account is created |
-| Step        | Description  |
+| # Step        | Description  |
 |  1 | User asks to sign up |  
-|  2 | System asks for email, checks if email is available |
+|  2 | System asks for email and checks if email has already been used by another user |
 |  3 | System asks for password and username |
+|  4 | User enters username and password |
+|  5 | System created account |
 
 ### UC3: Logout
 | User        |  |
 | ------------- |:-------------| 
-|  Precondition   | User must have an account and must be logged in |
+|  Precondition   | User must be logged in |
 |  Post condition | User is logged out |
 |  Nominal Scenario | Scenario 3.1  |
 |  Variants     | - |
-|  Exceptions     | User already logged out; User’s session expired (7 days); User not found |
+|  Exceptions     | User already logged out; User’s session expired (7 days); User not found; Connection to the DB fails |
+| Post condition (exception case) | Log out action not performed |
 
 | Scenario 3.1 | |
 | ------------- |:-------------| 
 |  Precondition     | User must have an account and must be logged in |
 |  Post condition     | User is logged out |
-| Step        | Description  |
+| # Step        | Description  |
 |  1 | User asks to log out |  
 |  2 | User’s device checks if access and refresh tokens exist |
 |  3 | System checks if refresh token exists |
@@ -181,15 +187,18 @@ Interacts with the application through a web browser on his phone.
 |  Post condition | Transaction created |
 |  Nominal Scenario | Scenario 4.1  |
 |  Variants     | - |
-|  Exceptions     | User not authorized |
+|  Exceptions     | User not authorized; Transaction already exists; Connection to the DB fails |
+| Post condition (exception case) | Transaction not created |
 
 | Scenario 4.1 | |
 | ------------- |:-------------| 
 |  Precondition | User must be logged in |
 |  Post condition | Transaction created |
-| Step        | Description  |
-|  1 | User enters name, amount, and type |  
-|  2 | System creates new transaction |
+| # Step        | Description  |
+|  1 | User asks the system to create a transaction |
+|  2 | System asks for transaction informations |
+|  3 | User enters name, amount, and type |  
+|  4 | System creates new transaction |
 
 ### UC5: Delete a transaction
 | User        |  |
@@ -198,15 +207,129 @@ Interacts with the application through a web browser on his phone.
 |  Post condition | Transaction deleted |
 |  Nominal Scenario | Scenario 5.1  |
 |  Variants     | - |
-|  Exceptions     | User not authorized  |
+|  Exceptions     | User not authorized; Transaction doesn't exist; Connection to the DB fails |
+| Post condition (exception case) | Transaction not deleted |
 
 | Scenario 5.1 | |
 | ------------- |:-------------| 
 |  Precondition | User must be logged in |
 |  Post condition | Transaction deleted |
-| Step        | Description  |
-|  1 | User enters transaction |  
-|  2 | System deletes transaction |
+| # Step        | Description  |
+|  1 | User asks the system to delete a transaction |
+|  2 | System asks which transaction should be deleted |
+|  3 | User enters transaction's ID |  
+|  4 | System deletes transaction |
+
+### UC6: Retrieve list of transactions
+| User        |  |
+| ------------- |:-------------| 
+|  Precondition   | User must be logged in |
+|  Post condition | Transaction data are retrieved |
+|  Nominal Scenario | Scenario 6.1  |
+|  Variants     | - |
+|  Exceptions     | User not authorized; Connection to the DB fails |
+| Post condition (exception case) | Transaction's list not retrieved |
+
+| Scenario 6.1 | |
+| ------------- |:-------------| 
+|  Precondition | User must be logged in |
+|  Post condition | Transaction data are retrieved |
+| # Step        | Description  |
+|  1 | User asks list of transactions |  
+|  2 | System gets transactions |
+
+### UC7: Create category
+| User        |  |
+| ------------- |:-------------| 
+|  Precondition   | User must be logged in |
+|  Post condition | Category created |
+|  Nominal Scenario | Scenario 7.1  |
+|  Variants     | - |
+|  Exceptions     | User not authorized; Category already exists; Connection to the DB fails |
+| Post condition (exception case) | Category not created |
+
+| Scenario 7.1 | |
+| ------------- |:-------------| 
+|  Precondition | User must be logged in |
+|  Post condition | Category created |
+| # Step        | Description  |
+|  1 | User asks the system to create a category |
+|  2 | System asks about category informations |
+|  3 | User enters type and color |  
+|  4 | System check if already present |
+|  5 | System creates new category |
+
+### UC8: Retrieve list of categories
+| User        |  |
+| ------------- |:-------------| 
+|  Precondition   | User must be logged in |
+|  Post condition | Categories are retrieved |
+|  Nominal Scenario | Scenario 8.1  |
+|  Variants     | - |
+|  Exceptions     | User not authorized; Connection to the DB fails |
+| Post condition (exception case) | Categories not retrieved |
+
+| Scenario 8.1 | |
+| ------------- |:-------------| 
+|  Precondition | User must be logged in |
+|  Post condition | Categories are retrieved |
+| # Step        | Description  |
+|  1 | User asks the system the list of categories |  
+|  2 | System retrieves all categories created by user |
+
+### UC9: Retrieve transaction by label
+| User        |  |
+| ------------- |:-------------| 
+|  Precondition   | User must be logged in |
+|  Post condition | List of transactions retrieved |
+|  Nominal Scenario | Scenario 9.1  |
+|  Variants     | - |
+|  Exceptions     | User not authorized; Connection to the DB fails |
+| Post condition (exception case) | Transactions not retrieved |
+
+| Scenario 9.1 | |
+| ------------- |:-------------| 
+|  Precondition | User must be logged in |
+|  Post condition | List of transactions retrieved |
+| # Step        | Description  |
+|  1 | User asks for a list of transactions grouped by category |  
+|  2 | System gets transactions |
+
+### UC10: Get list of all users
+| User        |  |
+| ------------- |:-------------| 
+|  Precondition   | User must be logged in |
+|  Post condition | List of users retrieved |
+|  Nominal Scenario | Scenario 10.1  |
+|  Variants     | - |
+|  Exceptions     | User not authorized; Connection to the DB fails |
+| Post condition (exception case) | List of users not retrieved |
+
+| Scenario 10.1 | |
+| ------------- |:-------------| 
+|  Precondition | User must be logged in |
+|  Post condition | List of users retrieved |
+| # Step        | Description  |
+|  1 | User asks to the system to get all users |  
+|  2 | System returns all users list |
+
+### UC11: Get user information
+| User        |  |
+| ------------- |:-------------| 
+|  Precondition   | User must be logged in |
+|  Post condition | Information about the user retrieved |
+|  Nominal Scenario | Scenario 11.1  |
+|  Variants     | - |
+|  Exceptions     | User not authorized; Connection to the DB fails |
+| Post condition (exception case) | User informations not retrieved |
+
+| Scenario 11.1 | |
+| ------------- |:-------------| 
+|  Precondition | User must be logged in |
+|  Post condition | Information about the user retrieved  |
+| # Step        | Description  |
+|  1 | User asks to the system to get his profile information |  
+|  2 | System returns the user information |
 
 \<describe here scenarios instances of UC1>
 
