@@ -47,7 +47,7 @@ The community behind the project is composed of developers that work on the appl
 | Stakeholder name  | Description | 
 | :----------------- |:-----------|
 | User | Someone who will use the application to keep track of his expenses | 
-| Administrator | Developer who has special privileges over the functions performed by the application (currently the system doesn't distinguish between roles so it isn't an actor) |
+| System administrator | User who has special privileges over the functions performed by the application (currently the system doesn't distinguish between roles so it isn't an actor) |
 
 # Context Diagram and interfaces
 
@@ -64,7 +64,7 @@ User
 
 | Actor | Logical Interface | Physical Interface  |
 | ------------- |:-------------| -----|
-| User | Smartphone | GUI (tdb + key functions: managing transactions and categories) |
+| User | PC/Smartphone | GUI (tdb + key functions: managing transactions and categories) |
 
 # Stories and personas
 
@@ -92,7 +92,7 @@ Interacts with the application through a web browser on his phone.
 
 | ID        | Description  |
 | ------------- |:-------------| 
-| FR1 | Manage transactions/expenses |
+| FR1 | Manage transactions |
 | FR2 | Manage categories |
 | FR3 | Manage users | 
 | FR4 | Authentication |
@@ -330,14 +330,6 @@ Interacts with the application through a web browser on his phone.
 | # Step        | Description  |
 |  1 | User asks to the system to get his profile information |  
 |  2 | System returns the user information |
-
-\<describe here scenarios instances of UC1>
-
-\<a scenario is a sequence of steps that corresponds to a particular execution of one use case>
-
-\<a scenario is a more formal description of a story>
-
-\<only relevant scenarios should be described>
 
 # Glossary
 
