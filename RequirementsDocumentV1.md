@@ -7,7 +7,7 @@ Version: V1 - description of EZWallet in CURRENT form (as received by teachers)
  
 | Version number | Change |
 | :-----------------: |:-----------:|
-| 1.1 | 2 | 
+| 1.1.2 | 4 | 
 
 
 # Contents
@@ -281,19 +281,19 @@ Interacts with the application through a web browser on his phone.
 | User        |  |
 | ------------- |:-------------| 
 |  Precondition   | User must be logged in |
-|  Post condition | List of transactions retrieved |
+|  Post condition | List of transactions more detailed retrieved |
 |  Nominal Scenario | Scenario 9.1  |
 |  Variants     | - |
 |  Exceptions     | - User not authorized<br> - Connection to the DB fails |
-| Post condition (exception case) | Transactions not retrieved |
+| Post condition (exception case) | Detailed transactions not retrieved |
 
 | Scenario 9.1 | |
 | ------------- |:-------------| 
 |  Precondition | User must be logged in |
 |  Post condition | List of transactions retrieved |
 | # Step        | Description  |
-|  1 | User asks for a list of transactions grouped by category |  
-|  2 | System gets transactions |
+|  1 | User asks for a list of transactions grouped with category's informations |  
+|  2 | System gets transactions and links them with category's informations |
 
 ### UC10: Get list of all users
 | User        |  |
