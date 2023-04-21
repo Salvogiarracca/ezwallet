@@ -7,7 +7,7 @@ Version: V1 - description of EZWallet in CURRENT form (as received by teachers)
  
 | Version number | Change |
 | :-----------------: |:-----------:|
-| 1.1.2 | 4 | 
+| 1.1.3 | 4 | 
 
 
 # Contents
@@ -30,6 +30,7 @@ Version: V1 - description of EZWallet in CURRENT form (as received by teachers)
 - [Glossary](#glossary)
 - [System design](#system-design)
 - [Deployment diagram](#deployment-diagram)
+- [Defects](#defects)
 
 # Informal description
 EZWallet (read EaSy Wallet) is a software application designed to help individuals and families keep track of their expenses. Users can enter and categorize their expenses, allowing them to quickly see where their money is going. EZWallet is a powerful tool for those looking to take control of their finances and make informed decisions about their spending.
@@ -52,13 +53,7 @@ The community behind the project is composed of developers that work on the appl
 # Context Diagram and interfaces
 
 ## Context Diagram
-\<Define here Context diagram using UML use case diagram>
-
-EZWallet
-
-\<actors are a subset of stakeholders>
-
-User
+![Context diagram](V1-Images/Context_diagram.png)
 
 ## Interfaces
 
@@ -111,12 +106,10 @@ Interacts with the application through a web browser on his phone.
 
 # Use case diagram and use cases
 
-
 ## Use case diagram
-\<define here UML Use case diagram UCD summarizing all use cases, and their relationships>
+![Use case diagram](V1-Images/Use_case_diagram.png)
 
-
-\<next describe here each use case in the UCD>
+## Use cases
 ### UC1: Login
 | User       |  |
 | ------------- |:-------------| 
@@ -332,20 +325,14 @@ Interacts with the application through a web browser on his phone.
 |  2 | System returns the user information |
 
 # Glossary
-
-\<use UML class diagram to define important terms, or concepts in the domain of the application, and their relationships> 
-
-\<concepts must be used consistently all over the document, ex in use cases, requirements etc>
+![Glossary](V1-Images/Glossary.png)
 
 # System Design
-\<describe here system design>
-
-\<must be consistent with Context diagram>
+![System diagram](V1-Images/System_diagram.png)
 
 # Deployment Diagram 
+![System diagram](V1-Images/Deployment_diagram.png)
 
-\<describe here deployment diagram >
-
-
+# Defects
 
 
