@@ -7,7 +7,7 @@ Version: V1 - description of EZWallet in CURRENT form (as received by teachers)
  
 | Version number | Change |
 | :-----------------: |:-----------:|
-| 1.1.3 | 4 | 
+| 1.1.5 | 5 | 
 
 
 # Contents
@@ -26,7 +26,6 @@ Version: V1 - description of EZWallet in CURRENT form (as received by teachers)
 - [Use case diagram and use cases](#use-case-diagram-and-use-cases)
 	+ [Use case diagram](#use-case-diagram)
 	+ [Use cases](#use-cases)
-    	+ [Relevant scenarios](#relevant-scenarios)
 - [Glossary](#glossary)
 - [System design](#system-design)
 - [Deployment diagram](#deployment-diagram)
@@ -63,23 +62,29 @@ The community behind the project is composed of developers that work on the appl
 
 # Stories and personas
 
-Persona 1 (P1): female, 23 y.o., student, low income, not married. <br>
-Interacts with the application through a web browser on her phone.
+### Persona 1 (P1): female, 23 y.o., student, low income, not married. <br>
+Interacts with the application through a web browser on her phone. <br>
+Story: wants to keep track of her expenses grouped by type.
 
-Persona 2 (P2): male, 51 y.o., worker, high income, married. <br>
-Interacts with the application through a web browser on his laptop.
+### Persona 2 (P2): male, 51 y.o., worker, high income, married. <br>
+Interacts with the application through a web browser on his laptop. <br>
+Story: wants to track household expenses with his wife and children, such as rent, school tuition, food, electrical bills, etc.
 
-Persona 3 (P3): male, old age, retired, low income, married. <br>
-Interacts with the application through a web browser on his desktop computer.
+### Persona 3 (P3): male, old age, retired, low income, married. <br>
+Interacts with the application through a web browser on his desktop computer. <br>
+Story: wants to keep track of how his pension is used during the month in order to have the needed amount for medicines.
 
-Persona 4 (P4): female, 28 y.o., worker, medium income, not married.<br>
-Interacts with the application through a web browser on her phone.
+### Persona 4 (P4): female, 28 y.o., worker, medium income, not married.<br>
+Interacts with the application through a web browser on her phone. <br>
+Story: wants to keep track of travel expenses.
 
-Persona 5 (P5): other, young age, part-time worker, low income, not married.<br>
-Interacts with the application through a web browser on its phone.
+### Persona 5 (P5): other, young age, part-time worker, low income, not married. <br>
+Interacts with the application through a web browser on its phone. <br>
+Story: wants to keep track of expenses to keep paying its school.
 
-Persona 6 (P6): male, young age, worker, medium income, not married.<br>
-Interacts with the application through a web browser on his phone.
+### Persona 6 (P6): male, young age, worker, medium income, not married. <br>
+Interacts with the application through a web browser on his phone. <br>
+Story: wants to keep track of expenses related to his ski hobby.
 
 # Functional and non functional requirements
 
