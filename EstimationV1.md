@@ -1,7 +1,7 @@
 # Project Estimation - CURRENT
-Date:
+Date: 21-04-2023
 
-Version:
+Version: 1
 
 
 # Estimation approach
@@ -9,25 +9,25 @@ Consider the EZWallet  project in CURRENT version (as received by the teachers),
 # Estimate by size
 ### 
 |             | Estimate                        |             
-| ----------- | ------------------------------- |  
-| NC =  Estimated number of classes to be developed   |                             |             
-|  A = Estimated average size per class, in LOC       |                            | 
-| S = Estimated size of project, in LOC (= NC * A) | |
-| E = Estimated effort, in person hours (here use productivity 10 LOC per person hour)  |                                      |   
-| C = Estimated cost, in euro (here use 1 person hour cost = 30 euro) | | 
-| Estimated calendar time, in calendar weeks (Assume team of 4 people, 8 hours per day, 5 days per week ) |                    |               
+| ----------- | ------------------------------- |
+| NC =  Estimated number of modules to be developed                                                         |4?|          
+| A = Estimated average size per module, in LOC                                                             |130| 
+| S = Estimated size of project, in LOC (= NC * A)                                                          |520| 
+| E = Estimated effort, in person hours (here use productivity 10 LOC per person hour)                      |52|   
+| C = Estimated cost, in euro (here use 1 person hour cost = 30 euro)                                       |1560| 
+| Estimated calendar time, in calendar weeks (Assume team of 4 people, 8 hours per day, 5 days per week )   |0.32|               
 
 # Estimate by product decomposition
 ### 
 |         component name    | Estimated effort (person hours)   |             
 | ----------- | ------------------------------- | 
-|requirement document    | |
-| GUI prototype ||
-|design document ||
-|code ||
-| unit tests ||
-| api tests ||
-| management documents  ||
+|requirement document    | 320 |
+| GUI prototype | 240 |
+|design document | 480 |
+|code | 20000 |
+| unit tests | 1000 |
+| api tests | 400 |
+| management documents  | 80 |
 
 
 
