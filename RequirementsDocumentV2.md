@@ -7,7 +7,7 @@ Version: V2 - description of EZWallet in FUTURE form (as proposed by the team)
  
 | Version number | Change |
 |:-----------------:|:-----------:|
-| 1.0 | 1 | 
+| 1.0.1 | 2 | 
 
 
 # Contents
@@ -75,26 +75,50 @@ The system allows users to link the application to their bank account, in order 
 | Currency converter system | Internet connection | APIs |
 
 # Stories and personas
-\<A Persona is a realistic impersonation of an actor. Define here a few personas and describe in plain text how a persona interacts with the system>
 
-\<Persona is-an-instance-of actor>
+### Persona 1 (P1): female, 23 y.o., student, low income, not married. <br>
+Interacts with the application through a web browser on her phone. <br>
+Story: wants to keep track of common expenses with housemates (electrical/internet bills, food, cleaning products…) to correctly split payments.
 
-\<stories will be formalized later as scenarios in use cases>
+### Persona 2 (P2): male, 51 y.o., worker, high income, married. <br>
+Interacts with the application through a web browser on his desktop pc. <br>
+Story: wants to track household expenses with his wife and children, such as rent, school tuition, food, electrical bills, etc. and get alerts if they are exceeding their budget.
+
+### Persona 3 (P3): male, old age, retired, low income, married. <br>
+Interacts with the application through a web browser on his desktop pc. <br>
+Story: wants to keep track of how his pension is used during the month in order to have the needed amount for medicines.
+
+### Persona 4 (P4): female, 28 y.o., worker, medium income, not married. <br>
+Interacts with the application through her laptop's browser. <br>
+Story: wants to keep track of travel expenses with a group of friends in order to avoid spending too much money. <br>
+
+### Persona 5 (P5): other, young age, part-time worker, medium income, not married. <br>
+Interacts with EZWallet's services through its smartphone's browser. <br>
+Story: wants to keep track of expenses to make sure it can keep paying its school tuition. <br>
+
+### Persona 6 (P6): male, young age, worker, medium income, not married. <br>
+Interacts with the services by using his laptop's browser. <br>
+Story: wants to keep track of expenses related to his ski hobby. <br>
+
+### Persona 7 (P7): male, middle age, worker , high income, divorced. <br>
+Interacts with the application through a browser on his desktop pc. <br>
+Story: wants to keep track of travel expenses of his tour to Japan.
 
 
 # Functional and non functional requirements
 
 ## Functional Requirements
-
-\<In the form DO SOMETHING, or VERB NOUN, describe high level capabilities of the system>
-
-\<they match to high level use cases>
-
 | ID        | Description  |
-| ------------- |:-------------:| 
-|  FR1     |  |
-|  FR2     |   |
-| FRx..  | | 
+|-----------|:-------------| 
+|  FR1      | Manage transactions |
+|  FR2      | Manage currencies	  |
+|  FR3 		| Handle bank accounts | 
+|  FR4		| Manage categories |
+|  FR5		| Handle goals |
+|  FR6 		| Create statistics |
+|  FR7		| Manage users |
+|  FR8		| Manage Wallets |
+|  FR9		| Authentication |
 
 ## Non Functional Requirements
 
