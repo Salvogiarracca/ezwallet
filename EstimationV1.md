@@ -1,7 +1,7 @@
 # Project Estimation - CURRENT
-Date: 24-04-2023
+Date: 25-04-2023
 
-Version: 1.2
+Version: 1.3
 
 
 # Estimation approach
@@ -9,18 +9,21 @@ Consider the EZWallet  project in CURRENT version (as received by the teachers),
 # Estimate by size
 ### 
 |             | Estimate                        |             
-| ----------- | ------------------------------- |
-| NC =  Estimated number of modules to be developed                                                         |4|          
-| A = Estimated average size per module, in LOC                                                             |130| 
-| S = Estimated size of project, in LOC (= NC * A)                                                          |520| 
-| E = Estimated effort, in person hours (here use productivity 10 LOC per person hour)                      |52|   
-| C = Estimated cost, in euro (here use 1 person hour cost = 30 euro)                                       |1560| 
-| Estimated calendar time, in calendar weeks (Assume team of 4 people, 8 hours per day, 5 days per week )   |0.32|               
+| ----------- | :-------------------------------: |
+| NC =  Estimated number of modules to be developed                                                         |8|          
+| A = Estimated average size per module, in LOC                                                             |163| 
+| S = Estimated size of project, in LOC (= NC * A)                                                          |1300| 
+| E = Estimated effort, in person hours (here use productivity 10 LOC per person hour)                      |130|   
+| C = Estimated cost, in euro (here use 1 person hour cost = 30 euro)                                       |3900| 
+| Estimated calendar time, in calendar weeks (Assume team of 4 people, 8 hours per day, 5 days per week )   | 1 |               
 
+### Modules: documents, app, controllers, db, models, routes, server, test.
+### We have included on the calculation *.js files LOCs + *V1.md files LOCs
+----------------------------------------------------------------------------
 # Estimate by product decomposition
 ### 
 |         component name    | Estimated effort (person hours)   |             
-| ----------- | ------------------------------- | 
+| ----------- | :-------------------------------: | 
 | requirement document | 96 |
 | GUI prototype | 24 |
 | design document | 64 |
@@ -34,60 +37,61 @@ Consider the EZWallet  project in CURRENT version (as received by the teachers),
 # Estimate by activity decomposition
 ### 
 |         Activity name    | Estimated effort (person hours)   |             
-| ----------- | ------------------------------- | 
-| Requirements | 96 |
+| ----------- | :------------------------------: | 
+| ***Requirements*** | 96 |
 |⟶ Functional requirements| 32 |
 |⟶ Non Functional requirements| 32 |
 |⟶ Stories | 32 |
 |⟶ Use cases | 32 |
-| GUI prototipe | 24 |
+| ***GUI prototipe*** | 24 |
 |⟶ Registration screen | 24 |
 |⟶ Login screen | 24 |
 |⟶ Home Screen | 24 |
 |⟶ Transaction management screen | 24 |
 |⟶ Category management screen | 24 |
 |⟶ Label management screen | 24 |
-| Design document | 64 |
+| ***Design document*** | 64 |
 |⟶ Architecture design  | 24 |
 |⟶ Databease schema design | 16 |
 |⟶ Code organization | 24 |
-| Code | 32 |
+| ***Code*** | 32 |
 |⟶ User interface code | 32 |
 |⟶ Authentication code | 24 |
 |⟶ Database access code | 24 |
-| Unit tests | 24 |
+| ***Unit tests*** | 24 |
 |⟶ Registration test | 12 |
 |⟶ Login test | 8 |
 |⟶ Logout test | 8 |
 |⟶ Transaction tests | 24 |
 |⟶ Category tests | 16 |
 |⟶ Label tests | 8 |
-| API tests | 24 |
+| ***API tests*** | 24 |
 |⟶ Registration endpoint tests | 16 |
 |⟶ Login endpoint tests | 8 |
 |⟶ Logout endpoint tests | 8 |
 |⟶ Transaction endpoint tests | 24 |
 |⟶ Category endpoint tests | 16 |
 |⟶ Label endpoint tests | 8 |
-| Management documents | 64 |
+| ***Management documents*** | 64 |
 |⟶ Project schedule | 24 |
 |⟶ Project budget | 24 |
 |⟶ Project report | 16 |
 
 ###
-#We have to chose between the two images
 ![GRANTT DIAGRAM](V1-Images\GRANTT.png)
-![GRANTT DIAGRAM ALTERNATIVE](V1-Images\GRANTT_alternative.png)
-
 # Summary
 
 Report here the results of the three estimation approaches. The  estimates may differ. Discuss here the possible reasons for the difference
 
 |             | Estimated effort                        |   Estimated duration |          
-| ----------- | ------------------------------- | ---------------|
-| estimate by size ||
-| estimate by product decomposition ||
-| estimate by activity decomposition ||
+| ----------- | :-------------------------------: | :---------------:|
+| estimate by size | 130 person hours | 4 days |
+| estimate by product decomposition | 328 person hours | 10 days |
+| estimate by activity decomposition | 328 person hours | 10 days |
+
+The calculations performed are based on the code given to us. For the estimation by LOCs we have considered only the *.js files and the *V1.md documents. There is a big difference compared with the other two approaches and this is related to the fact that the estimation is based only to the code given to us. We have assumed that external libraries are not to be included to the calculations and there are no acquisition costs for them. For the estimation by Product and by Activity we have imagined that some tasks could be performed in parallel rather than others that have to be performed in sequential way and there are holidays .
+
+Assumptions: in all the estimation approaches, we have team of 4 people that works 8 hours per day, 5 days per week.
 
 
 
