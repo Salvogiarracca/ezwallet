@@ -7,7 +7,7 @@ Version: V2 - description of EZWallet in FUTURE form (as proposed by the team)
  
 | Version number | Change |
 |:-----------------:|:-----------:|
-| 1.0.1 | 2 | 
+| 1.0.2 | 3 | 
 
 
 # Contents
@@ -121,15 +121,14 @@ Story: wants to keep track of travel expenses of his tour to Japan.
 |  FR9		| Authentication |
 
 ## Non Functional Requirements
-
-\<Describe constraints on functional requirements>
-
-| ID        | Type (efficiency, reliability, ..)           | Description  | Refers to |
-| ------------- |:-------------:| :-----:| -----:|
-|  NFR1     |   |  | |
-|  NFR2     | |  | |
-|  NFR3     | | | |
-| NFRx .. | | | | 
+| ID | Type (efficiency, reliability, ..) | Description | Refers to |
+| ------------- |:-------------| :-----| :-----|
+| NFR1 | Usability | Core functions for users should be used with no training, only with previous experience with smartphones/PCs | FR1, FR3, FR4, FR5, FR7, FR8, FR9 |
+| NFR2 | Availability | Max. Server downtime 1 hr / year | FR1, FR2, FR3, FR4, FR5, FR6, FR7, FR8, FR9 |
+| NFR3 | Security | Authorize users access, <br> Manage data privacy | FR3, FR9 |
+| NFR4 | Efficiency | All functions should be completed in less than 2 seconds | FR1, FR2, FR3, FR4, FR5, FR6, FR7, FR8, FR9 | 
+| NFR5 | Portability | Application can be run independently of the operating system/device by having a web interface | FR1, FR2, FR3, FR4, FR5, FR6, FR7, FR8, FR9 | 
+| NFR6 | Correctness | Actions should be managed correctly without errors to avoid having wrong informations or wrong authorization informations recorded | FR1, FR2, FR3, FR8 | 
 
 
 # Use case diagram and use cases
@@ -181,19 +180,13 @@ Story: wants to keep track of travel expenses of his tour to Japan.
 
 
 # Glossary
-
-\<use UML class diagram to define important terms, or concepts in the domain of the application, and their relationships> 
-
-\<concepts must be used consistently all over the document, ex in use cases, requirements etc>
+![Glossary](V2-Images/Glossary.png)
 
 # System Design
-\<describe here system design>
-
-\<must be consistent with Context diagram>
+![System diagram](V2-Images/System%20diagram.png)
 
 # Deployment Diagram 
-
-\<describe here deployment diagram >
+![Glossary](V2-Images/Deployment%20diagram.png)
 
 
 
