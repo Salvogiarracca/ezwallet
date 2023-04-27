@@ -341,4 +341,5 @@ Story: wants to keep track of expenses related to his ski hobby.
 # Defects
 The application, as given to us, presents some defects, visible in the different modules that compose it:
 - The getUsers functionality should be used only by administrators to correctly manage them. Instead this function can be called by any non-logged user, creating a vulnerability in the system and allowing anyone to see and use sensible data related to the different users.
-- The getUserByUsername 
+- The getUserByUsername also should be called only by administrator and should return informations about the researched user. Instead every logged user can call it but the informations they can get are only related to themselves.
+- The get_labels method doesn't return all the informations between a transaction and its related category: the color is missing, making the join between tables useless.
