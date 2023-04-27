@@ -7,7 +7,7 @@ Version: V1 - description of EZWallet in CURRENT form (as received by teachers)
  
 | Version number | Change |
 | :-----------------: |:-----------:|
-| 1.1.8 | 8 | 
+| 1.1.9 | 9 | 
 
 
 # Contents
@@ -343,3 +343,5 @@ The application, as given to us, presents some defects, visible in the different
 - The getUsers functionality should be used only by administrators to correctly manage them. Instead this function can be called by any non-logged user, creating a vulnerability in the system and allowing anyone to see and use sensible data related to the different users.
 - The getUserByUsername also should be called only by administrator and should return informations about the researched user. Instead every logged user can call it but the informations they can get are only related to themselves.
 - The get_labels method doesn't return all the informations between a transaction and its related category: the color is missing, making the join between tables useless.
+- The create_Categories method doesn't check during the creation process if a category was previously inserted. So, duplicate categories can be created and cannot be distinguished by a normal user.
+- Every user can get the list of all transactions, including the ones that haven't been created or edited by the user itself. This happens because the get_transactions method doesn't perform checks on user identity.
