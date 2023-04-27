@@ -137,47 +137,687 @@ Story: wants to keep track of travel expenses of his tour to Japan.
 ## Use case diagram
 \<define here UML Use case diagram UCD summarizing all use cases, and their relationships>
 
-
-\<next describe here each use case in the UCD>
-### Use case 1, UC1
-| Actors Involved        |  |
+### UC1: Login
+| User        |  |
 | ------------- |:-------------:| 
-|  Precondition     | \<Boolean expression, must evaluate to true before the UC can start> |
-|  Post condition     | \<Boolean expression, must evaluate to true after UC is finished> |
-|  Nominal Scenario     | \<Textual description of actions executed by the UC> |
-|  Variants     | \<other normal executions> |
-|  Exceptions     | \<exceptions, errors > |
-
-##### Scenario 1.1 
-
-\<describe here scenarios instances of UC1>
-
-\<a scenario is a sequence of steps that corresponds to a particular execution of one use case>
-
-\<a scenario is a more formal description of a story>
-
-\<only relevant scenarios should be described>
+|  Precondition     | User must have an account |
+|  Post condition     | User is authorized |
+|  Nominal Scenario     | Scenario 1.1 |
+|  Variants     | - |
+|  Exceptions     | - User already logged in<br>- Account dosen't exist <br>- Invalid credentials<br>-Connection to DB failed<br> |
 
 | Scenario 1.1 | |
 | ------------- |:-------------:| 
-|  Precondition     | \<Boolean expression, must evaluate to true before the scenario can start> |
-|  Post condition     | \<Boolean expression, must evaluate to true after scenario is finished> |
+|  Precondition     | User must have an account |
+|  Post condition     | User is authorized |
 | Step#        | Description  |
-|  1     |  |  
-|  2     |  |
-|  ...     |  |
+|  1 | User asks to login |
+|  2 | System asks for email and password |
+|  3 | User enters email and password |
+|  4 | System check if account name and password are correct. |
+|  5 | User is authorized |
 
-##### Scenario 1.2
+### UC2: Register
+| User        |  |
+| ------------- |:-------------:| 
+|  Precondition     | User must not have an account |
+|  Post condition     | Account created |
+|  Nominal Scenario     | Scenario 2.1 |
+|  Variants     | - |
+|  Exceptions     | - User already registered<br>- Invalid email<br>-Connection to DB failed |
 
-##### Scenario 1.x
+| Scenario 2.1 | |
+| ------------- |:-------------:| 
+|  Precondition     | User must have an account |
+|  Post condition     | User is authorized |
+| Step#        | Description  |
+|  1 | User asks to sign up |
+|  2 | System asks for email and password |
+|  3 | User enters email and password |
+|  4 | System checks if email is already used |
+|  5 | System asks for name, surname, and username |
+|  6 | User enters name, surname, and username |
+|  7 | Systems creates account |
 
-### Use case 2, UC2
-..
+### UC3: Logout
+| User        |  |
+| ------------- |:-------------:| 
+|  Precondition     | User must have an account and must be logged in |
+|  Post condition     | User is logged out |
+|  Nominal Scenario     | Scenario 3.1 |
+|  Variants     | - |
+|  Exceptions     | - User already logged out (invalid tokens)<br>- User's session expired (7 days)<br>- User not found<br>- Connection to DB failed |
 
-### Use case x, UCx
-..
+| Scenario 3.1 | |
+| ------------- |:-------------:| 
+|  Precondition     | User must have an account and must be logged in |
+|  Post condition     | User is logged out |
+| Step#        | Description  |
+|  1 | User asks to log out |
+|  2 | User’s device checks if access and refresh tokens exist |
+|  3 | System checks if refresh token exists |
+|  4 | System erases access and refresh tokens from user’s account |
+|  5 | User is logged out |
 
+### UC4: Delete Account
+| User        |  |
+| ------------- |:-------------:| 
+|  Precondition     | User must have an account and must be logged in |
+|  Post condition     | User's account is deleted |
+|  Nominal Scenario     | Scenario 4.1 |
+|  Variants     | - |
+|  Exceptions     | - User already logged out (invalid tokens)<br>- User's session expired (7 days)<br>- User not found<br>- User not authorized<br>- Connection to DB failed |
 
+| Scenario 4.1 | |
+| ------------- |:-------------:| 
+|  Precondition     | User must have an account and must be logged in |
+|  Post condition     | User is logged out |
+| Step#        | Description  |
+|  1 | User asks to delete account |
+|  2 | User’s device checks if access and refresh tokens exist |
+|  3 | System checks if refresh token exists |
+|  4 | System asks for password and user's confirmation |
+|  5 | User enters password |
+|  6 | System checks if password is correct |
+|  7 | System deletes account and refresh tokens from user’s account |
+|  8 | User is logged out |
+|  9 | System deletes account |
+
+### UC5: Create a transaction
+| User        |  |
+| ------------- |:-------------:| 
+|  Precondition     | User must be logged in and has to be part of at least one wallet, regardless of his role |
+|  Post condition     | Transaction pending for review (Member)<br>Transaction created (Admin) |
+|  Nominal Scenario     | Scenario 5.1 (Member)<br>Scenario 5.2 (Admin) |
+|  Variants     | - |
+|  Exceptions     | - Currency conversion failed<br>- Category dosen't exist<br>- Wallet not found<br>- User not authorized<br>- Connection to DB failed |
+
+| Scenario 5.1 | |
+| ------------- |:-------------:| 
+|  Precondition     | User must have an account, be logged in, and member of a wallet |
+|  Post condition     | Transaction pending for review |
+| Step#        | Description  |
+|  1 | User asks to create a transaction |
+|  2 | System prompts to the user a form where transaction information needs to be inserted |
+|  3 | User enters name, amount, type, payment type, currency, wallet |
+|  4 | System converts to wallet’s default currency |
+|  5 | Systems adds transaction to pending for review transactions |
+
+| Scenario 5.2 | |
+| ------------- |:-------------:| 
+|  Precondition     | User must have an account, be logged in, and administrator of a wallet |
+|  Post condition     | Transaction created |
+| Step#        | Description  |
+|  1 | User asks to create a transaction |
+|  2 | System prompts to the user a form where transaction information needs to be inserted |
+|  3 | User enters name, amount, type, payment type, currency, wallet |
+|  4 | System converts to wallet’s default currency |
+|  5 | Systems creates new transaction |
+|  6 | System updates goal information (if available) and checks if goal is reached |
+|  7 | Transaction created |
+
+### UC6: Delete a transaction
+| User        |  |
+| ------------- |:-------------:| 
+|  Precondition     | User must be logged in and is part of the wallet, regardless of his role |
+|  Post condition     | Transaction pending for review (Member)<br>Transaction deleted (Admin) |
+|  Nominal Scenario     | Scenario 6.1 (Member)<br>Scenario 6.2 (Admin) |
+|  Variants     | - |
+|  Exceptions     | - User not authorized (e.g. tokens are wrong)<br>- Connection to DB failed |
+
+| Scenario 6.1 | |
+| ------------- |:-------------:| 
+|  Precondition     | User must be logged in and is part of the wallet as a member |
+|  Post condition     | Transaction pending for review |
+| Step#        | Description  |
+|  1 | User asks the system to delete a transaction |
+|  2 | System prompts the user with all the transactions available to him |
+|  3 | User selects transaction to delete |
+|  4 | System adds transaction to wallet’s pending for review transactions |
+
+| Scenario 6.2 | |
+| ------------- |:-------------:| 
+|  Precondition     | User must be logged in and have to be part of at least one wallet as an admin |
+|  Post condition     | Transaction deleted |
+| Step#        | Description  |
+|  1 | User asks the system to delete a transaction |
+|  2 | System prompts the user with all the transactions available to him |
+|  3 | User selects transaction to delete |
+|  4 | System deletes transaction |
+|  5 | System updates goal information (if available) and checks if goal is reached |
+
+### UC7: Edit transaction
+| User        |  |
+| ------------- |:-------------:| 
+|  Precondition     | User must be logged in and is part of the wallet, regardless of his role |
+|  Post condition     | Transaction pending for review (User)<br>Transaction updated (Admin) |
+|  Nominal Scenario     | Scenario 7.1 (User)<br>Scenario 7.2 (Admin) |
+|  Variants     | - |
+|  Exceptions     | - User not authorized<br>- Can't convert amount to default currency<br>- Connection to DB failed |
+
+| Scenario 7.1 | |
+| ------------- |:-------------:| 
+|  Precondition     | User must be logged in and is part of the wallet |
+|  Post condition     | Transaction pending for review |
+| Step#        | Description  |
+|  1 | User asks to edit a transaction |
+|  2 | System prompts the user with all transactions available to him |
+|  3 | User selects transaction to edit |
+|  4 | User modifies name, amount, type, payment type, currency, wallet |
+|  5 | If currency was modified, system converts to wallet’s default currency |
+|  6 | System adds transaction to wallet’s pending for review transactions |
+
+| Scenario 7.2 | |
+| ------------- |:-------------:| 
+|  Precondition     | User must be logged in and have to be part of at least one wallet |
+|  Post condition     | Transaction updated |
+| Step#        | Description  |
+|  1 | Admin asks to edit a transaction |
+|  2 | System prompts the admin with all transactions available |
+|  3 | Admin selects transaction to edit |
+|  4 | Admin modifies name, amount, type, payment type, currency, wallet |
+|  5 | If amount or currency was modified, system updates goal information (if available) and checks if goal is reached |
+|  6 | System updates the transaction |
+
+ ### UC8: Retrieve Transactions
+| User        |  |
+| ------------- |:-------------:| 
+|  Precondition     | User must be logged in and is part of the wallet, regardless of his role |
+|  Post condition     | Transactions retrieved |
+|  Nominal Scenario     | Scenario 8.1 |
+|  Variants     | - |
+|  Exceptions     | - User not authorized (e.g. tokens are wrong)<br>- Connection to DB failed |
+
+| Scenario 8.1 | |
+| ------------- |:-------------:| 
+|  Precondition     | User must be logged in and is part of the wallet, regardless of his role |
+|  Post condition     | Transactions retrieved |
+| Step#        | Description  |
+|  1 | User selects wallet |
+|  2 | System gets transactions related to the wallet |
+|  3 | Transactions retrieved |
+
+### UC9: Filter Transactions
+| User        |  |
+| ------------- |:-------------:| 
+|  Precondition     | User must be logged in and have to be part of at least one wallet, regardless of his role |
+|  Post condition     | Transactions retrieved |
+|  Nominal Scenario     | Scenario 9.1 |
+|  Variants     | - |
+|  Exceptions     | - User not authorized (e.g. tokens are wrong)<br>- Connection to DB failed |
+
+| Scenario 9.1 | |
+| ------------- |:-------------:| 
+|  Precondition     | User must be logged in and has to be part of the wallet, regardless of his role |
+|  Post condition     | Transactions retrieved |
+| Step#        | Description  |
+|  1 | User selects filter |
+|  2 | System asks the user which filter should be applied |
+|  3 | User enters type of the filter (category, amount) and enters details for the filter to use |
+|  4 | System retrieves transactions based on filter |
+|  5 | Transactions retrieved |
+
+### UC10: Retrieve Pending Transactions
+| User        |  |
+| ------------- |:-------------:| 
+|  Precondition     | User must be logged in and wallet admin |
+|  Post condition     | Pending transactions retrieved |
+|  Nominal Scenario     | Scenario 10.1 |
+|  Variants     | - |
+|  Exceptions     | - User not authorized (e.g. tokens are wrong)<br>- Connection to DB failed |
+
+| Scenario 10.1 | |
+| ------------- |:-------------:| 
+|  Precondition     | User must be logged in and wallet admin |
+|  Post condition     | Pending transactions retrieved |
+| Step#        | Description  |
+|  1 | User selects wallet |
+|  2 | System gets pending for review transactions |
+|  3 | Pending transactions retrieved |
+
+### UC11: Verify Pending Transaction
+| User        |  |
+| ------------- |:-------------:| 
+|  Precondition     | User must be logged in and is part of the wallet as its administrator |
+|  Post condition     | Transaction created |
+|  Nominal Scenario     | Scenario 11.1 |
+|  Variants     | - |
+|  Exceptions     | - User not authorized (e.g. tokens are wrong)<br>- Connection to DB failed |
+
+| Scenario 11.1 | |
+| ------------- |:-------------:| 
+|  Precondition     | User must be logged in and is part of the wallet as its administrator |
+|  Post condition     | Transaction created |
+| Step#        | Description  |
+|  1 | User asks the system for pending transactions |
+|  2 | System gets list of pending transactions |
+|  3 | User selects a transaction |
+|  4 | System asks for confirmation |
+|  5 | System adds transaction to wallet’s transactions, updates goal information (if available), and checks if goal is reached |
+|  6 | Transaction created |
+
+### UC12: Delete Pending Transaction
+| User        |  |
+| ------------- |:-------------:| 
+|  Precondition     | User must be logged in and is part of the wallet as its administrator |
+|  Post condition     | Transaction deleted |
+|  Nominal Scenario     | Scenario 12.1 |
+|  Variants     | - |
+|  Exceptions     | - User not authorized (e.g. tokens are wrong)<br>- Connection to DB failed |
+
+| Scenario 12.1 | |
+| ------------- |:-------------:| 
+|  Precondition     | User must be logged in and is part of the wallet as its administrator |
+|  Post condition     | Transaction deleted |
+| Step#        | Description  |
+|  1 | User asks the system for pending transactions to be deleted |
+|  2 | System gets list of pending transactions to be deleted |
+|  3 | User selects a transaction |
+|  4 | System asks for confirmation of deletion |
+|  5 | System deletes transaction |
+|  6 | Transaction deleted |
+
+### UC13: Create Category
+| User        |  |
+| ------------- |:-------------:| 
+|  Precondition     | User must be logged in and is part of the wallet, regardless of its role |
+|  Post condition     | Category created |
+|  Nominal Scenario     | Scenario 13.1 |
+|  Variants     | - |
+|  Exceptions     | - User not authorized<br>- Connection to DB failed |
+
+| Scenario 13.1 | |
+| ------------- |:-------------:| 
+|  Precondition     | User must be logged in and is part of the wallet, regardless of its role |
+|  Post condition     | Category created |
+| Step#        | Description  |
+|  1 | User asks the system to create a category |
+|  2 | System prompts the user for details about the category |
+|  3 | User enters type and color |
+|  4 | System creates new category |
+|  5 | Category created |
+
+### UC14: Edit Category
+| User        |  |
+| ------------- |:-------------:| 
+|  Precondition     | User must be logged in and is part of the wallet, regardless of its role |
+|  Post condition     | Category updated |
+|  Nominal Scenario     | Scenario 14.1 |
+|  Variants     | - |
+|  Exceptions     | - User not authorized<br>- Connection to DB failed |
+
+| Scenario 14.1 | |
+| ------------- |:-------------:| 
+|  Precondition     | User must be logged in and is part of the wallet, regardless of its role |
+|  Post condition     | Category updated |
+| Step#        | Description  |
+|  1 | User asks the system to edit a category |
+|  2 | System prompts the user for selecting the category |
+|  3 | User selects category |
+|  4 | System gets category information |
+|  5 | User modifies type, color, and then confirms |
+|  6 | System updates category |
+|  7 | Category updated |
+
+### UC15: Delete Category
+| User        |  |
+| ------------- |:-------------:| 
+|  Precondition     | User must be logged in and is part of the wallet, regardless of its role |
+|  Post condition     | Category deleted |
+|  Nominal Scenario     | Scenario 15.1 |
+|  Variants     | - |
+|  Exceptions     | - User not authorized<br>- Category not found<br>- Connection to DB failed |
+
+| Scenario 15.1 | |
+| ------------- |:-------------:| 
+|  Precondition     | User must be logged in and is part of the wallet, regardless of its role |
+|  Post condition     | Category deleted |
+| Step#        | Description  |
+|  1 | User asks the system to delete a category |
+|  2 | System prompts the user for selecting the category |
+|  3 | User selects category |
+|  4 | System asks for confirmation |
+|  5 | User confirms |
+|  6 | System deletes category |
+|  7 | Category deleted |
+
+### UC16: Retrieve Categories
+| User        |  |
+| ------------- |:-------------:| 
+|  Precondition     | User must be logged in and is part of the wallet, regardless of its role |
+|  Post condition     | Categories retrieved |
+|  Nominal Scenario     | Scenario 16.1 |
+|  Variants     | - |
+|  Exceptions     | - User not authorized (e.g. tokens are wrong)<br>- Connection to DB failed |
+
+| Scenario 16.1 | |
+| ------------- |:-------------:| 
+|  Precondition     | User must be logged in and is part of the wallet, regardless of its role |
+|  Post condition     | Categories retrieved |
+| Step#        | Description  |
+|  1 | User asks the system for a list of categories |
+|  2 | System gets categories |
+|  3 | Categories are retrieved |
+
+### UC17: Retrieve Transaction by Label
+| User        |  |
+| ------------- |:-------------:| 
+|  Precondition     | User must be logged in and is part of the wallet, regardless of its role |
+|  Post condition     | List of transactions retrieved |
+|  Nominal Scenario     | Scenario 17.1 |
+|  Variants     | - |
+|  Exceptions     | - User not authorized (e.g. tokens are wrong)<br>- Connection to DB failed |
+
+| Scenario 17.1 | |
+| ------------- |:-------------:| 
+|  Precondition     | User must be logged in and have to be part of at least one wallet, regardless of its role |
+|  Post condition     | List of transactions retrieved |
+| Step#        | Description  |
+|  1 | User asks for a list of transactions with their associated categories |
+|  2 | System gets transactions with their associated categories |
+|  3 | List of transactions is retrieved |
+
+### UC18: Get All Users
+| User        |  |
+| ------------- |:-------------:| 
+|  Precondition     | User must be logged in |
+|  Post condition     | System returns all users list |
+|  Nominal Scenario     | Scenario 18.1 |
+|  Variants     | - |
+|  Exceptions     | - User not authorized<br>- Connection to DB failed |
+
+| Scenario 18.1 | |
+| ------------- |:-------------:| 
+|  Precondition     | User must be logged in |
+|  Post condition     | System returns all users list |
+| Step#        | Description  |
+|  1 | User asks the system to get all users |
+|  2 | System returns all users list |
+
+### UC19: Get User Information
+| User        |  |
+| ------------- |:-------------:| 
+|  Precondition     | User must be logged in |
+|  Post condition     | System returns the user's information |
+|  Nominal Scenario     | Scenario 19.1 |
+|  Variants     | - |
+|  Exceptions     | - User not authorized<br>- Connection to DB failed |
+
+| Scenario 19.1 | |
+| ------------- |:-------------:| 
+|  Precondition     | User must be logged in |
+|  Post condition     | System returns the user information |
+| Step#        | Description  |
+|  1 | User asks the system to get his profile information based on his username |
+|  2 | System returns the user's information |
+
+### UC20: Get user wallets
+
+| User        |  |
+| ------------- |:-------------:| 
+|  Precondition     | User must be logged in |
+|  Post condition     | System returns the user's wallets |
+|  Nominal Scenario     | Scenario 20.1 |
+|  Variants     | - |
+|  Exceptions     | - User not authorized<br>- Connection to DB failed |
+
+| Scenario 20.1 | |
+| ------------- |:-------------:| 
+|  Precondition     | User must be logged in |
+|  Post condition     | System returns the user's wallets |
+| Step#        | Description  |
+|  1 | User asks to the system to get the wallets based on his username |
+|  2 | System checks that the user is the same as the username |
+|  3 | System returns the user's wallets |
+
+### UC21: Authorize bank access
+
+| User        |  |
+| ------------- |:-------------:| 
+|  Precondition     | User must be logged in |
+|  Post condition     | System is authorized to access the user's transactions |
+|  Nominal Scenario     | Scenario 21.1 |
+|  Variants     | - |
+|  Exceptions     | - User not authorized<br>- Connection fails<br>- Bank not supported |
+
+| Scenario 21.1 | |
+| ------------- |:-------------:| 
+|  Precondition     | User must be logged in |
+|  Post condition     | System is authorized to access the user's transactions |
+| Step#        | Description  |
+|  1 | User asks to link bank account |
+|  2 | System redirects user to bank login |
+|  3 | User logs to his bank account |
+|  4 | Popup appears asking to authorize ezwallet for accessing their transactions |
+|  5 | System receives key and API to retrieve transactions |
+|  6 | System is authorized to access the user's transactions |
+
+### UC22: Remove bank access
+
+| User        |  |
+| ------------- |:-------------:| 
+|  Precondition     | User must be logged in |
+|  Post condition     | Bank information deleted |
+|  Nominal Scenario     | Scenario 22.1 |
+|  Variants     | - |
+|  Exceptions     | - User not authorized<br>- Connection to DB failed<br>- User has no linked bank accounts |
+
+| Scenario 22.1 | |
+| ------------- |:-------------:| 
+|  Precondition     | User must be logged in |
+|  Post condition     | Bank information deleted |
+| Step#        | Description  |
+|  1 | User asks to remove access to bank account and delete bank account information |
+|  2 | System deletes bank information from user's account and removes access to bank account information |
+|  3 | Bank information deleted |
+
+### UC23: Retrieve transactions from bank account
+
+| User        |  |
+| ------------- |:-------------:| 
+|  Precondition     | User must be logged in and has an authorized linked bank account |
+|  Post condition     | Transactions retrieved |
+|  Nominal Scenario     | Scenario 23.1 |
+|  Variants     | - |
+|  Exceptions     | - User not authorized<br>- Connection fails<br>- API key expired |
+
+| Scenario 23.1 | |
+| ------------- |:-------------:| 
+|  Precondition     | User must be logged in and has an authorized linked bank account |
+|  Post condition     | Transactions retrieved |
+| Step#        | Description  |
+|  1 | System retrieves user's key and access point |
+|  2 | System retrieves transactions |
+|  3 | Transactions retrieved |
+
+### UC24: Add Goal
+
+| User        |  |
+| ------------- |:-------------:| 
+|  Precondition     | User must be logged in and is part of the wallet as an administrator |
+|  Post condition     | Goal created |
+|  Nominal Scenario     | Scenario 24.1 |
+|  Variants     | - |
+|  Exceptions     | - User not authorized<br>- Connection to DB failed |
+
+| Scenario 24.1 | |
+| ------------- |:-------------:| 
+|  Precondition     | User must be logged in and is part of the wallet as an administrator |
+|  Post condition     | Goal created |
+| Step#        | Description  |
+|  1 | User asks the system to add a goal to the wallet |
+|   2 | System prompts for goal information |
+|   3 | User inserts description, amount to save, amount saved, start date, end date, and automatic reset |
+|   4 | System adds goal to wallet |
+|   5 | Goal created |
+
+### UC25: Delete Goal
+
+| User        |  |
+| ------------- |:-------------:| 
+|  Precondition     | User must be logged in and is part of the wallet as an administrator |
+|  Post condition     | Goal deleted |
+|  Nominal Scenario     | Scenario 25.1 |
+|  Variants     | - |
+|  Exceptions     | - User not authorized<br>- Connection to DB failed |
+
+| Scenario 25.1 | |
+| ------------- |:-------------:| 
+|  Precondition     | User must be logged in and have to be part of at least one wallet, as an administrator |
+|  Post condition     | Goal deleted |
+| Step#        | Description  |
+|  1 | User asks the system to delete a goal of the wallet |
+|   2 | System prompts for goal to delete |
+|   3 | User selects goal |
+|   4 | System removes goal from wallet |
+|   5 | Goal deleted |
+
+### UC26: Edit Goal
+| User        |  |
+| ------------- |:-------------:| 
+|  Precondition     | User must be logged in and is part of the wallet as an administrator |
+|  Post condition     | Goal updated |
+|  Nominal Scenario     | Scenario 26.1 |
+|  Variants     | - |
+|  Exceptions     | - User not authorized<br>- Connection to DB failed |
+
+| Scenario 26.1 | |
+| ------------- |:-------------:| 
+|  Precondition     | User must be logged in and is part of the wallet as an administrator |
+|  Post condition     | Goal updated |
+| Step#        | Description  |
+|  1 | User asks the system to edit a goal of the wallet |
+|  2 | System prompts for goal to edit |
+|  3 | User selects goal |
+|  4 | System recovers goal information |
+|  5 | User modifies goal information |
+|  6 | System updates goal information (if available), and checks if goal is reached |
+|  7 | Goal updated |
+
+### UC27: Create Wallet
+| User        |  |
+| ------------- |:-------------:| 
+|  Precondition     | User must be logged in |
+|  Post condition     | Wallet created |
+|  Nominal Scenario     | Scenario 27.1 |
+|  Variants     | - |
+|  Exceptions     | - User not authorized<br>- Connection to DB failed |
+
+| Scenario 27.1 | |
+| ------------- |:-------------:| 
+|  Precondition     | User must be logged in |
+|  Post condition     | Wallet created |
+| Step#        | Description  |
+|  1 | User asks the system to create a new wallet |
+|  2 | System asks for name and description |
+|  3 | User enters wallet information |
+|  4 | System creates wallet and sets the user as wallet administrator |
+|  5 | Wallet created |
+
+### UC28: Delete Wallet
+| User        |  |
+| ------------- |:-------------:| 
+|  Precondition     | User must be logged in and is the wallet administrator |
+|  Post condition     | Wallet, transactions, categories, and goals deleted |
+|  Nominal Scenario     | Scenario 28.1 |
+|  Variants     | - |
+|  Exceptions     | - User not authorized<br>- Connection to DB failed |
+
+| Scenario 28.1 | |
+| ------------- |:-------------:| 
+|  Precondition     | User must be logged in and is the wallet administrator |
+|  Post condition     | Wallet, transactions, categories, and goals deleted |
+| Step#        | Description  |
+|  1 | User asks system to delete a wallet |
+|  2 | System asks for confirmation |
+|  3 | User confirms deletion |
+|  4 | System deletes wallet and associated goal, transactions, and categories |
+|  5 | Wallet, transactions, categories, and goals deleted |
+
+### UC29: Add User to Wallet
+| User        |  |
+| ------------- |:-------------:| 
+|  Precondition     | User must be logged in and is the wallet administrator |
+|  Post condition     | Member asked to join the wallet |
+|  Nominal Scenario     | Scenario 29.1 |
+|  Variants     | - |
+|  Exceptions     | - User not authorized<br>- Username not found<br>- Connection to DB failed |
+
+| Scenario 29.1 | |
+| ------------- |:-------------:| 
+|  Precondition     | User must be logged in and wallet administrator |
+|  Post condition     | Member asked to join the wallet |
+| Step#        | Description  |
+|  1 | User asks the system to add a new member to a wallet |
+|  2 | System asks for the new member’s username |
+|  3 | User enters the username |
+|  4 | System sends an invite link to the future member of the wallet |
+|  5 | Member asked to join the wallet |
+
+### UC30: Leave wallet
+| User        |  |
+| ------------- |:-------------:| 
+|  Precondition     | User must be logged in is part of the wallet |
+|  Post condition     | Member removed from wallet (Member)<br>Member removed from wallet and new admin selected (Admin) |
+|  Nominal Scenario     | Scenario 30.1 (Member)<br>Scenario 30.2 (Admin) |
+|  Variants     | - |
+|  Exceptions     | - User not authorized<br>- Connection to DB failed |
+
+| Scenario 30.1 | |
+| ------------- |:-------------:| 
+|  Precondition     | User must be logged in and is a member of the wallet |
+|  Post condition     | Member removed from wallet |
+| Step#        | Description  |
+|  1 | User asks system to leave wallet |
+|  2 | System removes member from wallet |
+
+| Scenario 30.2 | |
+| ------------- |:-------------:| 
+|  Precondition     | User must be logged in and is a administrator of the wallet |
+|  Post condition     | Member is removed from wallet and new administrator is selected |
+| Step#        | Description  |
+|  1 | User asks system to leave wallet |
+|  2 | System asks for user to select the new wallet administrator |
+|  3 | User selects new wallet admin |
+|  4 | System updates group administrator |
+|  5 | System removes member from wallet |
+
+### UC31: Remove Member from Wallet
+| User        |  |
+| ------------- |:-------------:| 
+|  Precondition     | User must be logged in and is the wallet administrator |
+|  Post condition     | Member is removed from wallet |
+|  Nominal Scenario     | Scenario 31.1 |
+|  Variants     | - |
+|  Exceptions     | - User not authorized<br>- User not found<br>- Connection to DB failed |
+
+| Scenario 31.1 | |
+| ------------- |:-------------:| 
+|  Precondition     | User must be logged in and is the wallet administrator |
+|  Post condition     | Member removed from wallet |
+| Step#        | Description  |
+|  1 | User asks the system to remove a member from a wallet |
+|  2 | System prompts the user with the list of members of the wallet |
+|  3 | User selects member to delete |
+|  4 | System removes member from wallet |
+
+### UC32: Get Wallet Members
+| User        |  |
+| ------------- |:-------------:| 
+|  Precondition     | User must be logged in and is part of the wallet, regardless of its role |
+|  Post condition     | System returns wallet's members |
+|  Nominal Scenario     | Scenario 32.1 |
+|  Variants     | - |
+|  Exceptions     | - User not authorized<br>- Connection to DB failed |
+
+| Scenario 32.1 | |
+| ------------- |:-------------:| 
+|  Precondition     | User must be logged in and is part of the wallet, regardless of its role |
+|  Post condition     | System returns wallet's members |
+| Step#        | Description  |
+|  1 | User asks the system to get the members of the wallet |
+|  2 | System retrieves the list of members for the wallet |
+|  3 | System returns the list of members |
 
 # Glossary
 ![Glossary](V2-Images/Glossary.png)
