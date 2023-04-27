@@ -339,5 +339,6 @@ Story: wants to keep track of expenses related to his ski hobby.
 ![System diagram](V1-Images/Deployment_diagram.png)
 
 # Defects
-
-
+The application, as given to us, presents some defects, visible in the different modules that compose it:
+- The getUsers functionality should be used only by administrators to correctly manage them. Instead this function can be called by any non-logged user, creating a vulnerability in the system and allowing anyone to see and use sensible data related to the different users.
+- The getUserByUsername 
