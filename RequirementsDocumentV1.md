@@ -7,7 +7,7 @@ Version: V1 - description of EZWallet in CURRENT form (as received by teachers)
  
 | Version number | Change |
 | :-----------------: |:-----------:|
-| 1.1.5 | 5 | 
+| 1.1.8 | 8 | 
 
 
 # Contents
