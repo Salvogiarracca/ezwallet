@@ -135,7 +135,7 @@ Story: wants to keep track of travel expenses of his tour to Japan.
 
 
 ## Use case diagram
-\<define here UML Use case diagram UCD summarizing all use cases, and their relationships>
+![Use case diagram](V2-Images/Use%20case%20diagram.png)
 
 ### UC1: Login
 | User        |  |
