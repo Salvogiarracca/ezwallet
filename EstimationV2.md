@@ -94,7 +94,7 @@ Consider the EZWallet  project in FUTURE version (as proposed by the team), assu
 |- Project report | 72 |
 ###
 Insert here Gantt chart with above activities
-![GRANTT DIAGRAM](V2-Images\GRANTT.png)
+![GANTT DIAGRAM](V2-Images/GANTT.png)
 # Summary
 
 Report here the results of the three estimation approaches. The  estimates may differ. Discuss here the possible reasons for the difference
