@@ -1,7 +1,7 @@
 # Project Estimation - FUTURE
-Date:
+Date: 28-04-2023
 
-Version:
+Version: 1.0.5
 
 
 # Estimation approach
@@ -100,11 +100,13 @@ Insert here Gantt chart with above activities
 Report here the results of the three estimation approaches. The  estimates may differ. Discuss here the possible reasons for the difference
 
 |             | Estimated effort                        |   Estimated duration |          
-| ----------- | ------------------------------- | ---------------|
-| estimate by size ||
-| estimate by product decomposition ||
-| estimate by activity decomposition ||
+| ----------- | :-------------------------------: | :---------------: |
+| estimate by size | 1680 person hours | 55 days |
+| estimate by product decomposition | 1896 person hours | 62 days |
+| estimate by activity decomposition | 5960 person hours | 190 days |
 
+TODO ASAP
 
+Assumptions: in all the estimation approaches, we have team of 4 people that works 8 hours per day, 5 days per week.
 
 
