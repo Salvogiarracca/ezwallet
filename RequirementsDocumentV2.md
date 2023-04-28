@@ -7,7 +7,7 @@ Version: V2 - description of EZWallet in FUTURE form (as proposed by the team)
  
 | Version number | Change |
 |:-----------------:|:-----------:|
-| 1.0.2 | 3 | 
+| 1.0.3 | 4 | 
 
 
 # Contents
@@ -40,7 +40,7 @@ This application is being developed as an open-source project. The project aims 
 
 The community behind the project is composed of developers that work on the application in their free time. The owners of the repository on gitlab are the project leaders that guide the other developers towards predefined goals during the development phase. To support them a small bank account has been setted up to accept donations by users.
 
-The user who sets up the service on the server has elevated privileges and can modify transactions, categories and user accounts' informations in order to intervene in case problems arise. Users can access the service through their browser to register or login and start tracking their expenses, eventually inside a group composed of other individuals. 
+The user who sets up the service on the server has elevated privileges and can modify transactions, categories and user accounts' informations in order to intervene in case problems arise. Users can access the service through their browser to register or login and start tracking their expenses, eventually inside a Wallet composed of other individuals. 
 
 The system allows users to link the application to their bank account, in order to recover previous transaction informations, without having the need to input them manually.
 
@@ -64,12 +64,12 @@ The system allows users to link the application to their bank account, in order 
 ![Context diagram](V2-Images/Context%20diagram.png)
 
 ## Interfaces
-| Actor | Logical Interface | Physical Interface  |
+| Actor | Physical Interface | Logical Interface  |
 |:------|:------------------|:--------------------|
 | Project leader | PC | GUI (tbd + all functions + debug features) |
 | Project developer | PC | GUI (tbd + all functions + debug features) |
-| System administrator | PC | GUI (tbd + all functions + management of users and wallets  + configuration of server instance) |
-| Wallet administrator | PC/Smartphone | GUI (tbd + all functions + management of group settings) |
+| System administrator | PC | GUI (tbd + all functions + management of users and Wallets  + configuration of server instance) |
+| Wallet administrator | PC/Smartphone | GUI (tbd + all functions + management of Wallet settings) |
 | Wallet member | PC/Smartphone | GUI (tbd + all functions) |
 | Bank system | Internet connection | APIs |
 | Currency converter system | Internet connection | APIs |
@@ -206,7 +206,7 @@ Story: wants to keep track of travel expenses of his tour to Japan.
 |  Post condition     | User's account is deleted |
 |  Nominal Scenario     | Scenario 4.1 |
 |  Variants     | - |
-|  Exceptions     | - User already logged out (invalid tokens)<br>- User's session expired (7 days)<br>- User not found<br>- User not authorized<br>- Connection to DB failed |
+|  Exceptions     | - User already logged out (invalid tokens)<br>- User's session expired (7 days)<br>- User not found<br>- User not authorized<br>- Connection to DB failed<br>- Incorrect password |
 
 | Scenario 4.1 | |
 | ------------- |:-------------:| 
@@ -621,7 +621,7 @@ Story: wants to keep track of travel expenses of his tour to Japan.
 |  Variants     | - |
 |  Exceptions     | - User not authorized<br>- Connection to DB failed |
 
-| Scenario 24.1 | |
+| Scenario 23.1 | |
 | ------------- |:-------------:| 
 |  Precondition     | User must be logged in and is part of the wallet as an administrator |
 |  Post condition     | Goal created |
@@ -642,7 +642,7 @@ Story: wants to keep track of travel expenses of his tour to Japan.
 |  Variants     | - |
 |  Exceptions     | - User not authorized<br>- Connection to DB failed |
 
-| Scenario 25.1 | |
+| Scenario 24.1 | |
 | ------------- |:-------------:| 
 |  Precondition     | User must be logged in and have to be part of at least one wallet, as an administrator |
 |  Post condition     | Goal deleted |
@@ -662,7 +662,7 @@ Story: wants to keep track of travel expenses of his tour to Japan.
 |  Variants     | - |
 |  Exceptions     | - User not authorized<br>- Connection to DB failed |
 
-| Scenario 26.1 | |
+| Scenario 25.1 | |
 | ------------- |:-------------:| 
 |  Precondition     | User must be logged in and is part of the wallet as an administrator |
 |  Post condition     | Goal updated |
@@ -684,7 +684,7 @@ Story: wants to keep track of travel expenses of his tour to Japan.
 |  Variants     | - |
 |  Exceptions     | - User not authorized<br>- Connection to DB failed |
 
-| Scenario 27.1 | |
+| Scenario 26.1 | |
 | ------------- |:-------------:| 
 |  Precondition     | User must be logged in |
 |  Post condition     | Wallet created |
@@ -704,7 +704,7 @@ Story: wants to keep track of travel expenses of his tour to Japan.
 |  Variants     | - |
 |  Exceptions     | - User not authorized<br>- Connection to DB failed |
 
-| Scenario 28.1 | |
+| Scenario 27.1 | |
 | ------------- |:-------------:| 
 |  Precondition     | User must be logged in and is the wallet administrator |
 |  Post condition     | Wallet, transactions, categories, and goals deleted |
@@ -724,7 +724,7 @@ Story: wants to keep track of travel expenses of his tour to Japan.
 |  Variants     | - |
 |  Exceptions     | - User not authorized<br>- Username not found<br>- Connection to DB failed |
 
-| Scenario 29.1 | |
+| Scenario 28.1 | |
 | ------------- |:-------------:| 
 |  Precondition     | User must be logged in and wallet administrator |
 |  Post condition     | Member asked to join the wallet |
@@ -744,7 +744,7 @@ Story: wants to keep track of travel expenses of his tour to Japan.
 |  Variants     | - |
 |  Exceptions     | - User not authorized<br>- Connection to DB failed |
 
-| Scenario 30.1 | |
+| Scenario 29.1 | |
 | ------------- |:-------------:| 
 |  Precondition     | User must be logged in and is a member of the wallet |
 |  Post condition     | Member removed from wallet |
@@ -752,7 +752,7 @@ Story: wants to keep track of travel expenses of his tour to Japan.
 |  1 | User asks system to leave wallet |
 |  2 | System removes member from wallet |
 
-| Scenario 30.2 | |
+| Scenario 29.2 | |
 | ------------- |:-------------:| 
 |  Precondition     | User must be logged in and is a administrator of the wallet |
 |  Post condition     | Member is removed from wallet and new administrator is selected |
@@ -772,7 +772,7 @@ Story: wants to keep track of travel expenses of his tour to Japan.
 |  Variants     | - |
 |  Exceptions     | - User not authorized<br>- User not found<br>- Connection to DB failed |
 
-| Scenario 31.1 | |
+| Scenario 30.1 | |
 | ------------- |:-------------:| 
 |  Precondition     | User must be logged in and is the wallet administrator |
 |  Post condition     | Member removed from wallet |
@@ -791,7 +791,7 @@ Story: wants to keep track of travel expenses of his tour to Japan.
 |  Variants     | - |
 |  Exceptions     | - User not authorized<br>- Connection to DB failed |
 
-| Scenario 32.1 | |
+| Scenario 31.1 | |
 | ------------- |:-------------:| 
 |  Precondition     | User must be logged in and is part of the wallet, regardless of its role |
 |  Post condition     | System returns wallet's members |
@@ -799,6 +799,25 @@ Story: wants to keep track of travel expenses of his tour to Japan.
 |  1 | User asks the system to get the members of the wallet |
 |  2 | System retrieves the list of members for the wallet |
 |  3 | System returns the list of members |
+
+### UC32: Change password
+| User        |  |
+| ------------- |:-------------:| 
+|  Precondition     | User must be logged in |
+|  Post condition     | User's password changed |
+|  Nominal Scenario     | Scenario 32.1 |
+|  Variants     | - |
+|  Exceptions     | - User not authorized<br>- Connection to DB failed<br>- Incorrect password |
+
+| Scenario 32.1 | |
+| ------------- |:-------------:| 
+|  Precondition     | User must be logged in |
+|  Post condition     | User's password changed |
+| Step#        | Description  |
+|  1 | User asks the system to change password |
+|  2 | System asks for previous password and new password |
+|  3 | User enters passwords |
+|  4 | System updates user's password |
 
 # Glossary
 ![Glossary](V2-Images/Glossary.png)
@@ -808,7 +827,3 @@ Story: wants to keep track of travel expenses of his tour to Japan.
 
 # Deployment Diagram 
 ![Glossary](V2-Images/Deployment%20diagram.png)
-
-
-
-
