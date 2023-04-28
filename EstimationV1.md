@@ -91,7 +91,3 @@ Report here the results of the three estimation approaches. The  estimates may d
 The calculations performed are based on the code given to us. In the estimation by LOCs we have considered only the *.js files and the *V1.md documents: it is based solely on the numbers of lines of code, without taking into account other factors such as the number of features, the complexity of the code and the skill level of the developement team. This approach assumes that the amount of effort required to complete a project is directly proportional to the LOCs, which means that may not be always accurate. We have assumed that external libraries are not to be included to the calculations and there are no acquisition costs for them. On the other hand, the estimation by Product/Activity break down the project into smaller and manageable tasks and estimate the effort required to complete each one. They consider a wider range of factors that can affect the project's complexity and duration, indeed those two approaches are generally more accurate compared to the first one.
 
 Assumptions: in all the estimation approaches, we have team of 4 people that works 8 hours per day, 5 days per week.
-
-
-
-

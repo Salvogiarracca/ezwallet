@@ -93,7 +93,6 @@ Consider the EZWallet  project in FUTURE version (as proposed by the team), assu
 |- Project budget | 80 |
 |- Project report | 72 |
 ###
-Insert here Gantt chart with above activities
 ![GANTT DIAGRAM](V2-Images/GANTT.png)
 # Summary
 
@@ -105,7 +104,8 @@ Report here the results of the three estimation approaches. The  estimates may d
 | estimate by product decomposition | 1896 person hours | 62 days |
 | estimate by activity decomposition | 5960 person hours | 190 days |
 
-TODO ASAP
+Estimation by size: based on the code that we have and the functionalities that we have added, we tried to estimate the number of lines of code when the project will be finished. The calculations are based solely on the numbers of lines of code, without taking into account other factors such as the number of features, the complexity of the code and the skill level of the developement team. As a consequence, this method can be inaccurate.
+Estimation by Product decomposition and Activity decomposition, on the other hand, break down the project into smaller and manageable tasks and estimate the effort required to complete each one. They consider a wider range of factors that can affect the project's complexity and duration, indeed those two approaches are generally more accurate compared to the first one.
 
 Assumptions: in all the estimation approaches, we have team of 4 people that works 8 hours per day, 5 days per week.
 
