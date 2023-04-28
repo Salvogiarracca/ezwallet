@@ -611,26 +611,7 @@ Story: wants to keep track of travel expenses of his tour to Japan.
 |  2 | System deletes bank information from user's account and removes access to bank account information |
 |  3 | Bank information deleted |
 
-### UC23: Retrieve transactions from bank account
-
-| User        |  |
-| ------------- |:-------------:| 
-|  Precondition     | User must be logged in and has an authorized linked bank account |
-|  Post condition     | Transactions retrieved |
-|  Nominal Scenario     | Scenario 23.1 |
-|  Variants     | - |
-|  Exceptions     | - User not authorized<br>- Connection fails<br>- API key expired |
-
-| Scenario 23.1 | |
-| ------------- |:-------------:| 
-|  Precondition     | User must be logged in and has an authorized linked bank account |
-|  Post condition     | Transactions retrieved |
-| Step#        | Description  |
-|  1 | System retrieves user's key and access point |
-|  2 | System retrieves transactions |
-|  3 | Transactions retrieved |
-
-### UC24: Add Goal
+### UC23: Add Goal
 
 | User        |  |
 | ------------- |:-------------:| 
@@ -651,7 +632,7 @@ Story: wants to keep track of travel expenses of his tour to Japan.
 |   4 | System adds goal to wallet |
 |   5 | Goal created |
 
-### UC25: Delete Goal
+### UC24: Delete Goal
 
 | User        |  |
 | ------------- |:-------------:| 
@@ -672,7 +653,7 @@ Story: wants to keep track of travel expenses of his tour to Japan.
 |   4 | System removes goal from wallet |
 |   5 | Goal deleted |
 
-### UC26: Edit Goal
+### UC25: Edit Goal
 | User        |  |
 | ------------- |:-------------:| 
 |  Precondition     | User must be logged in and is part of the wallet as an administrator |
@@ -694,7 +675,7 @@ Story: wants to keep track of travel expenses of his tour to Japan.
 |  6 | System updates goal information (if available), and checks if goal is reached |
 |  7 | Goal updated |
 
-### UC27: Create Wallet
+### UC26: Create Wallet
 | User        |  |
 | ------------- |:-------------:| 
 |  Precondition     | User must be logged in |
@@ -714,7 +695,7 @@ Story: wants to keep track of travel expenses of his tour to Japan.
 |  4 | System creates wallet and sets the user as wallet administrator |
 |  5 | Wallet created |
 
-### UC28: Delete Wallet
+### UC27: Delete Wallet
 | User        |  |
 | ------------- |:-------------:| 
 |  Precondition     | User must be logged in and is the wallet administrator |
@@ -734,7 +715,7 @@ Story: wants to keep track of travel expenses of his tour to Japan.
 |  4 | System deletes wallet and associated goal, transactions, and categories |
 |  5 | Wallet, transactions, categories, and goals deleted |
 
-### UC29: Add User to Wallet
+### UC28: Add User to Wallet
 | User        |  |
 | ------------- |:-------------:| 
 |  Precondition     | User must be logged in and is the wallet administrator |
@@ -754,7 +735,7 @@ Story: wants to keep track of travel expenses of his tour to Japan.
 |  4 | System sends an invite link to the future member of the wallet |
 |  5 | Member asked to join the wallet |
 
-### UC30: Leave wallet
+### UC29: Leave wallet
 | User        |  |
 | ------------- |:-------------:| 
 |  Precondition     | User must be logged in is part of the wallet |
@@ -782,7 +763,7 @@ Story: wants to keep track of travel expenses of his tour to Japan.
 |  4 | System updates group administrator |
 |  5 | System removes member from wallet |
 
-### UC31: Remove Member from Wallet
+### UC30: Remove Member from Wallet
 | User        |  |
 | ------------- |:-------------:| 
 |  Precondition     | User must be logged in and is the wallet administrator |
@@ -801,7 +782,7 @@ Story: wants to keep track of travel expenses of his tour to Japan.
 |  3 | User selects member to delete |
 |  4 | System removes member from wallet |
 
-### UC32: Get Wallet Members
+### UC31: Get Wallet Members
 | User        |  |
 | ------------- |:-------------:| 
 |  Precondition     | User must be logged in and is part of the wallet, regardless of its role |
