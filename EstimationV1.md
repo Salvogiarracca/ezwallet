@@ -39,43 +39,43 @@ Consider the EZWallet  project in CURRENT version (as received by the teachers),
 |         Activity name    | Estimated effort (person hours)   |             
 | ----------- | :------------------------------: | 
 | ***Requirements*** | 96 |
-|⟶ Functional requirements| 32 |
-|⟶ Non Functional requirements| 32 |
-|⟶ Stories | 32 |
-|⟶ Use cases | 32 |
+|- Functional requirements| 32 |
+|- Non Functional requirements| 32 |
+|- Stories | 32 |
+|- Use cases | 32 |
 | ***GUI prototipe*** | 24 |
-|⟶ Registration screen | 24 |
-|⟶ Login screen | 24 |
-|⟶ Home Screen | 24 |
-|⟶ Transaction management screen | 24 |
-|⟶ Category management screen | 24 |
-|⟶ Label management screen | 24 |
+|- Registration screen | 24 |
+|- Login screen | 24 |
+|- Home Screen | 24 |
+|- Transaction management screen | 24 |
+|- Category management screen | 24 |
+|- Label management screen | 24 |
 | ***Design document*** | 64 |
-|⟶ Architecture design  | 24 |
-|⟶ Databease schema design | 16 |
-|⟶ Code organization | 24 |
+|- Architecture design  | 24 |
+|- Databease schema design | 16 |
+|- Code organization | 24 |
 | ***Code*** | 32 |
-|⟶ User interface code | 32 |
-|⟶ Authentication code | 24 |
-|⟶ Database access code | 24 |
+|- User interface code | 32 |
+|- Authentication code | 24 |
+|- Database access code | 24 |
 | ***Unit tests*** | 24 |
-|⟶ Registration test | 12 |
-|⟶ Login test | 8 |
-|⟶ Logout test | 8 |
-|⟶ Transaction tests | 24 |
-|⟶ Category tests | 16 |
-|⟶ Label tests | 8 |
+|- Registration test | 12 |
+|- Login test | 8 |
+|- Logout test | 8 |
+|- Transaction tests | 24 |
+|- Category tests | 16 |
+|- Label tests | 8 |
 | ***API tests*** | 24 |
-|⟶ Registration endpoint tests | 16 |
-|⟶ Login endpoint tests | 8 |
-|⟶ Logout endpoint tests | 8 |
-|⟶ Transaction endpoint tests | 24 |
-|⟶ Category endpoint tests | 16 |
-|⟶ Label endpoint tests | 8 |
+|- Registration endpoint tests | 16 |
+|- Login endpoint tests | 8 |
+|- Logout endpoint tests | 8 |
+|- Transaction endpoint tests | 24 |
+|- Category endpoint tests | 16 |
+|- Label endpoint tests | 8 |
 | ***Management documents*** | 64 |
-|⟶ Project schedule | 24 |
-|⟶ Project budget | 24 |
-|⟶ Project report | 16 |
+|- Project schedule | 24 |
+|- Project budget | 24 |
+|- Project report | 16 |
 
 ###
 ![GRANTT DIAGRAM](V1-Images\GRANTT.png)
@@ -89,7 +89,7 @@ Report here the results of the three estimation approaches. The  estimates may d
 | estimate by product decomposition | 328 person hours | 10 days |
 | estimate by activity decomposition | 328 person hours | 10 days |
 
-The calculations performed are based on the code given to us. For the estimation by LOCs we have considered only the *.js files and the *V1.md documents. There is a big difference compared with the other two approaches and this is related to the fact that the estimation is based only to the code given to us. We have assumed that external libraries are not to be included to the calculations and there are no acquisition costs for them. For the estimation by Product and by Activity we have imagined that some tasks could be performed in parallel rather than others that have to be performed in sequential way and there are holidays .
+The calculations performed are based on the code given to us. In the estimation by LOCs we have considered only the *.js files and the *V1.md documents: it is based solely on the numbers of lines of code, without taking into account other factors such as the number of features, the complexity of the code and the skill level of the developement team. This approach assumes that the amount of effort required to complete a project is directly proportional to the LOCs, which means that may not be always accurate. We have assumed that external libraries are not to be included to the calculations and there are no acquisition costs for them. On the other hand, the estimation by Product/Activity break down the project into smaller and manageable tasks and estimate the effort required to complete each one. They consider a wider range of factors that can affect the project's complexity and duration, indeed those two approaches are generally more accurate compared to the first one.
 
 Assumptions: in all the estimation approaches, we have team of 4 people that works 8 hours per day, 5 days per week.
 
