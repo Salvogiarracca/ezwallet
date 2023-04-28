@@ -11,24 +11,24 @@ Consider the EZWallet  project in FUTURE version (as proposed by the team), assu
 |             | Estimate                        |             
 | ----------- | :-------------------------------: |
 | NC =  Estimated number of modules to be developed                                                         |8|          
-| A = Estimated average size per module, in LOC                                                             |163| 
-| S = Estimated size of project, in LOC (= NC * A)                                                          |1300| 
-| E = Estimated effort, in person hours (here use productivity 10 LOC per person hour)                      |130|   
-| C = Estimated cost, in euro (here use 1 person hour cost = 30 euro)                                       |3900| 
-| Estimated calendar time, in calendar weeks (Assume team of 4 people, 8 hours per day, 5 days per week )   | 1 |               
+| A = Estimated average size per module, in LOC                                                             |8400| 
+| S = Estimated size of project, in LOC (= NC * A)                                                          |16800| 
+| E = Estimated effort, in person hours (here use productivity 10 LOC per person hour)                      |1680|   
+| C = Estimated cost, in euro (here use 1 person hour cost = 30 euro)                                       |54400| 
+| Estimated calendar time, in calendar weeks (Assume team of 4 people, 8 hours per day, 5 days per week )   | 11 |               
 ### Modules: documents, app, controllers, db, models, routes, server, test.
 
 # Estimate by product decomposition
 ### 
 |         component name    | Estimated effort (person hours)   |             
 | ----------- | :-------------------------------: | 
-| requirement document | 96 |
-| GUI prototype | 24 |
-| design document | 64 |
-| code | 32 |
-| unit tests | 24 |
-| api tests | 24 |
-| management documents | 64 |
+| requirement document | 360 |
+| GUI prototype | 120 |
+| design document | 256 |
+| code | 488 |
+| unit tests | 240 |
+| api tests | 200 |
+| management documents | 232 |
 
 
 
@@ -36,47 +36,65 @@ Consider the EZWallet  project in FUTURE version (as proposed by the team), assu
 ### 
 |         Activity name    | Estimated effort (person hours)   |             
 | ----------- | :------------------------------: | 
-| ***Requirements*** | 96 |
-|- Functional requirements| 32 |
-|- Non Functional requirements| 32 |
-|- Stories | 32 |
-|- Use cases | 32 |
-| ***GUI prototipe*** | 24 |
-|- Registration screen | 24 |
-|- Login screen | 24 |
-|- Home Screen | 24 |
-|- Transaction management screen | 24 |
-|- Category management screen | 24 |
-|- Label management screen | 24 |
-| ***Design document*** | 64 |
-|- Architecture design  | 24 |
-|- Databease schema design | 16 |
-|- Code organization | 24 |
-| ***Code*** | 32 |
-|- User interface code | 32 |
-|- Authentication code | 24 |
-|- Database access code | 24 |
-| ***Unit tests*** | 24 |
-|- Registration test | 12 |
-|- Login test | 8 |
-|- Logout test | 8 |
-|- Transaction tests | 24 |
-|- Category tests | 16 |
-|- Label tests | 8 |
-| ***API tests*** | 24 |
-|- Registration endpoint tests | 16 |
-|- Login endpoint tests | 8 |
-|- Logout endpoint tests | 8 |
-|- Transaction endpoint tests | 24 |
-|- Category endpoint tests | 16 |
-|- Label endpoint tests | 8 |
-| ***Management documents*** | 64 |
-|- Project schedule | 24 |
-|- Project budget | 24 |
-|- Project report | 16 |
+| ***Requirements*** | 360 |
+|- Functional requirements| 120 |
+|- Non Functional requirements| 120 |
+|- Stories | 64 |
+|- Use cases | 120 |
+| ***GUI prototipe*** | 120 |
+|- Registration screen | 96 |
+|- Login screen | 96 |
+|- Home screen | 96 |
+|- Profile screen | 64 |
+|- Transaction management screen | 96 |
+|- Wallet screen | 112 |
+|- Category management screen | 96 |
+|- Goal screen | 88 |
+|- Statistics screen | 120 |
+| ***Design document*** | 256 |
+|- Architecture design  | 96 |
+|- Databease schema design | 64 |
+|- Code organization | 96 |
+| ***Code*** | 488 |
+|- User interface code | 280 |
+|- Authentication code | 200 |
+|- Wallet management code | 480 |
+|- Database access code | 184 |
+|- Goal code | 96 |
+|- Statistics code | 128 |
+|- ***API*** | 200 |
+|-- Bank API code | 200 |
+|-- Currencies API code | 160 |
+| ***Unit tests*** | 240 |
+|- Registration test | 96 |
+|- Login test | 48 |
+|- Logout test | 40 |
+|- Transaction tests | 216 |
+|- Currencies management tests | 136 |
+|- Bank connection tests | 120 |
+|- Category tests | 88 |
+|- Label tests | 64 |
+|- Wallet tests | 240 |
+|- Statistics tests | 128 |
+|- Goal tests | 120 |
+| ***API tests*** | 224 |
+|- Registration endpoint test | 80 |
+|- Login endpoint test | 48 |
+|- Logout endpoint test | 48 |
+|- Transaction endpoint tests | 200 |
+|- Currencies endpoint tests | 128 |
+|- Bank endpoint tests | 112 |
+|- Category endpoint tests | 80 |
+|- Wallet endpoint tests | 224 |
+|- Statistics endpoint tests | 120 |
+|- Goal endpoint tests | 112 |
+| ***Management documents*** | 232 |
+|- Project schedule | 80 |
+|- Project budget | 80 |
+|- Project report | 72 |
 ###
 Insert here Gantt chart with above activities
-
+![GRANTT DIAGRAM](V2-Images\GRANTT.png)
 # Summary
 
 Report here the results of the three estimation approaches. The  estimates may differ. Discuss here the possible reasons for the difference

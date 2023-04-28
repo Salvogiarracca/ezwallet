@@ -63,8 +63,7 @@ Consider the EZWallet  project in CURRENT version (as received by the teachers),
 |- Login test | 8 |
 |- Logout test | 8 |
 |- Transaction tests | 24 |
-|- Category tests | 16 |
-|- Label tests | 8 |
+|- Category tests | 16 | 
 | ***API tests*** | 24 |
 |- Registration endpoint tests | 16 |
 |- Login endpoint tests | 8 |
@@ -78,7 +77,8 @@ Consider the EZWallet  project in CURRENT version (as received by the teachers),
 |- Project report | 16 |
 
 ###
-![GRANTT DIAGRAM](V1-Images\GRANTT.png)
+![GRANTT DIAGRAM](V1-Images\GRANTT.png) 
+update chart for label tests and endpoint
 # Summary
 
 Report here the results of the three estimation approaches. The  estimates may differ. Discuss here the possible reasons for the difference
