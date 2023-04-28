@@ -77,7 +77,7 @@ Consider the EZWallet  project in CURRENT version (as received by the teachers),
 |- Project report | 16 |
 
 ###
-![GRANTT DIAGRAM](V1-Images\GRANTT.png)
+![GANTT DIAGRAM](V1-Images/GANTT.png)
 # Summary
 
 Report here the results of the three estimation approaches. The  estimates may differ. Discuss here the possible reasons for the difference
