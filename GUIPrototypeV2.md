@@ -97,5 +97,5 @@ Here the same wireframe from admin perspective
 
 Here the same wireframe from admin perspective
 ![](V2-GUI_Mobile/Wallet%20infos%20(Admin).png)
-![](V2-Mobile/New%20goal.png)
+![](V2-GUI_Mobile/New%20goal.png)
 
