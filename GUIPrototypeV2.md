@@ -77,11 +77,11 @@ Here the same wireframe from admin perspective
 
 Here the same wireframe from admin perspective
 ![](V2-GUI_Mobile/Add%20transaction%20(Admin).png)
-![](V2-GUI_Mobile/Edit%20transactions.png)
+![](V2-GUI_Mobile/Edit%20transaction.png)
 
 Here the same wireframe from admin perspective
 ![](V2-GUI_Mobile/Edit%20transaction(Admin).png)
-![](V2-GUI_Mobile/List%20transaction.png)
+![](V2-GUI_Mobile/List%20transactions.png)
 
 Here the same wireframe from admin perspective
 ![](V2-GUI_Mobile/List%20transactions%20(admin).png)
