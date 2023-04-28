@@ -62,8 +62,8 @@ Here the same wireframe from admin perspective
 ![](V2-GUI_Mobile/Log%20in%20page.png)
 ![](V2-GUI_Mobile/Home.png)
 ![](V2-GUI_Mobile/Donate.png)
-![](V2-GUI_Mobile/Bank%20connection.png)
-![](V2-GUI_Mobile/Statistics.png)
+![](V2-GUI_Mobile/Bank%20account.png)
+![](V2-GUI_Mobile/Stats.png)
 ![](V2-GUI_Mobile/Profile%20information.png)
 ![](V2-GUI_Mobile/Change%20password.png)
 ![](V2-GUI_Mobile/Contact%20list.png)
@@ -72,7 +72,7 @@ Here the same wireframe from admin perspective
 ![](V2-GUI_Mobile/List%20categories.png)
 
 Here the same wireframe from admin perspective
-![](V2-GUI_Mobile/List%20categories%20(Admin).png)
+![](V2-GUI_Mobile/List%20categories%20(admin).png)
 ![](V2-GUI_Mobile/Add%20transaction.png)
 
 Here the same wireframe from admin perspective
@@ -80,22 +80,24 @@ Here the same wireframe from admin perspective
 ![](V2-GUI_Mobile/Edit%20transactions.png)
 
 Here the same wireframe from admin perspective
-![](V2-GUI_Mobile/Edit%20transactions(Admin).png)
-![](V2-GUI_Mobile/List%20transactions.png)
+![](V2-GUI_Mobile/Edit%20transaction(Admin).png)
+![](V2-GUI_Mobile/List%20transaction.png)
 
 Here the same wireframe from admin perspective
-![](V2-GUI_Mobile/List_transactions_(admin).png)
+![](V2-GUI_Mobile/List%20transactions%20(admin).png)
 ![](V2-GUI_Mobile/List%20transactions%20-%20More%20details.png)
 
 Here the same wireframe from admin perspective
-![](V2-GUI_Mobile/List%20transactions%20-%20More%20details%20(admin).png)
+![](V2-GUI_Mobile/List%20transactions%20-%20More%20details%20(Admin).png)
 ![](V2-GUI_Mobile/Create%20wallet.png)
 ![](V2-GUI_Mobile/Home%20(Wallet%20Created).png)
 ![](V2-GUI_Mobile/Add%20user%20to%20existing%20wallet.png)
 ![](V2-GUI_Mobile/List%20wallets.png)
 ![](V2-GUI_Mobile/Wallet%20infos.png)
+![](V2-GUI_Mobile/Wallet%20infos%20-%20continue.png)
 
-Here the same wireframe from admin perspective
+Here the same two wireframes from admin perspective
 ![](V2-GUI_Mobile/Wallet%20infos%20(Admin).png)
+![](V2-GUI_Mobile/Wallet%20infos%20-%20continue%20(admin).png)
 ![](V2-GUI_Mobile/New%20goal.png)
 
