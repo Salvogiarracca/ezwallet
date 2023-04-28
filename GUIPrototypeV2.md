@@ -13,7 +13,7 @@ Version: 1.0
 # Desktop web interface
 
 ![](V2-GUI_Desktop/Welcome%20Page.png)
-![](V2-GUI_Desktop/Register_page.png)
+![](V2-GUI_Desktop/Register%20page.png)
 ![](V2-GUI_Desktop/Log%20in%20page.png)
 ![](V2-GUI_Desktop/Home.png)
 ![](V2-GUI_Desktop/Donate.png)
@@ -32,18 +32,18 @@ Here the same wireframe from admin perspective
 
 Here the same wireframe from admin perspective
 ![](V2-GUI_Desktop/Add%20transaction%20(Admin).png)
-![](V2-GUI_Desktop/Edit%20transactions.png)
+![](V2-GUI_Desktop/Edit%20transaction.png)
 
 Here the same wireframe from admin perspective
-![](V2-GUI_Desktop/Edit%20transactions(Admin).png)
+![](V2-GUI_Desktop/Edit%20transaction%20(Admin).png)
 ![](V2-GUI_Desktop/List%20transactions.png)
 
 Here the same wireframe from admin perspective
-![](V2-GUI_Desktop/List_transactions_(admin).png)
+![](V2-GUI_Desktop/List%20transactions%20(admin).png)
 ![](V2-GUI_Desktop/List%20transactions%20-%20More%20details.png)
 
 Here the same wireframe from admin perspective
-![](V2-GUI_Desktop/List_transactions_-_More_details_(admin).png)
+![](V2-GUI_Desktop/List%20transactions%20-%20More%20details%20(admin).png)
 ![](V2-GUI_Desktop/Create%20wallet.png)
 ![](V2-GUI_Desktop/Home%20(Wallet%20Created).png)
 ![](V2-GUI_Desktop/Add%20user%20to%20existing%20wallet.png)
