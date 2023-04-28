@@ -97,7 +97,7 @@ Here the same wireframe from admin perspective
 ![](V2-GUI_Mobile/Wallet%20infos%20-%20continue.png)
 
 Here the same two wireframes from admin perspective
-![](V2-GUI_Mobile/Wallet%20infos%20(Admin).png)
+![](V2-GUI_Mobile/Wallet%20infos%20(admin).png)
 ![](V2-GUI_Mobile/Wallet%20infos%20-%20continue%20(admin).png)
 ![](V2-GUI_Mobile/New%20goal.png)
 
