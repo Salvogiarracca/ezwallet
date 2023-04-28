@@ -7,7 +7,7 @@ Version: V1 - description of EZWallet in CURRENT form (as received by teachers)
  
 | Version number | Change |
 | :-----------------: |:-----------:|
-| 1.1.9 | 9 | 
+| 1.2.0 | 10 | 
 
 
 # Contents
@@ -37,9 +37,9 @@ EZWallet (read EaSy Wallet) is a software application designed to help individua
 # Business Model
 This application is being developed as an open-source project. The project aims to become a self-hosted solution for users who want to manage their expenses without relying on any commercial product that may be more at risk of potential data leaks or, without the user knowing, may sell their information online. 
 
-The user who sets up the application has full rights on transactions and categories created and can grant more privileges to normal users. Normal users can login and track their expense, eventually inside a group composed by other individuals.
+The community behind the project is composed of developers that work on the application in their free time. The owners of the repository on gitlab are the project leaders that guide the other developers towards predefined goals during the development phase. To support them a small bank account has been setted up to accept donations by users.
 
-The community behind the project is composed of developers that work on the application in their free time. To support them a small bank account has been setted up to accept donations by users.
+The user who sets up the application has full rights on transactions and categories created and can grant more privileges to normal users. Normal users can login and track their expenses.
 
 
 # Stakeholders
@@ -341,7 +341,7 @@ Story: wants to keep track of expenses related to his ski hobby.
 # Defects
 The application, as given to us, presents some defects, visible in the different modules that compose it:
 - The getUsers functionality should be used only by administrators to correctly manage them. Instead this function can be called by any non-logged user, creating a vulnerability in the system and allowing anyone to see and use sensible data related to the different users.
-- The getUserByUsername also should be called only by administrator and should return informations about the researched user. Instead every logged user can call it but the informations they can get are only related to themselves.
+- The getUserByUsername should return only informations about the researched user. Instead every user can call it but the informations they can get are only related to themselves.
 - The get_labels method doesn't return all the informations between a transaction and its related category: the color is missing, making the join between tables useless.
 - The create_Categories method doesn't check during the creation process if a category was previously inserted. So, duplicate categories can be created and cannot be distinguished by a normal user.
 - Every user can get the list of all transactions, including the ones that haven't been created or edited by the user itself. This happens because the get_transactions method doesn't perform checks on user identity.

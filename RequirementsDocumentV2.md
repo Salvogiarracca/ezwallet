@@ -7,7 +7,7 @@ Version: V2 - description of EZWallet in FUTURE form (as proposed by the team)
  
 | Version number | Change |
 |:-----------------:|:-----------:|
-| 1.0.2 | 3 | 
+| 1.0.3 | 4 | 
 
 
 # Contents
@@ -40,7 +40,7 @@ This application is being developed as an open-source project. The project aims 
 
 The community behind the project is composed of developers that work on the application in their free time. The owners of the repository on gitlab are the project leaders that guide the other developers towards predefined goals during the development phase. To support them a small bank account has been setted up to accept donations by users.
 
-The user who sets up the service on the server has elevated privileges and can modify transactions, categories and user accounts' informations in order to intervene in case problems arise. Users can access the service through their browser to register or login and start tracking their expenses, eventually inside a group composed of other individuals. 
+The user who sets up the service on the server has elevated privileges and can modify transactions, categories and user accounts' informations in order to intervene in case problems arise. Users can access the service through their browser to register or login and start tracking their expenses, eventually inside a Wallet composed of other individuals. 
 
 The system allows users to link the application to their bank account, in order to recover previous transaction informations, without having the need to input them manually.
 
@@ -64,12 +64,12 @@ The system allows users to link the application to their bank account, in order 
 ![Context diagram](V2-Images/Context%20diagram.png)
 
 ## Interfaces
-| Actor | Logical Interface | Physical Interface  |
+| Actor | Physical Interface | Logical Interface  |
 |:------|:------------------|:--------------------|
 | Project leader | PC | GUI (tbd + all functions + debug features) |
 | Project developer | PC | GUI (tbd + all functions + debug features) |
-| System administrator | PC | GUI (tbd + all functions + management of users and wallets  + configuration of server instance) |
-| Wallet administrator | PC/Smartphone | GUI (tbd + all functions + management of group settings) |
+| System administrator | PC | GUI (tbd + all functions + management of users and Wallets  + configuration of server instance) |
+| Wallet administrator | PC/Smartphone | GUI (tbd + all functions + management of Wallet settings) |
 | Wallet member | PC/Smartphone | GUI (tbd + all functions) |
 | Bank system | Internet connection | APIs |
 | Currency converter system | Internet connection | APIs |
@@ -827,7 +827,3 @@ Story: wants to keep track of travel expenses of his tour to Japan.
 
 # Deployment Diagram 
 ![Glossary](V2-Images/Deployment%20diagram.png)
-
-
-
-
