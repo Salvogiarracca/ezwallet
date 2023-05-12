@@ -13,15 +13,21 @@ import { verifyAuth } from './utils.js';
 export const register = async (req, res) => {
     try {
         const { username, email, password } = req.body;
-        const existingUser = await User.findOne({ email: req.body.email });
-        if (existingUser) return res.status(400).json({ message: "you are already registered" });
+        
+        // Check if a user with same mail or username as already been registered before
+        const existingMail = await User.findOne({ email: req.body.email });
+        const existingUser = await User.findOne({ username : req.body.username });
+
+        if (existingMail || existingUser) 
+            return res.status(400).json({ message: "You are already registered" });
+
         const hashedPassword = await bcrypt.hash(password, 12);
         const newUser = await User.create({
             username,
             email,
             password: hashedPassword,
         });
-        res.status(200).json('user added succesfully');
+        res.status(200).json('User added succesfully');
     } catch (err) {
         res.status(400).json(err);
     }
@@ -36,9 +42,15 @@ export const register = async (req, res) => {
  */
 export const registerAdmin = async (req, res) => {
     try {
-        const { username, email, password } = req.body
-        const existingUser = await User.findOne({ email: req.body.email });
-        if (existingUser) return res.status(400).json({ message: "you are already registered" });
+        const { username, email, password } = req.body;
+
+        // Check if a user with same mail or username as already been registered before
+        const existingMail = await User.findOne({ email: req.body.email });
+        const existingUser = await User.findOne({ username : req.body.username });
+
+        if (existingMail || existingUser) 
+            return res.status(400).json({ message: "You are already registered" });
+
         const hashedPassword = await bcrypt.hash(password, 12);
         const newUser = await User.create({
             username,
@@ -46,7 +58,7 @@ export const registerAdmin = async (req, res) => {
             password: hashedPassword,
             role: "Admin"
         });
-        res.status(200).json('admin added succesfully');
+        res.status(200).json('Admin added succesfully');
     } catch (err) {
         res.status(500).json(err);
     }
@@ -62,9 +74,9 @@ export const registerAdmin = async (req, res) => {
     - error 400 is returned if the supplied password does not match with the one in the database
  */
 export const login = async (req, res) => {
-    const { email, password } = req.body
-    const cookie = req.cookies
-    const existingUser = await User.findOne({ email: email })
+    const { email, password } = req.body;
+    const cookie = req.cookies;
+    const existingUser = await User.findOne({ email: email });
     if (!existingUser) return res.status(400).json('please you need to register')
     try {
         const match = await bcrypt.compare(password, existingUser.password)
