@@ -74,10 +74,14 @@ export const registerAdmin = async (req, res) => {
     - error 400 is returned if the supplied password does not match with the one in the database
  */
 export const login = async (req, res) => {
+    
     const { email, password } = req.body;
     const cookie = req.cookies;
+
     const existingUser = await User.findOne({ email: email });
-    if (!existingUser) return res.status(400).json('please you need to register')
+    if (!existingUser) 
+        return res.status(400).json('Please you need to register to access the services');
+
     try {
         const match = await bcrypt.compare(password, existingUser.password)
         if (!match) return res.status(400).json('wrong credentials')
