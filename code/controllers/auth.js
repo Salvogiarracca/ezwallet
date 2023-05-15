@@ -42,6 +42,7 @@ export const register = async (req, res) => {
  */
 export const registerAdmin = async (req, res) => {
     try {
+
         const { username, email, password } = req.body;
 
         // Check if a user with same mail or username as already been registered before
@@ -58,7 +59,9 @@ export const registerAdmin = async (req, res) => {
             password: hashedPassword,
             role: "Admin"
         });
+
         res.status(200).json('Admin added succesfully');
+
     } catch (err) {
         res.status(500).json(err);
     }
@@ -78,13 +81,18 @@ export const login = async (req, res) => {
     const { email, password } = req.body;
     const cookie = req.cookies;
 
+    // User does not exist
     const existingUser = await User.findOne({ email: email });
     if (!existingUser) 
         return res.status(400).json('Please you need to register to access the services');
 
     try {
+
+        // Password mismatch
         const match = await bcrypt.compare(password, existingUser.password)
-        if (!match) return res.status(400).json('wrong credentials')
+        if (!match) 
+            return res.status(400).json('Wrong credentials')
+
         //CREATE ACCESSTOKEN
         const accessToken = jwt.sign({
             email: existingUser.email,
@@ -92,6 +100,7 @@ export const login = async (req, res) => {
             username: existingUser.username,
             role: existingUser.role
         }, process.env.ACCESS_KEY, { expiresIn: '1h' })
+
         //CREATE REFRESH TOKEN
         const refreshToken = jwt.sign({
             email: existingUser.email,
@@ -99,12 +108,14 @@ export const login = async (req, res) => {
             username: existingUser.username,
             role: existingUser.role
         }, process.env.ACCESS_KEY, { expiresIn: '7d' })
+
         //SAVE REFRESH TOKEN TO DB
         existingUser.refreshToken = refreshToken
         const savedUser = await existingUser.save()
         res.cookie("accessToken", accessToken, { httpOnly: true, domain: "localhost", path: "/api", maxAge: 60 * 60 * 1000, sameSite: "none", secure: true })
         res.cookie('refreshToken', refreshToken, { httpOnly: true, domain: "localhost", path: '/api', maxAge: 7 * 24 * 60 * 60 * 1000, sameSite: 'none', secure: true })
         res.status(200).json({ data: { accessToken: accessToken, refreshToken: refreshToken } })
+    
     } catch (error) {
         res.status(400).json(error)
     }
@@ -119,16 +130,22 @@ export const login = async (req, res) => {
     - error 400 is returned if the user does not exist
  */
 export const logout = async (req, res) => {
+
     const refreshToken = req.cookies.refreshToken
-    if (!refreshToken) return res.status(400).json("user not found")
+    if (!refreshToken) 
+        return res.status(400).json("User not found")
+
+    // Verify user existance
     const user = await User.findOne({ refreshToken: refreshToken })
-    if (!user) return res.status(400).json('user not found')
+    if (!user) 
+        return res.status(400).json('User not found')
+
     try {
         user.refreshToken = null
         res.cookie("accessToken", "", { httpOnly: true, path: '/api', maxAge: 0, sameSite: 'none', secure: true })
         res.cookie('refreshToken', "", { httpOnly: true, path: '/api', maxAge: 0, sameSite: 'none', secure: true })
         const savedUser = await user.save()
-        res.status(200).json('logged out')
+        res.status(200).json('Logged out')
     } catch (error) {
         res.status(400).json(error)
     }
