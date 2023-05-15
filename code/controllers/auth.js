@@ -42,7 +42,6 @@ export const register = async (req, res) => {
  */
 export const registerAdmin = async (req, res) => {
     try {
-
         const { username, email, password } = req.body;
 
         // Check if a user with same mail or username as already been registered before
@@ -61,7 +60,6 @@ export const registerAdmin = async (req, res) => {
         });
 
         res.status(200).json('Admin added succesfully');
-
     } catch (err) {
         res.status(500).json(err);
     }
@@ -81,7 +79,6 @@ export const login = async (req, res) => {
     const { email, password } = req.body;
     const cookie = req.cookies;
 
-    // User does not exist
     const existingUser = await User.findOne({ email: email });
     if (!existingUser) 
         return res.status(400).json('Please you need to register to access the services');

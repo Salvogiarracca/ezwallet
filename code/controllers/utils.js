@@ -57,6 +57,10 @@ export const verifyAuth = (req, res, info) => {
             res.status(401).json({ message: "Mismatched users" });
             return false;
         }
+        //return false if the issuer role of a request differs by the authType (probably to be modified in the future)
+        if (decodedAccessToken.role !== info.authType || decodedRefreshToken.role !== info.authType){
+            return false;
+        }
         return true
     } catch (err) {
         if (err.name === "TokenExpiredError") {
