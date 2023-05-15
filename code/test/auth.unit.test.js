@@ -63,8 +63,56 @@ describe('register', () => {
 });
 
 describe("registerAdmin", () => { 
-    test('Dummy test, change it', () => {
-        expect(true).toBe(true);
+    test('Regular admin Pippo registration: Test #1', async () => {
+        await request(app).post("/api/admin").send({
+            username : "PippoAdmin",
+            email : "a239834@studenti.polito.it",
+            password : "12345" 
+        }).then(response => {
+            expect(response.statusCode).toBe(200);
+        }); 
+    });
+
+    test('Regular admin Pluto registration: Test #2', async () => {
+        await request(app).post("/api/admin").send({
+            username : "PlutoAdmin",
+            email : "a392892@studenti.polito.it",
+            password : "12345" 
+        }).then(response => {
+            expect(response.statusCode).toBe(200);
+        }); 
+    });
+
+    test('Regular admin Paperino registration: Test #3', async () => {
+        await request(app).post("/api/admin").send({
+            username : "PaperinoAdmin",
+            email : "a498239@studenti.polito.it",
+            password : "12345" 
+        }).then(response => {
+            expect(response.statusCode).toBe(200);
+        }); 
+    });
+
+    test('Already existing admin username Pluto: Error test #1', async () => {
+        await request(app).post("/api/admin").send({
+            username : "PlutoAdmin",
+            email : "a573367@studenti.polito.it",
+            password : "12345" 
+        }).then(response => {
+            console.log('Response Body :', JSON.stringify(response.body, null, 2));
+            expect(response.statusCode).toBe(400);
+        }); 
+    });
+
+    test('Already existing admin email: Error test #1', async () => {
+        await request(app).post("/api/admin").send({
+            username : "TopolinoAdmin",
+            email : "a498239@studenti.polito.it",
+            password : "12345" 
+        }).then(response => {
+            console.log('Response Body :', JSON.stringify(response.body, null, 2));
+            expect(response.statusCode).toBe(400);
+        }); 
     });
 })
 
