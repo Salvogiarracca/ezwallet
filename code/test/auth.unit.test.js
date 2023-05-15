@@ -9,6 +9,19 @@ jest.mock("bcryptjs")
 jest.mock('../models/User.js');
 
 describe('register', () => { 
+    // Set up some data inside the database before running the test
+    // Since the tests do not save data
+    beforeEach( async () => {
+        let testUser = {
+            username : "Paperino",
+            email : "s256652@studenti.polito.it",
+            password : "12345"
+        };
+
+        await User.create(testUser);
+    });
+    
+    // Regular user insertion tests
     test('Regular user Pippo registration: Test #1', async () => {
         await request(app).post("/api/register").send({
             username : "Pippo",
@@ -29,40 +42,43 @@ describe('register', () => {
         }); 
     });
 
-    test('Regular user Paperino registration: Test #3', async () => {
+    // Exception cases
+    test('Already existing username Paperino: Error test #1', async () => {
         await request(app).post("/api/register").send({
             username : "Paperino",
-            email : "s498239@studenti.polito.it",
-            password : "12345" 
-        }).then(response => {
-            expect(response.statusCode).toBe(200);
-        }); 
-    });
-
-    test('Already existing username Pluto: Error test #1', async () => {
-        await request(app).post("/api/register").send({
-            username : "Pluto",
             email : "s573367@studenti.polito.it",
             password : "12345" 
         }).then(response => {
-            console.log('Response Body :', JSON.stringify(response.body, null, 2));
             expect(response.statusCode).toBe(400);
         }); 
     });
-
+    
     test('Already existing email: Error test #1', async () => {
         await request(app).post("/api/register").send({
             username : "Topolino",
-            email : "s498239@studenti.polito.it",
+            email : "s256652@studenti.polito.it",
             password : "12345" 
         }).then(response => {
-            console.log('Response Body :', JSON.stringify(response.body, null, 2));
             expect(response.statusCode).toBe(400);
         }); 
     });
 });
 
 describe("registerAdmin", () => { 
+    // Set up some data inside the database before running the test
+    // Since the tests do not save data
+    beforeEach( async () => {
+        let testUser = {
+            username : "PaperinoAdmin",
+            email : "a256652@studenti.polito.it",
+            password : "12345",
+            role : "Admin"
+        };
+
+        await User.create(testUser);
+    });
+
+    // Administrator insertion tests
     test('Regular admin Pippo registration: Test #1', async () => {
         await request(app).post("/api/admin").send({
             username : "PippoAdmin",
@@ -83,23 +99,13 @@ describe("registerAdmin", () => {
         }); 
     });
 
-    test('Regular admin Paperino registration: Test #3', async () => {
+    // Exception cases
+    test('Already existing admin username Paperino: Error test #1', async () => {
         await request(app).post("/api/admin").send({
             username : "PaperinoAdmin",
-            email : "a498239@studenti.polito.it",
-            password : "12345" 
-        }).then(response => {
-            expect(response.statusCode).toBe(200);
-        }); 
-    });
-
-    test('Already existing admin username Pluto: Error test #1', async () => {
-        await request(app).post("/api/admin").send({
-            username : "PlutoAdmin",
             email : "a573367@studenti.polito.it",
             password : "12345" 
         }).then(response => {
-            console.log('Response Body :', JSON.stringify(response.body, null, 2));
             expect(response.statusCode).toBe(400);
         }); 
     });
@@ -107,10 +113,9 @@ describe("registerAdmin", () => {
     test('Already existing admin email: Error test #1', async () => {
         await request(app).post("/api/admin").send({
             username : "TopolinoAdmin",
-            email : "a498239@studenti.polito.it",
+            email : "a256652@studenti.polito.it",
             password : "12345" 
         }).then(response => {
-            console.log('Response Body :', JSON.stringify(response.body, null, 2));
             expect(response.statusCode).toBe(400);
         }); 
     });
