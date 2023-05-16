@@ -40,11 +40,11 @@ export const getUser = async (req, res) => {
     const user = await User.findOne({ username });
 
     ///if user is Regular can retrive info only about himself {check with verifyAuth}
-    if (!verifyAuth(req, res, {authType: "Admin"})){
+    if (!verifyAuth(req, res, { authType: "Admin" })) {
       const user = await User.findOne({ refreshToken: cookie.refreshToken })
       if (user.username != username) return res.status(401).json({ message: "Unauthorized" })
     }
-    
+
     if (!user) return res.status(401).json({ message: "User not found" })
     res.status(200).json(user)
 
@@ -66,6 +66,46 @@ export const getUser = async (req, res) => {
  */
 export const createGroup = async (req, res) => {
   try {
+    const { name, memberEmails } = req.body;
+
+    ///check if group with the same name already exist
+    const existingGroup = await Group.findOne({ name });
+    if (existingGroup) {
+      return res.status(401).json({ error: 'Group with the same name already exists' });
+    }
+
+    ///find members already in a group
+    const alreadyInGroup = await Group.find({ 'members.mail': { $in: memberEmails } });
+    const alreadyInGroupEmails = alreadyInGroup.map(group => group.members.map(member => member.email)).flat();
+
+    const memberNotFound = [];
+    for (const email of memberEmails) {
+      const user = await User.findOne({ email });
+      if (!user) {
+        memberNotFound.push(email);
+      }
+    }
+    ///THIS DO NOT WORKS AS EXPECTED!! TODO!
+    if(alreadyInGroupEmails.length > 0 || memberNotFound.length > 0){
+      return res.status(401).json({ error: `Users already in group: ${alreadyInGroupEmails}. Users not found: ${memberNotFound}.`});
+    }
+
+    ///create the group
+    const newGroup = await Group.create({
+      name,
+      members: memberEmails.map(email => ({ email }))
+    });
+
+    const responseData = {
+      group: {
+        name: newGroup.name,
+        members: newGroup.members
+      },
+      alreadyInGroup: alreadyInGroupEmails,
+      memberNotFound
+    };
+
+    res.status(200).json(responseData);
   } catch (err) {
     res.status(500).json(err.message)
   }
@@ -81,7 +121,8 @@ export const createGroup = async (req, res) => {
  */
 export const getGroups = async (req, res) => {
   try {
-
+    const groups = await Group.find();
+    res.status(200).json(groups)
   } catch (err) {
     res.status(500).json(err.message)
   }
@@ -97,6 +138,12 @@ export const getGroups = async (req, res) => {
  */
 export const getGroup = async (req, res) => {
   try {
+    const name = req.params.name;
+    const group = await Group.findOne({ name });
+    if(!group){
+      return res.status(401).json({ error: 'Group does not exist' });
+    }
+    res.status(200).json(group);
   } catch (err) {
     res.status(500).json(err.message)
   }
@@ -148,6 +195,17 @@ export const removeFromGroup = async (req, res) => {
  */
 export const deleteUser = async (req, res) => {
   try {
+    const { email } = req.body;
+
+    ///find user to be deleted
+    const user = await User.findOne({ email });
+    if(!user){
+      res.status(401).json({ error: 'User not found' });
+    }
+
+    ///delete the user
+    await User.deleteOne({ email });
+    res.status(200).json({ message: 'User deleted succesfully' });
   } catch (err) {
     res.status(500).json(err.message)
   }
@@ -162,6 +220,17 @@ export const deleteUser = async (req, res) => {
  */
 export const deleteGroup = async (req, res) => {
   try {
+    const {name} = req.body;
+
+    ///find a group to be deleted
+    const group = await Group.findOne({ name });
+    if(!group){
+      return res.status(401).json({ error: 'Group not found'} );
+    }
+
+    ///delete the group
+    await Group.deleteOne({ name });
+    res.status(200).json({ message: 'Group deleted succesfully'});
   } catch (err) {
     res.status(500).json(err.message)
   }
