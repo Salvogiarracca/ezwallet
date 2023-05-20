@@ -12,11 +12,18 @@ import { verifyAuth } from "./utils.js";
 export const getUsers = async (req, res) => {
   try {
     ///only admin can perform this operation!
-    if (!verifyAuth(req, res, { authType: "Admin" })) {
-      res.status(401).json({ message: "Unauthorized" });
+    const adminAuth = verifyAuth(req, res, { authType: "Admin" });
+    if(adminAuth.authorized){
+      const users = await User.find();
+      const userList = users.map(user => ({
+        username: user.username,
+        email: user.email,
+        role: user.role
+      }));
+      res.status(200).json(userList);
+    } else {
+      return res.status(401).json({ error : adminAuth.cause });
     }
-    const users = await User.find();
-    res.status(200).json(users);
   } catch (error) {
     res.status(500).json(error.message);
   }
@@ -31,23 +38,36 @@ export const getUsers = async (req, res) => {
  */
 export const getUser = async (req, res) => {
   try {
-    const cookie = req.cookies
-    if (!cookie.accessToken || !cookie.refreshToken) {
-      return res.status(401).json({ message: "Unauthorized" }) // unauthorized
+    const cookie = req.cookies;
+    const username = req.params.username;
+    const userAuth = verifyAuth(req, res, { authType: "User", username: username });
+    ///if userAuth return true, user can retrieve only info about himself
+    if(userAuth.authorized){
+      const user = await User.findOne({ refreshToken: cookie.refreshToken });
+      if (!user) return res.status(401).json({ message: "User not found" })
+      const obj = {
+        username: user.username,
+        email: user.email,
+        role: user.role
+      }
+      return res.status(200).json(obj);
+      ///if userAuth fails (Username mismatch) it means that a user want to retrieve info about another user
+    } else {
+      const adminAuth = verifyAuth(req, res, { authType: "Admin" });
+      ///if the user is an Admin ok, otherwise unauthorized
+      if(adminAuth.authorized){
+        const user = await User.findOne({ username });
+        if (!user) return res.status(401).json({ message: "User not found" })
+        const obj = {
+          username: user.username,
+          email: user.email,
+          role: user.role
+        }
+        res.status(200).json(obj)
+      } else {
+        return res.status(401).json({ error: adminAuth.cause });
+      }
     }
-    const username = req.params.username
-    ///if user is Admin, can retrive info about all users {DEFAULT}
-    const user = await User.findOne({ username });
-
-    ///if user is Regular can retrive info only about himself {check with verifyAuth}
-    if (!verifyAuth(req, res, { authType: "Admin" })) {
-      const user = await User.findOne({ refreshToken: cookie.refreshToken })
-      if (user.username != username) return res.status(401).json({ message: "Unauthorized" })
-    }
-
-    if (!user) return res.status(401).json({ message: "User not found" })
-    res.status(200).json(user)
-
   } catch (error) {
     res.status(500).json(error.message)
   }

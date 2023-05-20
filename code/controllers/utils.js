@@ -44,14 +44,29 @@ export const verifyAuth = (req, res, info) => {
     try {
         const decodedAccessToken = jwt.verify(cookie.accessToken, process.env.ACCESS_KEY);
         const decodedRefreshToken = jwt.verify(cookie.refreshToken, process.env.ACCESS_KEY);
+        ///if one of username, email and role does not exist in AccessToken, => missing informations
         if (!decodedAccessToken.username || !decodedAccessToken.email || !decodedAccessToken.role) {
             return { authorized: false, cause: "Token is missing information" }
         }
+        ///if one of username, email and role does not exist in RefreshToken, => missing informations
         if (!decodedRefreshToken.username || !decodedRefreshToken.email || !decodedRefreshToken.role) {
             return { authorized: false, cause: "Token is missing information" }
         }
+        ///if username/email/role of AccessToken differs from username/email/role of RefreshToken, => mismatched users
         if (decodedAccessToken.username !== decodedRefreshToken.username || decodedAccessToken.email !== decodedRefreshToken.email || decodedAccessToken.role !== decodedRefreshToken.role) {
             return { authorized: false, cause: "Mismatched users" };
+        }
+        if(info.authType === "User"){
+            ///1 either the accessToken or the refreshToken have a `username` different from the requested one
+            if(decodedAccessToken.username !== info.username || decodedRefreshToken.username !== info.username){
+                return { authorized: false, cause: "Mismatched users"}
+            }
+        }
+        if(info.authType === "Admin"){
+            ///2 either the accessToken or the refreshToken have a `role` which is not Admin
+            if(decodedAccessToken.role !== "Admin" || decodedRefreshToken.role !== "Admin"){
+                return { authorized: false, cause: "Admin operation, Unauthorized!" }
+            }
         }
         return { authorized: true, cause: "Authorized" }
 
@@ -71,6 +86,16 @@ export const verifyAuth = (req, res, info) => {
                 }, process.env.ACCESS_KEY, { expiresIn: '1h' })
                 res.cookie('accessToken', newAccessToken, { httpOnly: true, path: '/api', maxAge: 60 * 60 * 1000, sameSite: 'none', secure: true })
                 res.locals.refreshedTokenMessage= 'Access token has been refreshed. Remember to copy the new one in the headers of subsequent calls'
+
+                ///1 the accessToken is expired and the refreshToken has a `username` different from the requested one
+                if(info.authType === "User" && refreshToken.username !== info.username){
+                    return { authorized: false, cause: "New AccessToken, mismatched users"}
+                }
+                ///2 the accessToken is expired and the refreshToken has a `role` which is not Admin
+                if(info.authType === "Admin" && refreshToken.role !== "Admin"){
+                    return { authorized: false, cause: "New AccessToken, mismatched roles"}
+                }
+
                 return { authorized: true, cause: "Authorized" }
             } catch (err) {
                 if (err.name === "TokenExpiredError") {
