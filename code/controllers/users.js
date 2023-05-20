@@ -14,13 +14,8 @@ export const getUsers = async (req, res) => {
     ///only admin can perform this operation!
     const adminAuth = verifyAuth(req, res, { authType: "Admin" });
     if(adminAuth.authorized){
-      const users = await User.find();
-      const userList = users.map(user => ({
-        username: user.username,
-        email: user.email,
-        role: user.role
-      }));
-      res.status(200).json(userList);
+      const users = await User.find().select( 'username email role' );
+      res.status(200).json(users);
     } else {
       return res.status(401).json({ error : adminAuth.cause });
     }
@@ -43,27 +38,17 @@ export const getUser = async (req, res) => {
     const userAuth = verifyAuth(req, res, { authType: "User", username: username });
     ///if userAuth return true, user can retrieve only info about himself
     if(userAuth.authorized){
-      const user = await User.findOne({ refreshToken: cookie.refreshToken });
+      const user = await User.findOne({ refreshToken: cookie.refreshToken }).select( 'username email role' );
       if (!user) return res.status(401).json({ message: "User not found" })
-      const obj = {
-        username: user.username,
-        email: user.email,
-        role: user.role
-      }
-      return res.status(200).json(obj);
+      return res.status(200).json(user);
       ///if userAuth fails (Username mismatch) it means that a user want to retrieve info about another user
     } else {
       const adminAuth = verifyAuth(req, res, { authType: "Admin" });
       ///if the user is an Admin ok, otherwise unauthorized
       if(adminAuth.authorized){
-        const user = await User.findOne({ username });
+        const user = await User.findOne({ username }).select( 'username email role' );
         if (!user) return res.status(401).json({ message: "User not found" })
-        const obj = {
-          username: user.username,
-          email: user.email,
-          role: user.role
-        }
-        res.status(200).json(obj)
+        res.status(200).json(user)
       } else {
         return res.status(401).json({ error: adminAuth.cause });
       }
@@ -86,46 +71,13 @@ export const getUser = async (req, res) => {
  */
 export const createGroup = async (req, res) => {
   try {
-    const { name, memberEmails } = req.body;
-
-    ///check if group with the same name already exist
-    const existingGroup = await Group.findOne({ name });
-    if (existingGroup) {
-      return res.status(401).json({ error: 'Group with the same name already exists' });
+    const simpleAuth = verifyAuth(req, res, { authType: "Simple" });
+    if(simpleAuth.authorized){
+      ///TODO: i have to understand how to implement this
+    } else {
+      return res.status(401).json(simpleAuth.cause);
     }
 
-    ///find members already in a group
-    const alreadyInGroup = await Group.find({ 'members.mail': { $in: memberEmails } });
-    const alreadyInGroupEmails = alreadyInGroup.map(group => group.members.map(member => member.email)).flat();
-
-    const memberNotFound = [];
-    for (const email of memberEmails) {
-      const user = await User.findOne({ email });
-      if (!user) {
-        memberNotFound.push(email);
-      }
-    }
-    ///THIS DO NOT WORKS AS EXPECTED!! TODO!
-    if(alreadyInGroupEmails.length > 0 || memberNotFound.length > 0){
-      return res.status(401).json({ error: `Users already in group: ${alreadyInGroupEmails}. Users not found: ${memberNotFound}.`});
-    }
-
-    ///create the group
-    const newGroup = await Group.create({
-      name,
-      members: memberEmails.map(email => ({ email }))
-    });
-
-    const responseData = {
-      group: {
-        name: newGroup.name,
-        members: newGroup.members
-      },
-      alreadyInGroup: alreadyInGroupEmails,
-      memberNotFound
-    };
-
-    res.status(200).json(responseData);
   } catch (err) {
     res.status(500).json(err.message)
   }
