@@ -68,11 +68,13 @@ export const verifyAuth = (req, res, info) => {
                 return { authorized: false, cause: "Admin operation, Unauthorized!" }
             }
         }
+        if(info.authType === "Group"){
+            ///3 either the accessToken or the refreshToken have a `email` which is not in the requested group
+            if(!info.emails.includes(decodedAccessToken.email) || !info.emails.includes(decodedRefreshToken.email)){
+                return { authorized: false, cause: "You can only retrive info about your own group"};
+            }
+        }
         return { authorized: true, cause: "Authorized" }
-
-        // if (decodedAccessToken.role !== info.authType || decodedRefreshToken.role !== info.authType){
-        //     return false;
-        // }
 
     } catch (err) {
         if (err.name === "TokenExpiredError") {
@@ -94,6 +96,10 @@ export const verifyAuth = (req, res, info) => {
                 ///2 the accessToken is expired and the refreshToken has a `role` which is not Admin
                 if(info.authType === "Admin" && refreshToken.role !== "Admin"){
                     return { authorized: false, cause: "New AccessToken, mismatched roles"}
+                }
+                ///3 the accessToken is expired and the refreshToken has a `email` which is not in the requested group
+                if(info.authType === "Group" && !info.emails.contains(refreshToken.email)){
+                    return { authorized: false, cause: "New AccessToken, requested other group infos"}
                 }
 
                 return { authorized: true, cause: "Authorized" }
