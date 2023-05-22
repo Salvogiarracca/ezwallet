@@ -2,36 +2,6 @@ import { Group, User } from "../models/User.js";
 import { transactions } from "../models/model.js";
 import { verifyAuth } from "./utils.js";
 
-// async function addMember(group, inGroup, notInGroup, newMembers) {
-//   const groups = await Group.find({}, 'members.email' );
-//   const emailsInGroup = groups.flatMap(group => group.members.map(member => member.email));
-//
-//   for (const member of newMembers) {
-//     const user = await User.findOne({ email: member });
-//     if(!user){
-//       notInGroup.push(member);
-//     } else if(emailsInGroup.includes(member)){
-//       inGroup.push(member);
-//     } else {
-//       group.members.push({ email: member, user: user });
-//     }
-//   }
-//
-//   if(notInGroup.length + inGroup.length === newMembers.length){
-//     return {
-//       error: 'all the members either do not exist or are already in a group',
-//       alreadyInGroup: inGroup,
-//       membersNotFound: notInGroup
-//     };
-//   } else {
-//     await group.save();
-//     return {
-//       group: group.name,
-//       members: group.members.map(member => member.email)
-//     }
-//   }
-// }
-
 /**
  * Return all the users
   - Request Body Content: None
