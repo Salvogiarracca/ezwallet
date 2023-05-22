@@ -2,6 +2,36 @@ import { Group, User } from "../models/User.js";
 import { transactions } from "../models/model.js";
 import { verifyAuth } from "./utils.js";
 
+// async function addMember(group, inGroup, notInGroup, newMembers) {
+//   const groups = await Group.find({}, 'members.email' );
+//   const emailsInGroup = groups.flatMap(group => group.members.map(member => member.email));
+//
+//   for (const member of newMembers) {
+//     const user = await User.findOne({ email: member });
+//     if(!user){
+//       notInGroup.push(member);
+//     } else if(emailsInGroup.includes(member)){
+//       inGroup.push(member);
+//     } else {
+//       group.members.push({ email: member, user: user });
+//     }
+//   }
+//
+//   if(notInGroup.length + inGroup.length === newMembers.length){
+//     return {
+//       error: 'all the members either do not exist or are already in a group',
+//       alreadyInGroup: inGroup,
+//       membersNotFound: notInGroup
+//     };
+//   } else {
+//     await group.save();
+//     return {
+//       group: group.name,
+//       members: group.members.map(member => member.email)
+//     }
+//   }
+// }
+
 /**
  * Return all the users
   - Request Body Content: None
@@ -207,6 +237,79 @@ export const getGroup = async (req, res) => {
  */
 export const addToGroup = async (req, res) => {
   try {
+    const groupName = req.params.name;
+    const newMembers = req.body;
+    const group = await Group.findOne({ name: groupName });
+
+    if(!group){
+      res.status(401).json({ error: 'Group does not exist' });
+    } else {
+      const groupAuth = verifyAuth(req, res, { authType: "Group", emails: group.members.map(member => member.email) });
+      const groups = await Group.find({}, 'members.email' );
+
+      const emailsInGroup = groups.flatMap(group => group.members.map(member => member.email));
+      const alreadyInGroup = [];
+      const notFoundEmails = [];
+
+      if(groupAuth.authorized){
+        for (const member of newMembers) {
+          const user = await User.findOne({ email: member });
+          if(!user){
+            notFoundEmails.push(member);
+          } else if(emailsInGroup.includes(member)){
+            alreadyInGroup.push(member);
+          } else {
+            group.members.push({ email: member, user: user });
+          }
+        }
+
+        if(notFoundEmails.length + alreadyInGroup.length === newMembers.length){
+          res.status(401).json({
+            error: 'all the members either do not exist or are already in a group',
+            alreadyInGroup: alreadyInGroup,
+            membersNotFound: notFoundEmails
+          });
+        } else {
+          await group.save();
+          res.status(200).json({
+            group: group.name,
+            members: group.members.map(member => member.email)
+          })
+        }
+      } else {
+        const adminAuth = verifyAuth(req, res, { authType: "Admin" });
+        if(adminAuth.authorized){
+          for (const member of newMembers) {
+            const user = await User.findOne({ email: member });
+            if(!user){
+              notFoundEmails.push(member);
+            } else if(emailsInGroup.includes(member)){
+              alreadyInGroup.push(member);
+            } else {
+              group.members.push({ email: member, user: user });
+            }
+          }
+
+          if(notFoundEmails.length + alreadyInGroup.length === newMembers.length){
+            res.status(401).json({
+              error: 'all the members either do not exist or are already in a group',
+              alreadyInGroup: alreadyInGroup,
+              membersNotFound: notFoundEmails
+            });
+          } else {
+            await group.save();
+            res.status(200).json({
+              group: group.name,
+              members: group.members.map(member => member.email)
+            })
+          }
+        } else {
+          res.status(401).json({ error: adminAuth.cause });
+        }
+
+      }
+    }
+
   } catch (err) {
     res.status(500).json(err.message)
   }
