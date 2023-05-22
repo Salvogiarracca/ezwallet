@@ -73,7 +73,57 @@ export const createGroup = async (req, res) => {
   try {
     const simpleAuth = verifyAuth(req, res, { authType: "Simple" });
     if(simpleAuth.authorized){
-      ///TODO: i have to understand how to implement this
+      const { name, members } = req.body;
+
+      ///if a group with the same name already exists, error 401 is returned
+      const group = await Group.findOne({ name });
+      if(group){
+        return res.status(401).json({ error: 'Group already exists' });
+      }
+
+      ///retrieve all the email of group members
+      const groups = await Group.find({}, 'members.email' );
+      const emailsInGroup = groups.flatMap(group => group.members.map(member => member.email));
+
+      const alreadyInGroup = [];
+      const notFoundEmails = [];
+      const membersList = [];
+
+      for (const member of members){
+        const user = await User.findOne({ email: member });
+        if(!user){
+          ///if user does not exist
+          notFoundEmails.push(member);
+        } else if(emailsInGroup.includes(member)){
+          ///if user is already in a group
+          alreadyInGroup.push(member);
+          ///if user does not belong to any group
+        } else {
+          membersList.push({ email: member, user: user });
+        }
+      }
+
+      ///if memberList contains at least one member, then create the group, otherwise error 401 is returned
+      if(membersList.length === 0){
+        return res.status(401).json({
+          error: 'all the members either do not exist or are already in a group',
+          alreadyInGroup: alreadyInGroup,
+          membersNotFound: notFoundEmails
+        })
+      } else {
+
+        const newGroup = await Group.create({
+          name,
+          members: membersList
+        });
+
+        return res.status(200).json({
+          group: newGroup.name,
+          members: newGroup.members,
+          alreadyInGroup: alreadyInGroup,
+          membersNotFound: notFoundEmails
+        });
+      }
     } else {
       return res.status(401).json(simpleAuth.cause);
     }
@@ -82,7 +132,6 @@ export const createGroup = async (req, res) => {
     res.status(500).json(err.message)
   }
 }
-
 /**
  * Return all the groups
   - Request Body Content: None
