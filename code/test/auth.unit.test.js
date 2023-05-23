@@ -9,16 +9,32 @@ jest.mock("bcryptjs")
 jest.mock('../models/User.js');
 
 describe('register', () => { 
-    // Set up some data inside the database before running the test
-    // Since the tests do not save data
-    beforeEach( async () => {
-        let testUser = {
+
+    // Set up a database in order to save some data inside it before running the test
+    // This is used to perform checks on exceptional cases
+    beforeAll(async () => {
+        const dbName = "testingRegisterDB";
+        const url = `${process.env.MONGO_URI}/${dbName}`;
+      
+        await mongoose.connect(url, {
+            useNewUrlParser: true,
+            useUnifiedTopology: true,
+        });
+
+        // Insert a user
+        const testUser = {
             username : "Paperino",
             email : "s256652@studenti.polito.it",
             password : "12345"
         };
 
         await User.create(testUser);
+    });
+    
+    // Drop the database once this suite of tests is over
+    afterAll(async () => {
+        await mongoose.connection.db.dropDatabase();
+        await mongoose.connection.close();  
     });
     
     // Regular user insertion tests
@@ -65,17 +81,32 @@ describe('register', () => {
 });
 
 describe("registerAdmin", () => { 
-    // Set up some data inside the database before running the test
-    // Since the tests do not save data
-    beforeEach( async () => {
-        let testUser = {
+    
+    // Set up a database in order to save some data inside it before running the test
+    // This is used to perform checks on exceptional cases
+    beforeAll(async () => {
+        const dbName = "testingRegisterAdminDB";
+        const url = `${process.env.MONGO_URI}/${dbName}`;
+      
+        await mongoose.connect(url, {
+            useNewUrlParser: true,
+            useUnifiedTopology: true,
+        });
+
+        // Insert a user
+        const testUser = {
             username : "PaperinoAdmin",
             email : "a256652@studenti.polito.it",
-            password : "12345",
-            role : "Admin"
+            password : "12345"
         };
 
         await User.create(testUser);
+    });
+    
+    // Drop the database once this suite of tests is over
+    afterAll(async () => {
+        await mongoose.connection.db.dropDatabase();
+        await mongoose.connection.close();  
     });
 
     // Administrator insertion tests
@@ -103,7 +134,7 @@ describe("registerAdmin", () => {
     test('Already existing admin username Paperino: Error test #1', async () => {
         await request(app).post("/api/admin").send({
             username : "PaperinoAdmin",
-            email : "a573367@studenti.polito.it",
+            email : "a487828@studenti.polito.it",
             password : "12345" 
         }).then(response => {
             expect(response.statusCode).toBe(400);

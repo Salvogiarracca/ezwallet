@@ -163,7 +163,6 @@ export const logout = async (req, res) => {
 /**
  * Perform email correctness verification
  * @param req : An object containing the 'email' parameter
- * @param res : The result object of the request
  * @returns true if the email is compliant with the standard, false otherwise
  */
 export const verifyEmail = (req) => {
