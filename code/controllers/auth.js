@@ -33,7 +33,13 @@ export const register = async (req, res) => {
             email,
             password: hashedPassword,
         });
-        res.status(200).json('User added succesfully');
+
+        let returnValue = {
+            data: { message : "User added successfully"},
+            message: res.locals.message
+        };
+
+        res.status(200).json(returnValue);
     } catch (err) {
         res.status(400).json(err);
     }
@@ -70,8 +76,13 @@ export const registerAdmin = async (req, res) => {
             password: hashedPassword,
             role: "Admin"
         });
+        
+        let returnValue = {
+            data: { message : "Admin added successfully"},
+            message: res.locals.message
+        };
 
-        res.status(200).json('Admin added succesfully');
+        res.status(200).json(returnValue);
     } catch (err) {
         res.status(500).json(err);
     }
@@ -123,7 +134,7 @@ export const login = async (req, res) => {
         const savedUser = await existingUser.save()
         res.cookie("accessToken", accessToken, { httpOnly: true, domain: "localhost", path: "/api", maxAge: 60 * 60 * 1000, sameSite: "none", secure: true })
         res.cookie('refreshToken', refreshToken, { httpOnly: true, domain: "localhost", path: '/api', maxAge: 7 * 24 * 60 * 60 * 1000, sameSite: 'none', secure: true })
-        res.status(200).json({ data: { accessToken: accessToken, refreshToken: refreshToken } })
+        res.status(200).json({ data: { accessToken: accessToken, refreshToken: refreshToken }, message: res.locals.message })
     
     } catch (error) {
         res.status(400).json(error)
@@ -150,13 +161,25 @@ export const logout = async (req, res) => {
         return res.status(400).json('User not found')
 
     try {
+        // Once user has been confirmed to exist, check if the token is expired
+        const decodedRefreshToken = jwt.verify(refreshToken, process.env.ACCESS_KEY);
+        let returnValue = {
+            data: { message : "Logged out"},
+            message: res.locals.message
+        };
+        
         user.refreshToken = null
         res.cookie("accessToken", "", { httpOnly: true, path: '/api', maxAge: 0, sameSite: 'none', secure: true })
         res.cookie('refreshToken', "", { httpOnly: true, path: '/api', maxAge: 0, sameSite: 'none', secure: true })
         const savedUser = await user.save()
-        res.status(200).json('Logged out')
+        res.status(200).json(returnValue);
     } catch (error) {
-        res.status(400).json(error)
+        if (error.name === "TokenExpiredError") {
+            res.status(400).json("User is already logged out of the system.");
+        }
+        else {
+            res.status(400).json(error)
+        }
     }
 }
 

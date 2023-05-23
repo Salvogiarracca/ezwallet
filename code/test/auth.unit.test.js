@@ -7,6 +7,7 @@ const bcrypt = require("bcryptjs")
 
 jest.mock("bcryptjs")
 jest.mock('../models/User.js');
+jest.mock("jsonwebtoken");
 
 /**
  * Defines code to be executed before each test case is launched
@@ -132,8 +133,50 @@ describe("registerAdmin", () => {
 })
 
 describe('login', () => { 
-    test('Dummy test, change it', () => {
-        expect(true).toBe(true);
+    // Mock the implementation of findOne in order to return a user for testing
+    const testUser = {
+        id: "12345",
+        username: "Paperino",
+        email : "s256652@studenti.polito.it",
+        password : "12345",
+        role: "Regular"
+    };
+
+    test('Log in: Test #1', async () => {
+        // Sent credentials
+        const registeredUserSent = {
+            email : "s256652@studenti.polito.it",
+            password : "12345"
+        }
+
+        //CREATE ACCESSTOKEN
+        const accessToken = jwt.sign({
+            email: testUser.email,
+            id: testUser.id,
+            username: testUser.username,
+            role: testUser.role
+        }, process.env.ACCESS_KEY, { expiresIn: '1h' })
+
+        //CREATE REFRESH TOKEN
+        const refreshToken = jwt.sign({
+            email: testUser.email,
+            id: testUser.id,
+            username: testUser.username,
+            role: testUser.role
+        }, process.env.ACCESS_KEY, { expiresIn: '7d' })
+
+        jest.spyOn(User, "findOne").mockImplementation(() => testUser);
+        jest.spyOn(bcrypt, "compare").mockImplementation(() => true);
+        jest.spyOn(jwt, "sign")
+            .mockImplementationOnce(() => accessToken)
+            .mockImplementationOnce(() => refreshToken);
+        
+        await request(app).post("/api/login").send(testUser).then(response => {
+            console.log(response.body)
+            expect(response.statusCode).toBe(200);
+            expect(response.body.data.accessToken).toEqual(accessToken);
+            expect(response.body.data.refreshToken).toEqual(refreshToken);
+        });
     });
 });
 
