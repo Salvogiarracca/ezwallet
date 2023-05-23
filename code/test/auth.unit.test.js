@@ -8,35 +8,17 @@ const bcrypt = require("bcryptjs")
 jest.mock("bcryptjs")
 jest.mock('../models/User.js');
 
+/**
+ * Defines code to be executed before each test case is launched
+ * In this case the mock implementation of `User.find()` is cleared, allowing the definition of a new mock implementation.
+ * Not doing this `mockClear()` means that test cases may use a mock implementation intended for other test cases.
+ */
+beforeEach(() => {
+    User.findOne.mockRestore();
+});
+
 describe('register', () => { 
 
-    // Set up a database in order to save some data inside it before running the test
-    // This is used to perform checks on exceptional cases
-    beforeAll(async () => {
-        const dbName = "testingRegisterDB";
-        const url = `${process.env.MONGO_URI}/${dbName}`;
-      
-        await mongoose.connect(url, {
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
-        });
-
-        // Insert a user
-        const testUser = {
-            username : "Paperino",
-            email : "s256652@studenti.polito.it",
-            password : "12345"
-        };
-
-        await User.create(testUser);
-    });
-    
-    // Drop the database once this suite of tests is over
-    afterAll(async () => {
-        await mongoose.connection.db.dropDatabase();
-        await mongoose.connection.close();  
-    });
-    
     // Regular user insertion tests
     test('Regular user Pippo registration: Test #1', async () => {
         await request(app).post("/api/register").send({
@@ -58,8 +40,18 @@ describe('register', () => {
         }); 
     });
 
+    // Mock the implementation of findOne in order to test the exceptional
+    // test cases
+    const testUser = {
+        username : "Paperino",
+        email : "s256652@studenti.polito.it",
+        password : "12345"
+    };
+
     // Exception cases
     test('Already existing username Paperino: Error test #1', async () => {
+        jest.spyOn(User, "findOne").mockImplementation(() => testUser);
+
         await request(app).post("/api/register").send({
             username : "Paperino",
             email : "s573367@studenti.polito.it",
@@ -70,6 +62,8 @@ describe('register', () => {
     });
     
     test('Already existing email: Error test #1', async () => {
+        jest.spyOn(User, "findOne").mockImplementation(() => testUser);
+
         await request(app).post("/api/register").send({
             username : "Topolino",
             email : "s256652@studenti.polito.it",
@@ -81,33 +75,6 @@ describe('register', () => {
 });
 
 describe("registerAdmin", () => { 
-    
-    // Set up a database in order to save some data inside it before running the test
-    // This is used to perform checks on exceptional cases
-    beforeAll(async () => {
-        const dbName = "testingRegisterAdminDB";
-        const url = `${process.env.MONGO_URI}/${dbName}`;
-      
-        await mongoose.connect(url, {
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
-        });
-
-        // Insert a user
-        const testUser = {
-            username : "PaperinoAdmin",
-            email : "a256652@studenti.polito.it",
-            password : "12345"
-        };
-
-        await User.create(testUser);
-    });
-    
-    // Drop the database once this suite of tests is over
-    afterAll(async () => {
-        await mongoose.connection.db.dropDatabase();
-        await mongoose.connection.close();  
-    });
 
     // Administrator insertion tests
     test('Regular admin Pippo registration: Test #1', async () => {
@@ -130,8 +97,18 @@ describe("registerAdmin", () => {
         }); 
     });
 
+    // Mock the implementation of findOne in order to test the exceptional
+    // test cases
+    const testUser = {
+        username : "PaperinoAdmin",
+        email : "a256652@studenti.polito.it",
+        password : "12345"
+    };
+
     // Exception cases
     test('Already existing admin username Paperino: Error test #1', async () => {
+        jest.spyOn(User, "findOne").mockImplementation(() => testUser);
+
         await request(app).post("/api/admin").send({
             username : "PaperinoAdmin",
             email : "a487828@studenti.polito.it",
@@ -142,6 +119,8 @@ describe("registerAdmin", () => {
     });
 
     test('Already existing admin email: Error test #1', async () => {
+        jest.spyOn(User, "findOne").mockImplementation(() => testUser);
+
         await request(app).post("/api/admin").send({
             username : "TopolinoAdmin",
             email : "a256652@studenti.polito.it",
