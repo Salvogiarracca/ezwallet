@@ -19,13 +19,13 @@ export const register = async (req, res) => {
         const existingUser = await User.findOne({ username : req.body.username });
 
         if (existingMail || existingUser) 
-            return res.status(400).json({ message: "You are already registered" });
+            return res.status(400).json({ error: "You are already registered" });
 
         // If the user is not yet registered, need to check if the email is valid
         const validMail = verifyEmail(req);
         
         if (!validMail)
-            return res.status(400).json({ message: "The used email is not valid, please check it."});
+            return res.status(400).json({ error: "The used email is not valid, please check it."});
 
         const hashedPassword = await bcrypt.hash(password, 12);
         const newUser = await User.create({
@@ -41,7 +41,7 @@ export const register = async (req, res) => {
 
         res.status(200).json(returnValue);
     } catch (err) {
-        res.status(400).json(err);
+        res.status(400).json({ error: err });
     }
 };
 
@@ -61,13 +61,13 @@ export const registerAdmin = async (req, res) => {
         const existingUser = await User.findOne({ username : req.body.username });
 
         if (existingMail || existingUser) 
-            return res.status(400).json({ message: "You are already registered" });
+            return res.status(400).json({ error: "You are already registered" });
 
         // If the admin is not yet registered, need to check if the email is valid
         const validMail = verifyEmail(req);
         
         if (!validMail)
-            return res.status(400).json({ message: "The used email is not valid, please check it."});
+            return res.status(400).json({ error: "The used email is not valid, please check it."});
 
         const hashedPassword = await bcrypt.hash(password, 12);
         const newUser = await User.create({
@@ -78,13 +78,13 @@ export const registerAdmin = async (req, res) => {
         });
         
         let returnValue = {
-            data: { message : "Admin added successfully"},
+            data: { message : "Admin added successfully" },
             message: res.locals.message
         };
 
         res.status(200).json(returnValue);
     } catch (err) {
-        res.status(500).json(err);
+        res.status(500).json({ error: err });
     }
 
 }
@@ -104,14 +104,14 @@ export const login = async (req, res) => {
 
     const existingUser = await User.findOne({ email: email });
     if (!existingUser) 
-        return res.status(400).json('Please you need to register to access the services');
+        return res.status(400).json({ error: 'Please you need to register to access the services' });
 
     try {
 
         // Password mismatch
         const match = await bcrypt.compare(password, existingUser.password)
         if (!match) 
-            return res.status(400).json('Wrong credentials')
+            return res.status(400).json({ error: 'Wrong credentials' })
 
         //CREATE ACCESSTOKEN
         const accessToken = jwt.sign({
@@ -137,7 +137,7 @@ export const login = async (req, res) => {
         res.status(200).json({ data: { accessToken: accessToken, refreshToken: refreshToken }, message: res.locals.message })
     
     } catch (error) {
-        res.status(400).json(error)
+        res.status(400).json({ error: error })
     }
 }
 
@@ -153,12 +153,12 @@ export const logout = async (req, res) => {
 
     const refreshToken = req.cookies.refreshToken
     if (!refreshToken) 
-        return res.status(400).json("User not found")
+        return res.status(400).json({ error: "User not found" })
 
     // Verify user existance
     const user = await User.findOne({ refreshToken: refreshToken })
     if (!user) 
-        return res.status(400).json('User not found')
+        return res.status(400).json({ error: 'User not found' })
 
     try {
         // Once user has been confirmed to exist, check if the token is expired
@@ -175,10 +175,10 @@ export const logout = async (req, res) => {
         res.status(200).json(returnValue);
     } catch (error) {
         if (error.name === "TokenExpiredError") {
-            res.status(400).json("User is already logged out of the system.");
+            res.status(400).json({ error: "User is already logged out of the system" });
         }
         else {
-            res.status(400).json(error)
+            res.status(400).json({ error: error})
         }
     }
 }

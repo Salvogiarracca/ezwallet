@@ -3,6 +3,7 @@ import { app } from '../app';
 import { User } from '../models/User.js';
 import jwt from 'jsonwebtoken';
 import { response } from 'express';
+import mongoose from "mongoose";
 const bcrypt = require("bcryptjs")
 
 jest.mock("bcryptjs")
@@ -15,7 +16,10 @@ jest.mock("jsonwebtoken");
  * Not doing this `mockClear()` means that test cases may use a mock implementation intended for other test cases.
  */
 beforeEach(() => {
+    // Restore the implementations that are touched inside the tests for lack of DB
     User.findOne.mockRestore();
+    //User.prototype.save.mockRestore();
+    bcrypt.compare.mockRestore();
 });
 
 describe('register', () => { 
@@ -149,7 +153,7 @@ describe('login', () => {
             password : "12345"
         }
 
-        //CREATE ACCESSTOKEN
+        // Access token to confirm the result data of the method
         const accessToken = jwt.sign({
             email: testUser.email,
             id: testUser.id,
@@ -157,7 +161,7 @@ describe('login', () => {
             role: testUser.role
         }, process.env.ACCESS_KEY, { expiresIn: '1h' })
 
-        //CREATE REFRESH TOKEN
+        // Refresh token to confirm the result data of the method
         const refreshToken = jwt.sign({
             email: testUser.email,
             id: testUser.id,
@@ -165,23 +169,96 @@ describe('login', () => {
             role: testUser.role
         }, process.env.ACCESS_KEY, { expiresIn: '7d' })
 
+        // Method to override since they depend on the DB
         jest.spyOn(User, "findOne").mockImplementation(() => testUser);
         jest.spyOn(bcrypt, "compare").mockImplementation(() => true);
-        jest.spyOn(jwt, "sign")
-            .mockImplementationOnce(() => accessToken)
-            .mockImplementationOnce(() => refreshToken);
+        jest.spyOn(User.prototype, "save").mockImplementation(() => testUser);
         
         await request(app).post("/api/login").send(testUser).then(response => {
-            console.log(response.body)
+            console.log(response.body);
             expect(response.statusCode).toBe(200);
             expect(response.body.data.accessToken).toEqual(accessToken);
             expect(response.body.data.refreshToken).toEqual(refreshToken);
         });
     });
+
+    test('Log in error test: User not found #1', async () => {
+        // Sent credentials
+        const registeredUserSent = {
+            email : "s256652@studenti.polito.it",
+            password : "12345"
+        }
+
+        // Method to override since they depend on the DB
+        jest.spyOn(User, "findOne").mockImplementation(() => {});
+        jest.spyOn(bcrypt, "compare").mockImplementation(() => true);
+        
+        await request(app).post("/api/login").send(testUser).then(response => {
+            expect(response.statusCode).toBe(400);
+        });
+    });
+
+    test('Log in error test: Password mismatch #1', async () => {
+        // Sent credentials
+        const registeredUserSent = {
+            email : "s256652@studenti.polito.it",
+            password : "456789"
+        }
+
+        // Method to override since they depend on the DB
+        jest.spyOn(User, "findOne").mockImplementation(() => testUser);
+        jest.spyOn(bcrypt, "compare").mockImplementation(() => false);
+        
+        await request(app).post("/api/login").send(testUser).then(response => {
+            expect(response.statusCode).toBe(400);
+        });
+    });
 });
 
 describe('logout', () => { 
-    test('Dummy test, change it', () => {
-        expect(true).toBe(true);
+    // Mock the implementation of findOne in order to return a user for testing
+    const testUser = {
+        id: "12345",
+        username: "Paperino",
+        email : "s256652@studenti.polito.it",
+        password : "12345",
+        role: "Regular"
+    };
+
+    // Refresh token to perform the checks inside the method
+    const refreshToken = jwt.sign({
+        email: testUser.email,
+        id: testUser.id,
+        username: testUser.username,
+        role: testUser.role
+    }, process.env.ACCESS_KEY, { expiresIn: '7d' })
+
+
+    test('Log out: Test #1', async () => {
+        jest.spyOn(User, "findOne").mockImplementation(() => testUser);
+        jest.spyOn(User, "save").mockImplementation(() => testUser);
+
+        await request(app).get("/api/logout").set("Cookie", "refreshToken=${refreshToken}")
+            .then(response => {
+                expect(response.statusCode).toBe(200);
+        });
+    });
+
+    test("Log out error test: User not found #1", async () =>{
+        jest.spyOn(User, "findOne").mockImplementation(() => {});
+        
+        await request(app).get("/api/logout").set("Cookie", "refreshToken=${refreshToken}")
+            .then(response => {
+                expect(response.statusCode).toBe(400);
+        });
+    });
+
+    test("Log out error test: User not found #2", async () =>{
+        jest.spyOn(User, "findOne").mockImplementation(() => testUser);
+        
+        await request(app).get("/api/logout").set("Cookie", "refreshToken=")
+            .then(response => {
+                expect(response.statusCode).toBe(400);
+        });
     });
 });
