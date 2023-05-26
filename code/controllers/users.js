@@ -2,6 +2,14 @@ import { Group, User } from "../models/User.js";
 import { transactions } from "../models/model.js";
 import { verifyAuth } from "./utils.js";
 
+function isValidEmail(email) {
+  // Regular expression pattern for email validation
+  const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+  // Test the email against the pattern
+  return emailPattern.test(email);
+}
+
 /**
  * Return all the users
     - Request Body Content: None
@@ -16,7 +24,7 @@ export const getUsers = async (req, res) => {
     const adminAuth = verifyAuth(req, res, { authType: "Admin" });
     if(adminAuth.authorized){
       const users = await User.find().select( 'username email role' );
-      return res.status(200).json(users);
+      return res.status(200).json({users, message: adminAuth.cause});
     } else {
       return res.status(401).json({ error : adminAuth.cause });
     }
@@ -44,16 +52,16 @@ export const getUser = async (req, res) => {
     ///if userAuth return true, user can retrieve only info about himself
     if(userAuth.authorized){
       const user = await User.findOne({ refreshToken: cookie.refreshToken }).select( 'username email role' );
-      if (!user) return res.status(401).json({ message: "User not found" })
-      return res.status(200).json(user);
+      if (!user) return res.status(400).json({ message: "User not found" })
+      return res.status(200).json({user, message: userAuth.cause});
       ///if userAuth fails (Username mismatch) it means that a user want to retrieve info about another user
     } else {
       const adminAuth = verifyAuth(req, res, { authType: "Admin" });
       ///if the user is an Admin ok, otherwise unauthorized
       if(adminAuth.authorized){
         const user = await User.findOne({ username }).select( 'username email role' );
-        if (!user) return res.status(401).json({ message: "User not found" })
-        return res.status(200).json(user)
+        if (!user) return res.status(400).json({ message: "User not found" })
+        return res.status(200).json({user, message: adminAuth.cause})
       } else {
         return res.status(401).json({ error: adminAuth.cause });
       }
@@ -89,21 +97,37 @@ export const createGroup = async (req, res) => {
     if(simpleAuth.authorized){
       const { name, members } = req.body;
 
+      if (!name || !members || name === "") return res.status(400).json({ error: 'request body does not contain all the necessary attributes'})
+
       ///if a group with the same name already exists, error 401 is returned
       const group = await Group.findOne({ name });
       if(group){
-        return res.status(401).json({ error: 'Group already exists' });
+        return res.status(400).json({ error: 'Group already exists' });
       }
 
       ///retrieve all the email of group members
       const groups = await Group.find({}, 'members.email' );
       const emailsInGroup = groups.flatMap(group => group.members.map(member => member.email));
 
+      const req_issuer = await User.findOne({ refreshToken: req.cookies.refreshToken });
+      if(emailsInGroup.includes(req_issuer.email)){
+        return res.status(400).json({ error: 'You are already in a group' });
+      }
+
       const alreadyInGroup = [];
       const notFoundEmails = [];
       const membersList = [];
 
+
+      membersList.push({ email: req_issuer.email, user: req_issuer });
+
       for (const member of members){
+        if(!isValidEmail(member)){
+          return res.status(400).json({ error: 'at least one of the member emails is not in a valid email format' });
+        }
+        if(member === ""){
+          return res.status(400).json({ error: 'at least one of the member emails is an empty string' });
+        }
         const user = await User.findOne({ email: member });
         if(!user){
           ///if user does not exist
@@ -117,9 +141,9 @@ export const createGroup = async (req, res) => {
         }
       }
 
-      ///if memberList contains at least one member, then create the group, otherwise error 401 is returned
-      if(membersList.length === 0){
-        return res.status(401).json({
+      ///if memberList contains at least one member, then create the group, otherwise error 400 is returned
+      if(membersList.length === 1){
+        return res.status(400).json({
           error: 'all the members either do not exist or are already in a group',
           alreadyInGroup: alreadyInGroup,
           membersNotFound: notFoundEmails
@@ -163,7 +187,7 @@ export const getGroups = async (req, res) => {
     const adminAuth = verifyAuth(req, res, { authType: "Admin" });
     if(adminAuth.authorized){
       const groups = await Group.find().select( 'name members' );
-      return res.status(200).json(groups);
+      return res.status(200).json({groups, message: adminAuth.cause});
     } else {
       return res.status(401).json({ error : adminAuth.cause });
     }
@@ -207,7 +231,7 @@ export const getGroup = async (req, res) => {
             members: group.members.map(member => member.email)
           });
         } else {
-          return res.status(401).json({ error: adminAuth.cause });
+          return res.status(401).json({ error: adminAuth.cause + " " + groupAuth.cause });
         }
       }
     }
