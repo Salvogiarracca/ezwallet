@@ -3,7 +3,6 @@ import { app } from '../app';
 import { User } from '../models/User.js';
 import jwt from 'jsonwebtoken';
 import { response } from 'express';
-import mongoose from "mongoose";
 const bcrypt = require("bcryptjs")
 
 jest.mock("bcryptjs")
