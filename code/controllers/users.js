@@ -97,6 +97,15 @@ export const createGroup = async (req, res) => {
     if(simpleAuth.authorized){
       const { name, members } = req.body;
 
+      /// check if all provided emails are valid
+      if(members.some(member => !isValidEmail(member))) {
+        return res.status(400).json({ error: 'at least one of the members emails is not in a valid email format' });
+      }
+      /// check if at least one of the member emails is an empty string
+      if(members.some(member => member === "")){
+        return res.status(400).json({ error: 'at least one of the member emails is an empty string' });
+      }
+
       if (!name || !members || name === "") return res.status(400).json({ error: 'request body does not contain all the necessary attributes'})
 
       ///if a group with the same name already exists, error 401 is returned
@@ -122,12 +131,6 @@ export const createGroup = async (req, res) => {
       membersList.push({ email: req_issuer.email, user: req_issuer });
 
       for (const member of members){
-        if(!isValidEmail(member)){
-          return res.status(400).json({ error: 'at least one of the member emails is not in a valid email format' });
-        }
-        if(member === ""){
-          return res.status(400).json({ error: 'at least one of the member emails is an empty string' });
-        }
         const user = await User.findOne({ email: member });
         if(!user){
           ///if user does not exist
@@ -141,8 +144,8 @@ export const createGroup = async (req, res) => {
         }
       }
 
-      ///if memberList contains at least one member, then create the group, otherwise error 400 is returned
-      if(membersList.length === 1){
+      ///if memberList contains at least two members, then create the group, otherwise error 400 is returned
+      if(membersList.length < 2){
         return res.status(400).json({
           error: 'all the members either do not exist or are already in a group',
           alreadyInGroup: alreadyInGroup,
@@ -205,7 +208,6 @@ export const getGroups = async (req, res) => {
       `members` of the group
       - Example: `res.status(200).json({data: {group: {name: "Family", members: [{email: "mario.red@email.com"}, {email: "luigi.red@email.com"}]}} refreshedTokenMessage: res.locals.refreshedTokenMessage})`
   - Optional behavior:
-    - error 401 is returned if the group does not exist
     - Returns a 400 error if the group name passed as a route parameter does not represent a group in the database
     - Returns a 401 error if called by an authenticated user who is neither part of the group (authType = Group) nor an admin (authType = Admin)
  */
@@ -215,23 +217,25 @@ export const getGroup = async (req, res) => {
     const group = await Group.findOne({ name });
 
     if(!group){
-      return res.status(401).json({ error: 'Group does not exist' });
+      return res.status(400).json({ error: 'Group does not exist' });
     } else {
       const groupAuth = verifyAuth(req, res, { authType: "Group", emails: group.members.map(member => member.email) });
       if(groupAuth.authorized){
         return res.status(200).json({
           group: group.name,
-          members: group.members.map(member => member.email)
+          members: group.members.map(member => member.email),
+          message: groupAuth.cause
         });
       } else {
         const adminAuth = verifyAuth(req, res, { authType: "Admin" });
         if(adminAuth.authorized){
           return res.status(200).json({
             group: group.name,
-            members: group.members.map(member => member.email)
+            members: group.members.map(member => member.email),
+            message: adminAuth.cause
           });
         } else {
-          return res.status(401).json({ error: adminAuth.cause + " " + groupAuth.cause });
+          return res.status(401).json({ error: adminAuth.cause });
         }
       }
     }
@@ -253,7 +257,6 @@ export const getGroup = async (req, res) => {
       the `membersNotFound` (members whose email does not appear in the system)
       - Example: `res.status(200).json({data: {group: {name: "Family", members: [{email: "mario.red@email.com"}, {email: "luigi.red@email.com"}, {email: "pietro.blue@email.com"}]}, membersNotFound: [], alreadyInGroup: []} refreshedTokenMessage: res.locals.refreshedTokenMessage})`
     - Optional behavior:
-      - error 401 is returned if the group does not exist
       - error 401 is returned if all the `memberEmails` either do not exist or are already in a group
       - In case any of the following errors apply then no user is added to the group
       - Returns a 400 error if the request body does not contain all the necessary attributes
@@ -268,74 +271,110 @@ export const addToGroup = async (req, res) => {
   try {
     const groupName = req.params.name;
     const newMembers = req.body;
+    const route = req.originalUrl;
+
+    /// check if all provided emails are valid
+    if(newMembers.some(member => !isValidEmail(member))){
+      return res.status(400).json({ error: 'at least one of the members emails is not in a valid email format' });
+    }
+    /// check if at least one of the member emails is an empty string
+    if(newMembers.some(member => member === "")){
+      return res.status(400).json({ error: 'at least one of the member emails is an empty string' });
+    }
+
+    if(!groupName || !newMembers || newMembers.length === 0){
+      return res.status(400).json({ error: 'Request body does not contain all the necessary attributes' });
+    }
+
     const group = await Group.findOne({ name: groupName });
 
     if(!group){
       return res.status(401).json({ error: 'Group does not exist' });
     } else {
-      const groupAuth = verifyAuth(req, res, { authType: "Group", emails: group.members.map(member => member.email) });
       const groups = await Group.find({}, 'members.email' );
-
       const emailsInGroup = groups.flatMap(group => group.members.map(member => member.email));
       const alreadyInGroup = [];
       const notFoundEmails = [];
 
-      if(groupAuth.authorized){
-        for (const member of newMembers) {
-          const user = await User.findOne({ email: member });
-          if(!user){
-            notFoundEmails.push(member);
-          } else if(emailsInGroup.includes(member)){
-            alreadyInGroup.push(member);
-          } else {
-            group.members.push({ email: member, user: user });
-          }
-        }
+      switch (route) {
+        ///Group route
+        case `/api/groups/${groupName}/add`:{
+          const groupAuth = verifyAuth(req, res, { authType: "Group", emails: group.members.map(member => member.email) });
+          if(groupAuth.authorized){
+            for (const member of newMembers) {
+              const user = await User.findOne({ email: member });
+              if(!user){
+                notFoundEmails.push(member);
+              } else if(emailsInGroup.includes(member)){
+                alreadyInGroup.push(member);
+              } else {
+                group.members.push({ email: member, user: user });
+              }
+            }
 
-        if(notFoundEmails.length + alreadyInGroup.length === newMembers.length){
-          return res.status(401).json({
-            error: 'all the members either do not exist or are already in a group',
-            alreadyInGroup: alreadyInGroup,
-            membersNotFound: notFoundEmails
-          });
-        } else {
-          await group.save();
-          return res.status(200).json({
-            group: group.name,
-            members: group.members.map(member => member.email)
-          })
-        }
-      } else {
-        const adminAuth = verifyAuth(req, res, { authType: "Admin" });
-        if(adminAuth.authorized){
-          for (const member of newMembers) {
-            const user = await User.findOne({ email: member });
-            if(!user){
-              notFoundEmails.push(member);
-            } else if(emailsInGroup.includes(member)){
-              alreadyInGroup.push(member);
+            if(notFoundEmails.length + alreadyInGroup.length === newMembers.length){
+              return res.status(400).json({
+                error: 'all the members either do not exist or are already in a group',
+                alreadyInGroup: alreadyInGroup,
+                membersNotFound: notFoundEmails,
+                message: groupAuth.cause
+              });
             } else {
-              group.members.push({ email: member, user: user });
+              await group.save();
+              return res.status(200).json({
+                group: group.name,
+                members: group.members.map(member => member.email),
+                alreadyInGroup: alreadyInGroup,
+                membersNotFound: notFoundEmails,
+                message: groupAuth.cause
+              })
             }
           }
-
-          if(notFoundEmails.length + alreadyInGroup.length === newMembers.length){
-            return res.status(401).json({
-              error: 'all the members either do not exist or are already in a group',
-              alreadyInGroup: alreadyInGroup,
-              membersNotFound: notFoundEmails
-            });
-          } else {
-            await group.save();
-            return res.status(200).json({
-              group: group.name,
-              members: group.members.map(member => member.email)
-            })
+          else {
+            const adminAuth = verifyAuth(req, res, { authType: "Admin" });
+            if (adminAuth.authorized){
+              return res.status(400).json({message:  `You must use a different url (api/groups/${groupName}/insert)`});
+            }
+            return res.status(400).json({error: groupAuth.cause + ", " + "you are not a member of requested group"});
           }
-        } else {
-          return res.status(401).json({ error: adminAuth.cause });
         }
+        ///Admin route
+        case `/api/groups/${groupName}/insert`:{
+          const adminAuth = verifyAuth(req, res, { authType: "Admin" });
+            if(adminAuth.authorized){
+              for (const member of newMembers) {
+                const user = await User.findOne({ email: member });
+                if(!user){
+                  notFoundEmails.push(member);
+                } else if(emailsInGroup.includes(member)){
+                  alreadyInGroup.push(member);
+                } else {
+                  group.members.push({ email: member, user: user });
+                }
+              }
 
+              if(notFoundEmails.length + alreadyInGroup.length === newMembers.length){
+                return res.status(400).json({
+                  error: 'all the members either do not exist or are already in a group',
+                  alreadyInGroup: alreadyInGroup,
+                  membersNotFound: notFoundEmails,
+                  message: adminAuth.cause
+                });
+              } else {
+                await group.save();
+                return res.status(200).json({
+                  group: group.name,
+                  members: group.members.map(member => member.email),
+                  alreadyInGroup: alreadyInGroup,
+                  membersNotFound: notFoundEmails,
+                  message: adminAuth.cause
+                })
+              }
+            } else {
+              return res.status(400).json({ error: adminAuth.cause + ", " + "you are not an admin" });
+            }
+        }
+        default:
       }
     }
 
