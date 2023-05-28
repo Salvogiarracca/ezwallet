@@ -3,10 +3,12 @@ import { transactions } from "../models/model.js";
 import { verifyAuth } from "./utils.js";
 
 function isValidEmail(email) {
-  // Regular expression pattern for email validation
+  /// Test if empty string
+  if(!email) return false;
+
   const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
-  // Test the email against the pattern
+  /// Test if is valid
   return emailPattern.test(email);
 }
 
@@ -97,13 +99,9 @@ export const createGroup = async (req, res) => {
     if(simpleAuth.authorized){
       const { name, members } = req.body;
 
-      /// check if all provided emails are valid
+      /// check if all provided emails are valid or an empty string
       if(members.some(member => !isValidEmail(member))) {
-        return res.status(400).json({ error: 'at least one of the members emails is not in a valid email format' });
-      }
-      /// check if at least one of the member emails is an empty string
-      if(members.some(member => member === "")){
-        return res.status(400).json({ error: 'at least one of the member emails is an empty string' });
+        return res.status(400).json({ error: 'at least one of the members emails is not in a valid email format or is an empty string' });
       }
 
       if (!name || !members || name === "") return res.status(400).json({ error: 'request body does not contain all the necessary attributes'})
@@ -273,13 +271,9 @@ export const addToGroup = async (req, res) => {
     const newMembers = req.body;
     const route = req.originalUrl;
 
-    /// check if all provided emails are valid
+    /// check if all provided emails are valid or an empty string
     if(newMembers.some(member => !isValidEmail(member))){
-      return res.status(400).json({ error: 'at least one of the members emails is not in a valid email format' });
-    }
-    /// check if at least one of the member emails is an empty string
-    if(newMembers.some(member => member === "")){
-      return res.status(400).json({ error: 'at least one of the member emails is an empty string' });
+      return res.status(400).json({ error: 'at least one of the members emails is not in a valid email format or is an empty string' });
     }
 
     if(!groupName || !newMembers || newMembers.length === 0){
@@ -335,7 +329,7 @@ export const addToGroup = async (req, res) => {
             if (adminAuth.authorized){
               return res.status(400).json({message:  `You must use a different url (api/groups/${groupName}/insert)`});
             }
-            return res.status(400).json({error: groupAuth.cause + ", " + "you are not a member of requested group"});
+            return res.status(401).json({error: groupAuth.cause + ", " + "you are not a member of requested group"});
           }
         }
         ///Admin route
@@ -371,10 +365,11 @@ export const addToGroup = async (req, res) => {
                 })
               }
             } else {
-              return res.status(400).json({ error: adminAuth.cause + ", " + "you are not an admin" });
+              return res.status(401).json({ error: adminAuth.cause + ", " + "you are not an admin" });
             }
         }
         default:
+          break
       }
     }
 
@@ -410,6 +405,127 @@ export const addToGroup = async (req, res) => {
  */
 export const removeFromGroup = async (req, res) => {
   try{
+    const groupName = req.params.name;
+    const emails = req.body.emails;
+    const route = req.originalUrl;
+
+    if (!groupName || emails.length === 0 ){
+      return res.status(400).json({ error: 'Request body does not contain all the necessary attributes' });
+    }
+
+    /// check if all provided emails are valid or an empty string
+    if(emails.some(member => !isValidEmail(member))){
+      return res.status(400).json({ error: 'at least one of the members emails is not in a valid email format or is an empty string' });
+    }
+
+    const group = await Group.findOne({ name: groupName });
+    if(!group){
+      return res.status(400).json({ error: 'Group does not exist' });
+    } else {
+      const groups = await Group.find({}, 'members.email' );
+      const emailsInGroup = groups.flatMap(group => group.members.map(member => member.email));
+      const notInGroup = [];
+      const notFoundEmails = [];
+      // const members = group.members.map(member => member.email);
+      switch (route) {
+          ///Group route
+        case `/api/groups/${groupName}/remove`:{
+          const groupAuth = verifyAuth(req, res, { authType: "Group", emails: group.members.map(member => member.email) });
+          if(groupAuth.authorized){
+            for (const email of emails) {
+              const user = await User.findOne({ email: email });
+              if(!user){
+                notFoundEmails.push(email);
+              } else if(!emailsInGroup.includes(email)){
+                notInGroup.push(email);
+              } else {
+                // toRemove.push({email: email, user: user});
+                const index = group.members.findIndex(member => member.email === email);
+                group.members.splice(index, 1);
+              }
+            }
+
+            if(group.members.length === 1){
+              return res.status(400).json({ error: 'the group cannot contains only one member' })
+            }
+
+            if(notFoundEmails.length + notInGroup.length === emails.length){
+              return res.status(400).json({
+                error: 'all the members either do not exist or are already in a group',
+                notInGroup: notInGroup,
+                membersNotFound: notFoundEmails,
+                message: groupAuth.cause
+              });
+            } else {
+              await group.save();
+              return res.status(200).json({
+                group: group.name,
+                members: group.members.map(member => member.email),
+                notInGroup: notInGroup,
+                membersNotFound: notFoundEmails,
+                message: groupAuth.cause
+              })
+            }
+          }
+          else {
+            const adminAuth = verifyAuth(req, res, { authType: "Admin" });
+            if (adminAuth.authorized){
+              return res.status(400).json({message:  `You must use a different url (api/groups/${groupName}/pull)`});
+            }
+            return res.status(401).json({error: groupAuth.cause + ", " + "you are not a member of requested group"});
+          }
+        }
+          ///Admin route
+        case `/api/groups/${groupName}/pull`: {
+          const adminAuth = verifyAuth(req, res, {authType: "Admin"});
+          if (adminAuth.authorized) {
+            for (const email of emails) {
+              const user = await User.findOne({email: email});
+              if (!user) {
+                notFoundEmails.push(email);
+              } else if (!emailsInGroup.includes(email)) {
+                notInGroup.push(email);
+              } else {
+                // toRemove.push({email: email, user: user});
+                const index = group.members.findIndex(member => member.email === email);
+                group.members.splice(index, 1);
+              }
+            }
+
+            if(group.members.length === 1){
+              return res.status(400).json({ error: 'the group cannot contains only one member' })
+            }
+
+            if (notFoundEmails.length + notInGroup.length === emails.length) {
+              return res.status(400).json({
+                error: 'all the members either do not exist or are already in a group',
+                notInGroup: notInGroup,
+                membersNotFound: notFoundEmails,
+                message: adminAuth.cause
+              });
+            } else {
+              await group.save();
+              return res.status(200).json({
+                group: group.name,
+                members: group.members.map(member => member.email),
+                notInGroup: notInGroup,
+                membersNotFound: notFoundEmails,
+                message: adminAuth.cause
+              })
+            }
+          } else {
+            return res.status(401).json({error: adminAuth.cause + ", " + "you are not an admin"});
+          }
+        }
+        default:
+          break;
+      }
+    }
+
+
+
+
+
   } catch(err){
     res.status(500).json(err.message)
   }
