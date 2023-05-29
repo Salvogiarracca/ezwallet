@@ -53,6 +53,25 @@ describe('register', () => {
     };
 
     // Exception cases
+    test('Missing parameters: Error test #1', async () => {
+        await request(app).post("/api/register").send({
+            username : "Paperino",
+            password : "12345" 
+        }).then(response => {
+            expect(response.statusCode).toBe(400);
+        }); 
+    });
+
+    test('Missing parameters: Error test #2', async () => {
+        await request(app).post("/api/register").send({
+            username : "",
+            email : "s256652@studenti.polito.it",
+            password : "12345" 
+        }).then(response => {
+            expect(response.statusCode).toBe(400);
+        }); 
+    });
+
     test('Already existing username Paperino: Error test #1', async () => {
         jest.spyOn(User, "findOne").mockImplementation(() => testUser);
 
@@ -110,6 +129,25 @@ describe("registerAdmin", () => {
     };
 
     // Exception cases
+    test('Missing parameters: Error test #1', async () => {
+        await request(app).post("/api/admin").send({
+            username : "PaperinoAdmin",
+            password : "12345" 
+        }).then(response => {
+            expect(response.statusCode).toBe(400);
+        }); 
+    });
+
+    test('Missing parameters: Error test #2', async () => {
+        await request(app).post("/api/admin").send({
+            username : "",
+            email : "a256652@studenti.polito.it",
+            password : "12345" 
+        }).then(response => {
+            expect(response.statusCode).toBe(400);
+        }); 
+    });
+
     test('Already existing admin username Paperino: Error test #1', async () => {
         jest.spyOn(User, "findOne").mockImplementation(() => testUser);
 
@@ -173,11 +211,33 @@ describe('login', () => {
         jest.spyOn(bcrypt, "compare").mockImplementation(() => true);
         jest.spyOn(User.prototype, "save").mockImplementation(() => testUser);
         
-        await request(app).post("/api/login").send(testUser).then(response => {
-            console.log(response.body);
+        await request(app).post("/api/login").send(registeredUserSent).then(response => {
             expect(response.statusCode).toBe(200);
             expect(response.body.data.accessToken).toEqual(accessToken);
             expect(response.body.data.refreshToken).toEqual(refreshToken);
+        });
+    });
+
+    test('Log in error test: Missing parameters #1', async () => {
+        // Sent credentials
+        const registeredUserSent = {
+            password : "456789"
+        }
+
+        await request(app).post("/api/login").send(registeredUserSent).then(response => {
+            expect(response.statusCode).toBe(400);
+        });
+    });
+
+    test('Log in error test: Missing parameters #2', async () => {
+        // Sent credentials
+        const registeredUserSent = {
+            email : "s256652@studenti.polito.it",
+            password : ""
+        }
+
+        await request(app).post("/api/login").send(registeredUserSent).then(response => {
+            expect(response.statusCode).toBe(400);
         });
     });
 
@@ -192,7 +252,7 @@ describe('login', () => {
         jest.spyOn(User, "findOne").mockImplementation(() => {});
         jest.spyOn(bcrypt, "compare").mockImplementation(() => true);
         
-        await request(app).post("/api/login").send(testUser).then(response => {
+        await request(app).post("/api/login").send(registeredUserSent).then(response => {
             expect(response.statusCode).toBe(400);
         });
     });
@@ -208,7 +268,7 @@ describe('login', () => {
         jest.spyOn(User, "findOne").mockImplementation(() => testUser);
         jest.spyOn(bcrypt, "compare").mockImplementation(() => false);
         
-        await request(app).post("/api/login").send(testUser).then(response => {
+        await request(app).post("/api/login").send(registeredUserSent).then(response => {
             expect(response.statusCode).toBe(400);
         });
     });
@@ -235,9 +295,9 @@ describe('logout', () => {
 
     test('Log out: Test #1', async () => {
         jest.spyOn(User, "findOne").mockImplementation(() => testUser);
-        jest.spyOn(User, "save").mockImplementation(() => testUser);
+        jest.spyOn(User.prototype, "save").mockImplementation(() => testUser);
 
-        await request(app).get("/api/logout").set("Cookie", "refreshToken=${refreshToken}")
+        await request(app).get("/api/logout").set("Cookie", `refreshToken=${refreshToken}`)
             .then(response => {
                 expect(response.statusCode).toBe(200);
         });
@@ -246,7 +306,7 @@ describe('logout', () => {
     test("Log out error test: User not found #1", async () =>{
         jest.spyOn(User, "findOne").mockImplementation(() => {});
         
-        await request(app).get("/api/logout").set("Cookie", "refreshToken=${refreshToken}")
+        await request(app).get("/api/logout").set("Cookie", `refreshToken=${refreshToken}`)
             .then(response => {
                 expect(response.statusCode).toBe(400);
         });
