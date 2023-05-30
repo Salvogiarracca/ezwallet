@@ -422,11 +422,15 @@ export const removeFromGroup = async (req, res) => {
     if(!group){
       return res.status(400).json({ error: 'Group does not exist' });
     } else {
+
+      if(group.members.length === 1){
+        return res.status(400).json({ error: 'the group contains only one member' })
+      }
+
       const groups = await Group.find({}, 'members.email' );
       const emailsInGroup = groups.flatMap(group => group.members.map(member => member.email));
       const notInGroup = [];
       const notFoundEmails = [];
-      // const members = group.members.map(member => member.email);
       switch (route) {
           ///Group route
         case `/api/groups/${groupName}/remove`:{
@@ -443,10 +447,6 @@ export const removeFromGroup = async (req, res) => {
                 const index = group.members.findIndex(member => member.email === email);
                 group.members.splice(index, 1);
               }
-            }
-
-            if(group.members.length === 1){
-              return res.status(400).json({ error: 'the group cannot contains only one member' })
             }
 
             if(notFoundEmails.length + notInGroup.length === emails.length){
@@ -492,10 +492,6 @@ export const removeFromGroup = async (req, res) => {
               }
             }
 
-            if(group.members.length === 1){
-              return res.status(400).json({ error: 'the group cannot contains only one member' })
-            }
-
             if (notFoundEmails.length + notInGroup.length === emails.length) {
               return res.status(400).json({
                 error: 'all the members either do not exist or are already in a group',
@@ -521,11 +517,6 @@ export const removeFromGroup = async (req, res) => {
           break;
       }
     }
-
-
-
-
-
   } catch(err){
     res.status(500).json(err.message)
   }
@@ -552,16 +543,34 @@ export const removeFromGroup = async (req, res) => {
 export const deleteUser = async (req, res) => {
   try {
     const { email } = req.body;
+    const adminAuth = verifyAuth(req, res, { authType: "Admin" });
+    if (adminAuth.authorized) {
+      ///find user to be deleted
+      const user = await User.findOne({ email });
+      if(!user){
+        return res.status(401).json({ error: 'User not found' });
+      } else {
+        const group = await Group.findOne({ 'members.email': email });
+        if(!group){
+          //remove user that not belong to any group
+          await User.deleteOne({ email });
+          return res.status(200).json({ data: { deletedTransaction: "Transaction count not implemented yet", deletedFromGroup: false }, message: adminAuth.cause });
+        } else {
+          //user belongs to a group
+          //TODO: count of transactions performed by deleted user
+          if (group.members.length === 1) {
+            //remove group
+            await Group.deleteOne({ name: group.name });
+            //delete the user
+            await User.deleteOne({ email });
+            return res.status(200).json({ data: { deletedTransaction: "Transaction count not implemented yet", deletedFromGroup: true }, message: adminAuth.cause });
+          }
+        }
+      }
 
-    ///find user to be deleted
-    const user = await User.findOne({ email });
-    if(!user){
-      res.status(401).json({ error: 'User not found' });
+    } else {
+      return res.status(401).json({ error: adminAuth.cause + ", " + "you are not an admin"});
     }
-
-    ///delete the user
-    await User.deleteOne({ email });
-    res.status(200).json({ message: 'User deleted succesfully' });
   } catch (err) {
     res.status(500).json(err.message)
   }
@@ -575,7 +584,6 @@ export const deleteUser = async (req, res) => {
     - Response `data` Content: A message confirming successful deletion
       - Example: `res.status(200).json({data: {message: "Group deleted successfully"} , refreshedTokenMessage: res.locals.refreshedTokenMessage})`
     - Optional behavior:
-      - error 401 is returned if the group does not exist
       - Returns a 400 error if the request body does not contain all the necessary attributes
       - Returns a 400 error if the name passed in the request body is an empty string
       - Returns a 400 error if the name passed in the request body does not represent a group in the database
@@ -585,15 +593,26 @@ export const deleteGroup = async (req, res) => {
   try {
     const {name} = req.body;
 
-    ///find a group to be deleted
-    const group = await Group.findOne({ name });
-    if(!group){
-      return res.status(401).json({ error: 'Group not found'} );
+    ///check if undefined or empty string
+    if (!name) {
+      return res.status(400).json({ error: 'Request body does not contain all the necessary attributes' });
     }
+    const adminAuth = verifyAuth(req, res, { authType: "Admin" });
+    if (adminAuth.authorized) {
 
-    ///delete the group
-    await Group.deleteOne({ name });
-    res.status(200).json({ message: 'Group deleted succesfully'});
+      ///find group to be deleted
+      const group = await Group.findOne({ name });
+      if(!group){
+        return res.status(400).json({ error: 'Group not found' });
+      } else {
+        ///delete the group
+        await Group.deleteOne({ name });
+        return res.status(200).json({ data: {message: 'Group deleted succesfully'}, message: adminAuth.cause });
+      }
+
+    } else {
+      return res.status(401).json({ error: adminAuth.cause + ", " + "you are not an admin"});
+    }
   } catch (err) {
     res.status(500).json(err.message)
   }
