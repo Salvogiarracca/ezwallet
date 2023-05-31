@@ -216,7 +216,7 @@ export const getTransactionsByUser = async (req, res) => {
       })
       .catch((error) => {
         throw error;
-      });
+      });}
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
