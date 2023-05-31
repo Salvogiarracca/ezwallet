@@ -126,37 +126,49 @@ export const getAllTransactions = async (req, res) => {
     /**
      * MongoDB equivalent to the query "SELECT * FROM transactions, categories WHERE transactions.type = categories.type"
      */
-    transactions
-      .aggregate([
-        {
-          $lookup: {
-            from: "categories",
-            localField: "type",
-            foreignField: "type",
-            as: "categories_info",
+    const username = req.params.username;
+    const userAuth = verifyAuth(req, res, {
+      authType: "User",
+      username: username,
+    });
+    ///if userAuth return true, user can retrieve only info about himself
+    const adminAuth = verifyAuth(req, res, { authType: "Admin" });
+    ///if the user is an Admin ok, otherwise unauthorized
+    if (adminAuth.authorized) {
+      transactions
+        .aggregate([
+          {
+            $lookup: {
+              from: "categories",
+              localField: "type",
+              foreignField: "type",
+              as: "categories_info",
+            },
           },
-        },
-        { $unwind: "$categories_info" },
-      ])
-      .then((result) => {
-        let data = result.map((v) =>
-          Object.assign(
-            {},
-            {
-              _id: v._id,
-              username: v.username,
-              amount: v.amount,
-              type: v.type,
-              color: v.categories_info.color,
-              date: v.date,
-            }
-          )
-        );
-        res.json(data);
-      })
-      .catch((error) => {
-        throw error;
-      });
+          { $unwind: "$categories_info" },
+        ])
+        .then((result) => {
+          let data = result.map((v) =>
+            Object.assign(
+              {},
+              {
+                _id: v._id,
+                username: v.username,
+                amount: v.amount,
+                type: v.type,
+                color: v.categories_info.color,
+                date: v.date,
+              }
+            )
+          );
+          return res.status(200).json({ data, message: adminAuth.cause });
+        })
+        .catch((error) => {
+          throw error;
+        });
+    } else {
+      return res.status(401).json({ error: adminAuth.cause });
+    }
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
@@ -173,50 +185,94 @@ export const getAllTransactions = async (req, res) => {
  */
 export const getTransactionsByUser = async (req, res) => {
   try {
-    //Distinction between route accessed by Admins or Regular users for functions that can be called by both
-    //and different behaviors and access rights
-    if(simpleAuth.authorized){
-    const cookie = req.cookies;
-    if (!cookie.accessToken) {
-      return res.status(401).json({ message: "Unauthorized" }); // unauthorized
-    }
-    /**
-     * MongoDB equivalent to the query "SELECT * FROM transactions, categories WHERE transactions.type = categories.type"
-     */
-    transactions
-      .aggregate([
-        {
-          $match: { username: req.params.username },
-        },
-        {
-          $lookup: {
-            from: "categories",
-            localField: "type",
-            foreignField: "type",
-            as: "categories_info",
+    const username = req.params.username;
+    const userAuth = verifyAuth(req, res, {
+      authType: "User",
+      username: username,
+    });
+    ///if userAuth return true, user can retrieve only info about himself
+    if (userAuth.authorized) {
+      transactions
+        .aggregate([
+          {
+            $match: { username: username },
           },
-        },
-        { $unwind: "$categories_info" },
-      ])
-      .then((result) => {
-        let data = result.map((v) =>
-          Object.assign(
-            {},
-            {
-              _id: v._id,
-              username: v.username,
-              amount: v.amount,
-              type: v.type,
-              color: v.categories_info.color,
-              date: v.date,
-            }
-          )
+          {
+            $lookup: {
+              from: "categories",
+              localField: "type",
+              foreignField: "type",
+              as: "categories_info",
+            },
+          },
+          { $unwind: "$categories_info" },
+        ])
+        .then((result) => {
+          let data = result.map((v) =>
+            Object.assign(
+              {},
+              {
+                _id: v._id,
+                username: v.username,
+                amount: v.amount,
+                type: v.type,
+                color: v.categories_info.color,
+                date: v.date,
+              }
+            )
+          );
+          res.status(200).json({ data, message: userAuth.cause });
+        })
+        .catch((error) => {
+          throw error;
+        });
+      ///if userAuth fails (Username mismatch) it means that a user want to retrieve info about another user
+    } else {
+      const adminAuth = verifyAuth(req, res, { authType: "Admin" });
+      ///if the user is an Admin ok, otherwise unauthorized
+      if (adminAuth.authorized) {
+        const user = await User.findOne({ username: username }).select(
+          "username email role"
         );
-        res.json(data);
-      })
-      .catch((error) => {
-        throw error;
-      });}
+        if (!user) return res.status(401).json({ message: "User not found" });
+        transactions
+          .aggregate([
+            {
+              $match: { username: username },
+            },
+            {
+              $lookup: {
+                from: "categories",
+                localField: "type",
+                foreignField: "type",
+                as: "categories_info",
+              },
+            },
+            { $unwind: "$categories_info" },
+          ])
+          .then((result) => {
+            let data = result.map((v) =>
+              Object.assign(
+                {},
+                {
+                  _id: v._id,
+                  username: v.username,
+                  amount: v.amount,
+                  type: v.type,
+                  color: v.categories_info.color,
+                  date: v.date,
+                }
+              )
+            );
+            res.status(200).json({ data, message: adminAuth.cause });
+          })
+          .catch((error) => {
+            throw error;
+          });
+      } else {
+        return res.status(401).json({ error: adminAuth.cause });
+      }
+    }
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
@@ -232,47 +288,94 @@ export const getTransactionsByUser = async (req, res) => {
  */
 export const getTransactionsByUserByCategory = async (req, res) => {
   try {
-    const cookie = req.cookies;
-    if (!cookie.accessToken) {
-      return res.status(401).json({ message: "Unauthorized" }); // unauthorized
-    }
-    /**
-     * MongoDB equivalent to the query "SELECT * FROM transactions, categories WHERE transactions.type = categories.type"
-     */
-    transactions
-      .aggregate([
-        {
-          $match: { username: req.params.username, type: req.params.category },
-        },
-        {
-          $lookup: {
-            from: "categories",
-            localField: "type",
-            foreignField: "type",
-            as: "categories_info",
+    const username = req.params.username;
+    const userAuth = verifyAuth(req, res, {
+      authType: "User",
+      username: username,
+    });
+    ///if userAuth return true, user can retrieve only info about himself
+    if (userAuth.authorized) {
+      transactions
+        .aggregate([
+          {
+            $match: { username: username, type: req.params.category },
           },
-        },
-        { $unwind: "$categories_info" },
-      ])
-      .then((result) => {
-        let data = result.map((v) =>
-          Object.assign(
-            {},
-            {
-              _id: v._id,
-              username: v.username,
-              amount: v.amount,
-              type: v.type,
-              color: v.categories_info.color,
-              date: v.date,
-            }
-          )
+          {
+            $lookup: {
+              from: "categories",
+              localField: "type",
+              foreignField: "type",
+              as: "categories_info",
+            },
+          },
+          { $unwind: "$categories_info" },
+        ])
+        .then((result) => {
+          let data = result.map((v) =>
+            Object.assign(
+              {},
+              {
+                _id: v._id,
+                username: v.username,
+                amount: v.amount,
+                type: v.type,
+                color: v.categories_info.color,
+                date: v.date,
+              }
+            )
+          );
+          res.status(200).json({ data, message: userAuth.cause });
+        })
+        .catch((error) => {
+          throw error;
+        });
+      ///if userAuth fails (Username mismatch) it means that a user want to retrieve info about another user
+    } else {
+      const adminAuth = verifyAuth(req, res, { authType: "Admin" });
+      ///if the user is an Admin ok, otherwise unauthorized
+      if (adminAuth.authorized) {
+        const user = await User.findOne({ username: username }).select(
+          "username email role"
         );
-        res.json(data);
-      })
-      .catch((error) => {
-        throw error;
-      });
+        if (!user) return res.status(401).json({ message: "User not found" });
+        transactions
+          .aggregate([
+            {
+              $match: { username: username, type: req.params.category },
+            },
+            {
+              $lookup: {
+                from: "categories",
+                localField: "type",
+                foreignField: "type",
+                as: "categories_info",
+              },
+            },
+            { $unwind: "$categories_info" },
+          ])
+          .then((result) => {
+            let data = result.map((v) =>
+              Object.assign(
+                {},
+                {
+                  _id: v._id,
+                  username: v.username,
+                  amount: v.amount,
+                  type: v.type,
+                  color: v.categories_info.color,
+                  date: v.date,
+                }
+              )
+            );
+            res.status(200).json({ data, message: adminAuth.cause });
+          })
+          .catch((error) => {
+            throw error;
+          });
+      } else {
+        return res.status(401).json({ error: adminAuth.cause });
+      }
+    }
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
@@ -292,48 +395,101 @@ export const getTransactionsByGroup = async (req, res) => {
     if (!cookie.accessToken) {
       return res.status(401).json({ message: "Unauthorized" }); // unauthorized
     }
-    /**
-     * MongoDB equivalent to the query "SELECT * FROM transactions, categories WHERE transactions.type = categories.type"
-     */
-    //let data = await Group.find().select("members").select("email")
+    const name = req.params.name;
+    const group = await Group.findOne({ name });
+    const emails = group.members.map((member) => member.email);
+    const usernames = (await User.find({ email: emails })).map(
+      (user) => user.username
+    );
+    const usersTransactions = await transactions.find({ username: usernames });
+    console.log(usersTransactions);
 
-    Group.aggregate([
-      {
-        $match: { name: req.params.name },
-        $lookup: {
-          from: "Group",
-          localField: "members.user.username",
-          foreignField: "username",
-          as: "username_info",
-        },
-        $lookup: {
-          from: "categories",
-          localField: "type",
-          foreignField: "type",
-          as: "categories_info",
-        },
-      },
-      { $unwind: "$categories_info" },
-    ])
-      .then((result) => {
-        let data = result.map((v) =>
-          Object.assign(
-            {},
-            {
-              _id: v._id,
-              username: v.username,
-              amount: v.amount,
-              type: v.type,
-              color: v.categories_info.color,
-              date: v.date,
-            }
-          )
-        );
-        res.json(data);
-      })
-      .catch((error) => {
-        throw error;
+    if (!group) {
+      return res.status(400).json({ error: "Group does not exist" });
+    } else {
+      const groupAuth = verifyAuth(req, res, {
+        authType: "Group",
+        emails: group.members.map((member) => member.email),
       });
+      if (groupAuth.authorized) {
+        transactions
+          .aggregate([
+            {
+              $match: {
+                username: {
+                  $in:usernames
+                },
+              },
+            },
+            {
+              $lookup: {
+                from: "categories",
+                localField: "type",
+                foreignField: "type",
+                as: "categories_info",
+              },
+            },
+            { $unwind: "$categories_info" },
+          ])
+          .then((result) => {
+            let data = result.map((v) =>
+              Object.assign(
+                {},
+                {
+                  _id: v._id,
+                  username: v.username,
+                  amount: v.amount,
+                  type: v.type,
+                  color: v.categories_info.color,
+                  date: v.date,
+                }
+              )
+            );
+            return res.status(200).json({ data, message: groupAuth.cause });
+          });
+      } else {
+        const adminAuth = verifyAuth(req, res, { authType: "Admin" });
+        if (adminAuth.authorized) {
+          transactions
+            .aggregate([
+              {
+                $match: {
+                  username: {
+                    $in:usernames
+                  },
+                },
+              },
+              {
+                $lookup: {
+                  from: "categories",
+                  localField: "type",
+                  foreignField: "type",
+                  as: "categories_info",
+                },
+              },
+              { $unwind: "$categories_info" },
+            ])
+            .then((result) => {
+              let data = result.map((v) =>
+                Object.assign(
+                  {},
+                  {
+                    _id: v._id,
+                    username: v.username,
+                    amount: v.amount,
+                    type: v.type,
+                    color: v.categories_info.color,
+                    date: v.date,
+                  }
+                )
+              );
+              return res.status(200).json({ data, message: adminAuth.cause });
+            });
+        } else {
+          return res.status(401).json({ error: adminAuth.cause });
+        }
+      }
+    }
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
@@ -349,6 +505,107 @@ export const getTransactionsByGroup = async (req, res) => {
  */
 export const getTransactionsByGroupByCategory = async (req, res) => {
   try {
+    const cookie = req.cookies;
+    if (!cookie.accessToken) {
+      return res.status(401).json({ message: "Unauthorized" }); // unauthorized
+    }
+    const name = req.params.name;
+    const group = await Group.findOne({ name });
+    const emails = group.members.map((member) => member.email);
+    const usernames = (await User.find({ email: emails })).map(
+      (user) => user.username
+    );
+    const usersTransactions = await transactions.find({ username: usernames });
+    console.log(usersTransactions);
+
+    if (!group) {
+      return res.status(400).json({ error: "Group does not exist" });
+    } else {
+      const groupAuth = verifyAuth(req, res, {
+        authType: "Group",
+        emails: group.members.map((member) => member.email),
+      });
+      if (groupAuth.authorized) {
+        transactions
+          .aggregate([
+            {
+              $match: {
+                username: {
+                  $in:usernames
+                },
+                type: req.params.category
+              },
+            },
+            {
+              $lookup: {
+                from: "categories",
+                localField: "type",
+                foreignField: "type",
+                as: "categories_info",
+              },
+            },
+            { $unwind: "$categories_info" },
+          ])
+          .then((result) => {
+            let data = result.map((v) =>
+              Object.assign(
+                {},
+                {
+                  _id: v._id,
+                  username: v.username,
+                  amount: v.amount,
+                  type: v.type,
+                  color: v.categories_info.color,
+                  date: v.date,
+                }
+              )
+            );
+            return res.status(200).json({ data, message: groupAuth.cause });
+          });
+      } else {
+        const adminAuth = verifyAuth(req, res, { authType: "Admin" });
+        if (adminAuth.authorized) {
+          transactions
+            .aggregate([
+              {
+                $match: {
+                  username: {
+                    $in:usernames
+                  },
+                  type: req.params.category
+                },
+              },
+              {
+                $lookup: {
+                  from: "categories",
+                  localField: "type",
+                  foreignField: "type",
+                  as: "categories_info",
+                },
+              },
+              { $unwind: "$categories_info" },
+            ])
+            .then((result) => {
+              let data = result.map((v) =>
+                Object.assign(
+                  {},
+                  {
+                    _id: v._id,
+                    username: v.username,
+                    amount: v.amount,
+                    type: v.type,
+                    color: v.categories_info.color,
+                    date: v.date,
+                  }
+                )
+              );
+              return res.status(200).json({ data, message: adminAuth.cause });
+            });
+        } else {
+          return res.status(401).json({ error: adminAuth.cause });
+        }
+      }
+    }
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
