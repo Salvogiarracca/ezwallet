@@ -38,12 +38,43 @@ export const createCategory = (req, res) => {
     - error 401 returned if the specified category does not exist
     - error 401 is returned if new parameters have invalid values
  */
-export const updateCategory = async (req, res) => {
-  try {
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
-};
+    export const updateCategory = async (req, res) => {
+      try {
+          const cookie = req.cookies
+          if (!cookie.accessToken) {
+              return res.status(401).json({ message: "Unauthorized" }) // unauthorized
+          }
+          //to add: control of admin (even for deleteCategory)
+          const { type: newType, color: newColor } = req.body;
+          const oldType = req.params.type;
+          if(!newType || !newColor){
+              return res.status(400).json({ message: "Missing attributes!"});
+          }
+          
+          if(typeof(newType) !== "string" || typeof(newColor) !== "string"){   //check input
+              return res.status(400).json({ message: "Mismatched types in request body!"});
+          }
+          
+          if( newColor.length !== 7 || newColor[1] !== '#'){
+              return res.status(400).json({ message: "Wrong format for color" });
+          }
+  
+          const alreadyExists = await categories.findOne({ type: newType });   //if new type value refers to an existing category, fails
+          if(alreadyExists){
+              return res.status(400).json({ message: "new type invalid, category already exists"});
+          }
+          
+          const updated = await categories.findOneAndUpdate({type: oldType}, { type: newType, color: newColor});  //update category
+          const updTransactions = await transactions.updateMany({type: oldType}, { $set: {type: newType}});
+          const nUpdated = updTransactions.modifiedCount;
+  
+          return res.status(200).json({ message: "Update completed successfully",
+                  count: nUpdated});
+          
+      } catch (error) {
+          res.status(400).json({ error: error.message });
+      }
+  };
 
 /**
  * Delete a category
