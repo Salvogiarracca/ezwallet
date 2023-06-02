@@ -81,7 +81,7 @@ export const verifyAuth = (req, res, info) => {
             return { authorized: false, cause: "Unauthorized"}
         }
         ///2 either the accessToken or the refreshToken have a `role` which is not Admin
-        if(info.authType === "Admin" && (decodedAccessToken.role!== info.authType || decodedRefreshToken.role!== info.authType)){
+        if(info.authType === "Admin" && (decodedAccessToken.role !== info.authType || decodedRefreshToken.role !== info.authType)){
             return { authorized: false, cause: "Unauthorized" }
         }
         ///3 either the accessToken or the refreshToken have a `email` which is not in the requested group
@@ -118,9 +118,7 @@ export const verifyAuth = (req, res, info) => {
                 res.cookie('accessToken', newAccessToken, { httpOnly: true, path: '/api', maxAge: 60 * 60 * 1000, sameSite: 'none', secure: true })
                 res.locals.refreshedTokenMessage= 'Access token has been refreshed. Remember to copy the new one in the headers of subsequent calls'
 
-                const message = res.locals.refreshedTokenMessage
-
-                return { authorized: true, cause: message }
+                return { authorized: true, cause: "Authorized" }
             } catch (err) {
                 if (err.name === "TokenExpiredError") {
                     return { authorized: false, cause: "Perform login again" }

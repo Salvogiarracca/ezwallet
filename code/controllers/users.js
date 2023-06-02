@@ -26,7 +26,10 @@ export const getUsers = async (req, res) => {
     const adminAuth = verifyAuth(req, res, { authType: "Admin" });
     if(adminAuth.authorized){
       const users = await User.find().select( 'username email role' );
-      return res.status(200).json({users, message: adminAuth.cause});
+      return res.status(200).json({
+        users,
+        refreshedTokenMessage: res?.locals?.refreshedTokenMessage
+      });
     } else {
       return res.status(401).json({ error : adminAuth.cause });
     }
@@ -55,7 +58,7 @@ export const getUser = async (req, res) => {
     if(userAuth.authorized){
       const user = await User.findOne({ refreshToken: cookie.refreshToken }).select( 'username email role' );
       if (!user) return res.status(400).json({ message: "User not found" })
-      return res.status(200).json({user, message: userAuth.cause});
+      return res.status(200).json({data: {username: user.username, email: user.email, role: user.role}, refreshedTokenMessage: res?.locals?.refreshedTokenMessage });
       ///if userAuth fails (Username mismatch) it means that a user want to retrieve info about another user
     } else {
       const adminAuth = verifyAuth(req, res, { authType: "Admin" });
@@ -63,7 +66,7 @@ export const getUser = async (req, res) => {
       if(adminAuth.authorized){
         const user = await User.findOne({ username }).select( 'username email role' );
         if (!user) return res.status(400).json({ message: "User not found" })
-        return res.status(200).json({user, message: adminAuth.cause})
+        return res.status(200).json({data: { username: user.username, email: user.email, role: user.role}, refreshedTokenMessage: res?.locals?.refreshedTokenMessage })
       } else {
         return res.status(401).json({ error: adminAuth.cause });
       }
@@ -157,11 +160,13 @@ export const createGroup = async (req, res) => {
         });
 
         return res.status(200).json({
-          group: newGroup.name,
-          members: newGroup.members,
-          alreadyInGroup: alreadyInGroup,
-          membersNotFound: notFoundEmails
-        });
+          data: {
+            name: newGroup.name,
+            members: newGroup.members,
+            alreadyInGroup: alreadyInGroup,
+            membersNotFound: notFoundEmails,
+            refreshedTokenMessage: res?.locals?.refreshedTokenMessage
+        }});
       }
     } else {
       return res.status(401).json(simpleAuth.cause);
@@ -187,8 +192,14 @@ export const getGroups = async (req, res) => {
     ///only admin can perform this operation!
     const adminAuth = verifyAuth(req, res, { authType: "Admin" });
     if(adminAuth.authorized){
-      const groups = await Group.find().select( 'name members' );
-      return res.status(200).json({groups, message: adminAuth.cause});
+       const groups = await Group.find().select( 'name members' );
+      const data = groups.map(group => {
+        return {
+          name: group.name,
+          members: group.members.map( member => ({ email: member.email }))
+        }
+      })
+      return res.status(200).json({data, refreshedTokenMessage: res?.locals?.refreshedTokenMessage });
     } else {
       return res.status(401).json({ error : adminAuth.cause });
     }
@@ -220,17 +231,21 @@ export const getGroup = async (req, res) => {
       const groupAuth = verifyAuth(req, res, { authType: "Group", emails: group.members.map(member => member.email) });
       if(groupAuth.authorized){
         return res.status(200).json({
-          group: group.name,
-          members: group.members.map(member => member.email),
-          message: groupAuth.cause
+          data: {
+            name: group.name,
+            members: group.members.map(member => ({ email: member.email })),
+            refreshedTokenMessage: res?.locals?.refreshedTokenMessage
+          }
         });
       } else {
         const adminAuth = verifyAuth(req, res, { authType: "Admin" });
         if(adminAuth.authorized){
           return res.status(200).json({
-            group: group.name,
-            members: group.members.map(member => member.email),
-            message: adminAuth.cause
+            data: {
+              name: group.name,
+              members: group.members.map(member => ({ email: member.email })),
+              refreshedTokenMessage: res?.locals?.refreshedTokenMessage
+            }
           });
         } else {
           return res.status(401).json({ error: adminAuth.cause });
@@ -268,8 +283,9 @@ export const getGroup = async (req, res) => {
 export const addToGroup = async (req, res) => {
   try {
     const groupName = req.params.name;
-    const newMembers = req.body;
+    const newMembers = req.body.emails;
     const route = req.originalUrl;
+
 
     /// check if all provided emails are valid or an empty string
     if(newMembers.some(member => !isValidEmail(member))){
@@ -316,11 +332,13 @@ export const addToGroup = async (req, res) => {
             } else {
               await group.save();
               return res.status(200).json({
-                group: group.name,
-                members: group.members.map(member => member.email),
+                data: {
+                  name: group.name,
+                  members: group.members.map(member => ({ email: member.email })),
+                },
                 alreadyInGroup: alreadyInGroup,
                 membersNotFound: notFoundEmails,
-                message: groupAuth.cause
+                refreshedTokenMessage: res?.locals?.refreshedTokenMessage
               })
             }
           }
@@ -357,11 +375,13 @@ export const addToGroup = async (req, res) => {
               } else {
                 await group.save();
                 return res.status(200).json({
-                  group: group.name,
-                  members: group.members.map(member => member.email),
+                  data: {
+                    name: group.name,
+                    members: group.members.map(member => ({ email: member.email })),
+                  },
                   alreadyInGroup: alreadyInGroup,
                   membersNotFound: notFoundEmails,
-                  message: adminAuth.cause
+                  refreshedTokenMessage: res?.locals?.refreshedTokenMessage
                 })
               }
             } else {
@@ -459,11 +479,13 @@ export const removeFromGroup = async (req, res) => {
             } else {
               await group.save();
               return res.status(200).json({
-                group: group.name,
-                members: group.members.map(member => member.email),
+                data: {
+                  name: group.name,
+                  members: group.members.map(member => member.email)
+                },
                 notInGroup: notInGroup,
                 membersNotFound: notFoundEmails,
-                message: groupAuth.cause
+                refreshedTokenMessage: res?.locals?.refreshedTokenMessage
               })
             }
           }
@@ -502,11 +524,13 @@ export const removeFromGroup = async (req, res) => {
             } else {
               await group.save();
               return res.status(200).json({
-                group: group.name,
-                members: group.members.map(member => member.email),
+                data: {
+                  name: group.name,
+                  members: group.members.map(member => member.email)
+                },
                 notInGroup: notInGroup,
                 membersNotFound: notFoundEmails,
-                message: adminAuth.cause
+                refreshedTokenMessage: res?.locals?.refreshedTokenMessage
               })
             }
           } else {
@@ -554,7 +578,7 @@ export const deleteUser = async (req, res) => {
         if(!group){
           //remove user that not belong to any group
           await User.deleteOne({ email });
-          return res.status(200).json({ data: { deletedTransaction: "Transaction count not implemented yet", deletedFromGroup: false }, message: adminAuth.cause });
+          return res.status(200).json({ data: { deletedTransaction: "Transaction count not implemented yet", deletedFromGroup: false }, refreshedTokenMessage: res?.locals?.refreshedTokenMessage });
         } else {
           //user belongs to a group
           //TODO: count of transactions performed by deleted user
@@ -563,7 +587,7 @@ export const deleteUser = async (req, res) => {
             await Group.deleteOne({ name: group.name });
             //delete the user
             await User.deleteOne({ email });
-            return res.status(200).json({ data: { deletedTransaction: "Transaction count not implemented yet", deletedFromGroup: true }, message: adminAuth.cause });
+            return res.status(200).json({ data: { deletedTransaction: "Transaction count not implemented yet", deletedFromGroup: true }, refreshedTokenMessage: res?.locals?.refreshedTokenMessage });
           }
         }
       }
@@ -607,7 +631,7 @@ export const deleteGroup = async (req, res) => {
       } else {
         ///delete the group
         await Group.deleteOne({ name });
-        return res.status(200).json({ data: {message: 'Group deleted succesfully'}, message: adminAuth.cause });
+        return res.status(200).json({ data: {message: 'Group deleted succesfully'}, refreshedTokenMessage: res?.locals?.refreshedTokenMessage });
       }
 
     } else {
