@@ -25,9 +25,15 @@ export const getUsers = async (req, res) => {
     ///only admin can perform this operation!
     const adminAuth = verifyAuth(req, res, { authType: "Admin" });
     if(adminAuth.authorized){
-      const users = await User.find().select( 'username email role' );
+      const users = await User.find();
+      const data = users.map(user => {
+        return {
+          username: user.username,
+          email: user.email
+        }
+      })
       return res.status(200).json({
-        users,
+        data,
         refreshedTokenMessage: res?.locals?.refreshedTokenMessage
       });
     } else {
@@ -56,7 +62,7 @@ export const getUser = async (req, res) => {
     const userAuth = verifyAuth(req, res, { authType: "User", username: username });
     ///if userAuth return true, user can retrieve only info about himself
     if(userAuth.authorized){
-      const user = await User.findOne({ refreshToken: cookie.refreshToken }).select( 'username email role' );
+      const user = await User.findOne({ refreshToken: cookie.refreshToken }).select( 'username email role -_id' );
       if (!user) return res.status(400).json({ message: "User not found" })
       return res.status(200).json({data: {username: user.username, email: user.email, role: user.role}, refreshedTokenMessage: res?.locals?.refreshedTokenMessage });
       ///if userAuth fails (Username mismatch) it means that a user want to retrieve info about another user
@@ -64,7 +70,7 @@ export const getUser = async (req, res) => {
       const adminAuth = verifyAuth(req, res, { authType: "Admin" });
       ///if the user is an Admin ok, otherwise unauthorized
       if(adminAuth.authorized){
-        const user = await User.findOne({ username }).select( 'username email role' );
+        const user = await User.findOne({ username }).select( 'username email role -_id' );
         if (!user) return res.status(400).json({ message: "User not found" })
         return res.status(200).json({data: { username: user.username, email: user.email, role: user.role}, refreshedTokenMessage: res?.locals?.refreshedTokenMessage })
       } else {
@@ -162,11 +168,12 @@ export const createGroup = async (req, res) => {
         return res.status(200).json({
           data: {
             name: newGroup.name,
-            members: newGroup.members,
-            alreadyInGroup: alreadyInGroup,
-            membersNotFound: notFoundEmails,
-            refreshedTokenMessage: res?.locals?.refreshedTokenMessage
-        }});
+            members: newGroup.members
+          },
+          alreadyInGroup: alreadyInGroup,
+          membersNotFound: notFoundEmails,
+          refreshedTokenMessage: res?.locals?.refreshedTokenMessage
+        });
       }
     } else {
       return res.status(401).json(simpleAuth.cause);
@@ -192,7 +199,7 @@ export const getGroups = async (req, res) => {
     ///only admin can perform this operation!
     const adminAuth = verifyAuth(req, res, { authType: "Admin" });
     if(adminAuth.authorized){
-       const groups = await Group.find().select( 'name members' );
+       const groups = await Group.find().select( 'name members -_id' );
       const data = groups.map(group => {
         return {
           name: group.name,
@@ -233,9 +240,9 @@ export const getGroup = async (req, res) => {
         return res.status(200).json({
           data: {
             name: group.name,
-            members: group.members.map(member => ({ email: member.email })),
-            refreshedTokenMessage: res?.locals?.refreshedTokenMessage
-          }
+            members: group.members.map(member => ({ email: member.email }))
+          },
+          refreshedTokenMessage: res?.locals?.refreshedTokenMessage
         });
       } else {
         const adminAuth = verifyAuth(req, res, { authType: "Admin" });
@@ -243,9 +250,9 @@ export const getGroup = async (req, res) => {
           return res.status(200).json({
             data: {
               name: group.name,
-              members: group.members.map(member => ({ email: member.email })),
-              refreshedTokenMessage: res?.locals?.refreshedTokenMessage
-            }
+              members: group.members.map(member => ({ email: member.email }))
+            },
+            refreshedTokenMessage: res?.locals?.refreshedTokenMessage
           });
         } else {
           return res.status(401).json({ error: adminAuth.cause });
@@ -578,7 +585,12 @@ export const deleteUser = async (req, res) => {
         if(!group){
           //remove user that not belong to any group
           await User.deleteOne({ email });
-          return res.status(200).json({ data: { deletedTransaction: "Transaction count not implemented yet", deletedFromGroup: false }, refreshedTokenMessage: res?.locals?.refreshedTokenMessage });
+          return res.status(200).json({
+            data: {
+              deletedTransaction: "Transaction count not implemented yet", deletedFromGroup: false
+            },
+            refreshedTokenMessage: res?.locals?.refreshedTokenMessage
+          });
         } else {
           //user belongs to a group
           //TODO: count of transactions performed by deleted user
@@ -587,7 +599,12 @@ export const deleteUser = async (req, res) => {
             await Group.deleteOne({ name: group.name });
             //delete the user
             await User.deleteOne({ email });
-            return res.status(200).json({ data: { deletedTransaction: "Transaction count not implemented yet", deletedFromGroup: true }, refreshedTokenMessage: res?.locals?.refreshedTokenMessage });
+            return res.status(200).json({
+              data: {
+                deletedTransaction: "Transaction count not implemented yet", deletedFromGroup: true
+              },
+              refreshedTokenMessage: res?.locals?.refreshedTokenMessage
+            });
           }
         }
       }
@@ -631,7 +648,12 @@ export const deleteGroup = async (req, res) => {
       } else {
         ///delete the group
         await Group.deleteOne({ name });
-        return res.status(200).json({ data: {message: 'Group deleted succesfully'}, refreshedTokenMessage: res?.locals?.refreshedTokenMessage });
+        return res.status(200).json({
+          data: {
+            message: 'Group deleted succesfully'
+          },
+          refreshedTokenMessage: res?.locals?.refreshedTokenMessage
+        });
       }
 
     } else {
