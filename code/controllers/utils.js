@@ -1,5 +1,16 @@
 import jwt from 'jsonwebtoken'
 
+function newToken(res, refreshToken){
+    const newAccessToken = jwt.sign({
+        username: refreshToken.username,
+        email: refreshToken.email,
+        id: refreshToken.id,
+        role: refreshToken.role
+    }, process.env.ACCESS_KEY, { expiresIn: '1h' })
+    res.cookie('accessToken', newAccessToken, { httpOnly: true, path: '/api', maxAge: 60 * 60 * 1000, sameSite: 'none', secure: true })
+    res.locals.refreshedTokenMessage= 'Access token has been refreshed. Remember to copy the new one in the headers of subsequent calls'
+}
+
 /**
  * Handle possible date filtering options in the query parameters for getTransactionsByUser when called by a Regular user.
  * @param req the request object that can contain query parameters
@@ -76,49 +87,50 @@ export const verifyAuth = (req, res, info) => {
         if (decodedAccessToken.username !== decodedRefreshToken.username || decodedAccessToken.email !== decodedRefreshToken.email || decodedAccessToken.role !== decodedRefreshToken.role) {
             return { authorized: false, cause: "Mismatched users" };
         }
+        if(info.authType === "Simple"){
+            return { authorized: true, cause: "Authorized" }
+        }
         ///1 either the accessToken or the refreshToken have a `username` different from the requested one
-        if(info.authType === "User" && (decodedAccessToken.username !== info.username || decodedRefreshToken.username !== info.username)){
-            return { authorized: false, cause: "Unauthorized"}
+        if(info.authType === "User" && (decodedAccessToken.username === info.username || decodedRefreshToken.username === info.username)){
+            return { authorized: true, cause: "Authorized" }
         }
         ///2 either the accessToken or the refreshToken have a `role` which is not Admin
-        if(info.authType === "Admin" && (decodedAccessToken.role !== info.authType || decodedRefreshToken.role !== info.authType)){
-            return { authorized: false, cause: "Unauthorized" }
+        if(info.authType === "Admin" && (decodedAccessToken.role === info.authType || decodedRefreshToken.role === info.authType)){
+            return { authorized: true, cause: "Authorized" }
         }
         ///3 either the accessToken or the refreshToken have a `email` which is not in the requested group
-        if(info.authType === "Group" && (!info.emails.includes(decodedAccessToken.email) || !info.emails.includes(decodedRefreshToken.email))){
-            return { authorized: false, cause: "Unauthorized"};
+        if(info.authType === "Group" && (info.emails.includes(decodedAccessToken.email) || info.emails.includes(decodedRefreshToken.email))){
+            return { authorized: true, cause: "Authorized" }
         }
 
-        return { authorized: true, cause: "Authorized" }
+        return { authorized: false, cause: "Unauthorized" }
 
     } catch (err) {
         if (err.name === "TokenExpiredError") {
             try {
                 const refreshToken = jwt.verify(cookie.refreshToken, process.env.ACCESS_KEY)
-
+                if(info.authType === "Simple"){
+                    newToken(res, refreshToken);
+                    return { authorized: true, cause: "Authorized" }
+                }
                 ///1 the accessToken is expired and the refreshToken has a `username` different from the requested one
-                if(info.authType === "User" && refreshToken.username !== info.username){
-                    return { authorized: false, cause: "Unauthorized"}
+                if(info.authType === "User" && refreshToken.username === info.username){
+                    newToken(res, refreshToken);
+                    return { authorized: true, cause: "Authorized" }
                 }
                 ///2 the accessToken is expired and the refreshToken has a `role` which is not Admin
-                if(info.authType === "Admin" && refreshToken.role !== "Admin"){
-                    return { authorized: false, cause: "Unauthorized!!"}
+                if(info.authType === "Admin" && refreshToken.role === "Admin"){
+                    newToken(res, refreshToken);
+                    return { authorized: true, cause: "Authorized" }
                 }
                 ///3 the accessToken is expired and the refreshToken has a `email` which is not in the requested group
-                if(info.authType === "Group" && !info.emails.includes(refreshToken.email)){
-                    return { authorized: false, cause: "Unauthorized"}
+                if(info.authType === "Group" && info.emails.includes(refreshToken.email)){
+                    newToken(res, refreshToken);
+                    return { authorized: true, cause: "Authorized" }
                 }
 
-                const newAccessToken = jwt.sign({
-                    username: refreshToken.username,
-                    email: refreshToken.email,
-                    id: refreshToken.id,
-                    role: refreshToken.role
-                }, process.env.ACCESS_KEY, { expiresIn: '1h' })
-                res.cookie('accessToken', newAccessToken, { httpOnly: true, path: '/api', maxAge: 60 * 60 * 1000, sameSite: 'none', secure: true })
-                res.locals.refreshedTokenMessage= 'Access token has been refreshed. Remember to copy the new one in the headers of subsequent calls'
+                return { authorized: false, cause: "Unauthorized" }
 
-                return { authorized: true, cause: "Authorized" }
             } catch (err) {
                 if (err.name === "TokenExpiredError") {
                     return { authorized: false, cause: "Perform login again" }

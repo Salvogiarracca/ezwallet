@@ -3,7 +3,7 @@ import request from 'supertest';
 import { app } from '../app';
 import jwt from 'jsonwebtoken';
 import { User } from '../models/User.js';
-import { login, register, registerAdmin } from '../controllers/auth';
+import { login, logout, register, registerAdmin } from '../controllers/auth';
 import { verifyEmail } from '../controllers/genericFunctions';
 const bcrypt = require("bcryptjs")
 
@@ -18,7 +18,7 @@ jest.mock("jsonwebtoken");
  * Not doing this `mockClear()` means that test cases may use a mock implementation intended for other test cases.
  */
 beforeEach(() => {
-    jest.clearAllMocks();
+    jest.restoreAllMocks();
 });
 
 describe('register', () => { 
@@ -398,7 +398,7 @@ describe("registerAdmin", () => {
 })
 
 describe('login', () => {
-
+    
     test('Log in: Test #1', async () => {
         const mockUser = {
             id: "12345",
@@ -414,20 +414,10 @@ describe('login', () => {
         };
 
         // Access token to confirm the result data of the method
-        const accessToken = jwt.sign({
-            email: mockUser.email,
-            id: mockUser.id,
-            username: mockUser.username,
-            role: mockUser.role
-        }, process.env.ACCESS_KEY, { expiresIn: '1h' })
+        const accessToken = "testAccessToken"
 
         // Refresh token to confirm the result data of the method
-        const refreshToken = jwt.sign({
-            email: mockUser.email,
-            id: mockUser.id,
-            username: mockUser.username,
-            role: mockUser.role
-        }, process.env.ACCESS_KEY, { expiresIn: '7d' })
+        const refreshToken = "testRefreshToken"
 
         //Since we are calling the function directly, we need to manually define a request object with all the necessary parameters (route params, body, cookies, url)
         const req = {
@@ -448,122 +438,279 @@ describe('login', () => {
 
         // Method to override since they depend on the DB
         verifyEmail.mockImplementation(() => true);
+        mockUser.save = jest.fn();
+        jest.spyOn(User, "findOne").mockImplementation(() => mockUser);
+        jest.spyOn(bcrypt, "compare").mockImplementation(() => true);
+        jwt.sign = jest.fn().mockReturnValue(accessToken).mockReturnValue(refreshToken);
+
+        await login(req, res);
+        expect(res.status).toHaveBeenCalledWith(200);
+        expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
+            data: expect.objectContaining({
+                accessToken: expect.any(String),
+                refreshToken: expect.any(String)
+            })
+        }));
+    });
+    
+    test('Log in error test: Missing parameters #1', async () => {
+        const mockUser = {};
+
+        // Sent credentials
+        const sentUser = {
+            password : "12345" 
+        };
+
+        //Since we are calling the function directly, we need to manually define a request object with all the necessary parameters (route params, body, cookies, url)
+        const req = {
+            body: sentUser
+        }
+
+        //The same reasoning applies for the response object: we must manually define the functions used and then check if they are called (and with which values)
+        const res = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn(),
+            cookie: jest.fn(),
+            locals: {
+                //The name can also be message, what matters is consistency with the one used in the code
+                refreshedTokenMessage: ""
+            }
+        };
+
+        jest.spyOn(User, "findOne").mockImplementation(() => mockUser);
+
+        await login(req, res);
+        expect(res.status).toHaveBeenCalledWith(400);
+    });
+
+    
+    test('Log in error test: Missing parameters #2', async () => {
+        // Sent credentials
+        const sentUser = {
+            email : "",
+            password : "12345" 
+        };
+
+        //Since we are calling the function directly, we need to manually define a request object with all the necessary parameters (route params, body, cookies, url)
+        const req = {
+            body: sentUser
+        }
+
+        //The same reasoning applies for the response object: we must manually define the functions used and then check if they are called (and with which values)
+        const res = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn(),
+            cookies: jest.fn(),
+            locals: {
+                //The name can also be message, what matters is consistency with the one used in the code
+                refreshedTokenMessage: ""
+            }
+        };
+
+        await login(req, res);
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
+            error: expect.any(String)
+        }));
+    });
+
+    
+    test('Log in error test: User not found #1', async () => {
+        const mockUser = {};
+
+        const sentUser = {
+            email : "s256652@studenti.polito.it",
+            password : "12345"
+        };
+
+        //Since we are calling the function directly, we need to manually define a request object with all the necessary parameters (route params, body, cookies, url)
+        const req = {
+            body: sentUser
+        }
+
+        //The same reasoning applies for the response object: we must manually define the functions used and then check if they are called (and with which values)
+        const res = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn(),
+            cookie: jest.fn(),
+            locals: {
+                //The name can also be message, what matters is consistency with the one used in the code
+                refreshedTokenMessage: ""
+            }
+        };
+
+        // Method to override since they depend on the DB
+        verifyEmail.mockImplementation(() => true);
         jest.spyOn(User, "findOne").mockImplementation(() => mockUser);
         jest.spyOn(User.prototype, "save").mockResolvedValue(true);
         jest.spyOn(bcrypt, "compare").mockImplementation(() => true);
 
         await login(req, res);
-        console.log(res.json.mock.calls)
+        expect(res.status).toHaveBeenCalledWith(400);
+    });
+
+    test('Log in error test: Password mismatch #1', async () => {
+        const mockUser = {
+            id: "12345",
+            username: "Paperino",
+            email : "s256652@studenti.polito.it",
+            password : "45678",
+            role: "Regular"
+        };
+
+        const sentUser = {
+            email : "s256652@studenti.polito.it",
+            password : "12345"
+        };
+
+        //Since we are calling the function directly, we need to manually define a request object with all the necessary parameters (route params, body, cookies, url)
+        const req = {
+            body: sentUser
+        }
+
+        //The same reasoning applies for the response object: we must manually define the functions used and then check if they are called (and with which values)
+        const res = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn(),
+            cookie: jest.fn(),
+            locals: {
+                //The name can also be message, what matters is consistency with the one used in the code
+                refreshedTokenMessage: ""
+            }
+        };
+
+        // Method to override since they depend on the DB
+        verifyEmail.mockImplementation(() => true);
+        jest.spyOn(User, "findOne").mockImplementation(() => mockUser);
+        jest.spyOn(User.prototype, "save").mockResolvedValue(true);
+        jest.spyOn(bcrypt, "compare").mockImplementation(() => false);
+
+        await login(req, res);
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
+            error: expect.any(String)
+        }));
+    });
+});
+
+describe('logout', () => {
+
+    test('Log out: Test #1', async () => {
+        // Mock the implementation of findOne in order to return a user for testing
+        const mockUser = {
+            id: "12345",
+            username: "Paperino",
+            email : "s256652@studenti.polito.it",
+            password : "12345",
+            role: "Regular"
+        };
+
+        // Refresh token to perform the checks inside the method
+        const refreshToken = "testRefreshToken"
+
+        //Since we are calling the function directly, we need to manually define a request object with all the necessary parameters (route params, body, cookies, url)
+        const req = {
+            cookies: {
+                refreshToken: refreshToken
+            }
+        }
+
+        //The same reasoning applies for the response object: we must manually define the functions used and then check if they are called (and with which values)
+        const res = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn(),
+            cookie: jest.fn(),
+            locals: {
+                //The name can also be message, what matters is consistency with the one used in the code
+                refreshedTokenMessage: ""
+            }
+        };
+
+        mockUser.save = jest.fn();
+        jest.spyOn(User, "findOne").mockImplementation(() => mockUser);
+        jwt.verify = jest.fn().mockReturnValue({
+            username: "Paperino",
+            email : "s256652@studenti.polito.it",
+            password : "12345",
+        });
+
+        await logout(req, res);
         expect(res.status).toHaveBeenCalledWith(200);
         expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
             data: expect.objectContaining({
-                accessToken: expect.toBe(accessToken),
-                refreshToken: expect.toBe(refreshToken)
+                message: expect.any(String)
             })
         }));
     });
 
-    /*
-    test('Log in error test: Missing parameters #1', async () => {
-        // Sent credentials
-        const registeredUserSent = {
-            password : "456789"
-        }
-
-        await request(app).post("/api/login").send(registeredUserSent).then(response => {
-            expect(response.statusCode).toBe(400);
-        });
-    });
-
-    test('Log in error test: Missing parameters #2', async () => {
-        // Sent credentials
-        const registeredUserSent = {
-            email : "s256652@studenti.polito.it",
-            password : ""
-        }
-
-        await request(app).post("/api/login").send(registeredUserSent).then(response => {
-            expect(response.statusCode).toBe(400);
-        });
-    });
-
-    test('Log in error test: User not found #1', async () => {
-        // Sent credentials
-        const registeredUserSent = {
-            email : "s256652@studenti.polito.it",
-            password : "12345"
-        }
-
-        // Method to override since they depend on the DB
-        jest.spyOn(User, "findOne").mockImplementation(() => {});
-        jest.spyOn(bcrypt, "compare").mockImplementation(() => true);
-        
-        await request(app).post("/api/login").send(registeredUserSent).then(response => {
-            expect(response.statusCode).toBe(400);
-        });
-    });
-
-    test('Log in error test: Password mismatch #1', async () => {
-        // Sent credentials
-        const registeredUserSent = {
-            email : "s256652@studenti.polito.it",
-            password : "456789"
-        }
-
-        // Method to override since they depend on the DB
-        jest.spyOn(User, "findOne").mockImplementation(() => testUser);
-        jest.spyOn(bcrypt, "compare").mockImplementation(() => false);
-        
-        await request(app).post("/api/login").send(registeredUserSent).then(response => {
-            expect(response.statusCode).toBe(400);
-        });
-    });*/
-});
-
-describe('logout', () => { 
-    // Mock the implementation of findOne in order to return a user for testing
-    const testUser = {
-        id: "12345",
-        username: "Paperino",
-        email : "s256652@studenti.polito.it",
-        password : "12345",
-        role: "Regular"
-    };
-
-    // Refresh token to perform the checks inside the method
-    const refreshToken = jwt.sign({
-        email: testUser.email,
-        id: testUser.id,
-        username: testUser.username,
-        role: testUser.role
-    }, process.env.ACCESS_KEY, { expiresIn: '7d' })
-
-
-    test('Log out: Test #1', async () => {
-        jest.spyOn(User, "findOne").mockImplementation(() => testUser);
-        jest.spyOn(User.prototype, "save").mockImplementation(() => testUser);
-
-        await request(app).get("/api/logout").set("Cookie", `refreshToken=${refreshToken}`)
-            .then(response => {
-                expect(response.statusCode).toBe(200);
-        });
-    });
-
     test("Log out error test: User not found #1", async () =>{
-        jest.spyOn(User, "findOne").mockImplementation(() => {});
+        // Mock the implementation of findOne in order to return a user for testing
+        const testUser = {
+            id: "12345",
+            username: "Paperino",
+            email : "s256652@studenti.polito.it",
+            password : "12345",
+            role: "Regular"
+        };
+
+        // Refresh token to perform the checks inside the method
+        const refreshToken = "testRefreshToken"
+
+        // Mock the implementation of findOne in order to return a user for testing
+        const mockUser = {};
+
+        //Since we are calling the function directly, we need to manually define a request object with all the necessary parameters (route params, body, cookies, url)
+        const req = {
+            cookies: {
+                refreshToken: refreshToken
+            }
+        }
+
+        //The same reasoning applies for the response object: we must manually define the functions used and then check if they are called (and with which values)
+        const res = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn(),
+            cookie: jest.fn(),
+            locals: {
+                //The name can also be message, what matters is consistency with the one used in the code
+                refreshedTokenMessage: ""
+            }
+        };
+
+        jest.spyOn(User, "findOne").mockImplementation(() => mockUser);
         
-        await request(app).get("/api/logout").set("Cookie", `refreshToken=${refreshToken}`)
-            .then(response => {
-                expect(response.statusCode).toBe(400);
-        });
+        await logout(req, res);
+        expect(res.status).toHaveBeenCalledWith(400);
     });
 
     test("Log out error test: User not found #2", async () =>{
-        jest.spyOn(User, "findOne").mockImplementation(() => testUser);
+        // Mock the implementation of findOne in order to return a user for testing
+        const mockUser = {};
+
+        //Since we are calling the function directly, we need to manually define a request object with all the necessary parameters (route params, body, cookies, url)
+        const req = {
+            cookies: {
+                refreshToken: ""
+            }
+        }
+
+        //The same reasoning applies for the response object: we must manually define the functions used and then check if they are called (and with which values)
+        const res = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn(),
+            cookie: jest.fn(),
+            locals: {
+                //The name can also be message, what matters is consistency with the one used in the code
+                refreshedTokenMessage: ""
+            }
+        };
+
+        jest.spyOn(User, "findOne").mockImplementation(() => mockUser);
         
-        await request(app).get("/api/logout").set("Cookie", "refreshToken=")
-            .then(response => {
-                expect(response.statusCode).toBe(400);
-        });
+        await logout(req, res);
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
+            error: expect.any(String)
+        }));
     });
 });

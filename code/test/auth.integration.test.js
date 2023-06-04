@@ -23,23 +23,21 @@ afterAll(async () => {
   await mongoose.connection.close();
 });
 
+beforeEach(async () => {
+    await User.deleteMany({});
+});
+
 describe('register', () => {
+    
+    beforeEach(async () => {
+        await User.deleteMany({});
+    });
 
     // Regular user insertion tests
-    test('Regular user Pippo registration: Test #1', async () => {
+    test('Regular user registration: Test #1', async () => {
         await request(app).post("/api/register").send({
             username : "Pippo",
             email : "s239834@studenti.polito.it",
-            password : "12345" 
-        }).then(response => {
-            expect(response.statusCode).toBe(200);
-        }); 
-    });
-
-    test('Regular user Paperino registration: Test #2', async () => {
-        await request(app).post("/api/register").send({
-            username : "Paperino",
-            email : "s256652@studenti.polito.it",
             password : "12345" 
         }).then(response => {
             expect(response.statusCode).toBe(200);
@@ -66,43 +64,50 @@ describe('register', () => {
         }); 
     });
 
-    test('Already existing username Paperino: Error test #1', async () => {
+    test('Already existing username: Error test #1', async () => {
+        await User.create({
+            username : "Paperino",
+            email : "s328281@studenti.polito.it",
+            password : "12345" 
+        });
+
         await request(app).post("/api/register").send({
             username : "Paperino",
             email : "s573367@studenti.polito.it",
             password : "12345" 
         }).then(response => {
             expect(response.statusCode).toBe(400);
-        }); 
+        });
     });
     
     test('Already existing email: Error test #1', async () => {
+        await User.create({
+            username : "Gastone",
+            email : "s256652@studenti.polito.it",
+            password : "12345" 
+        });
+
         await request(app).post("/api/register").send({
             username : "Topolino",
             email : "s256652@studenti.polito.it",
             password : "12345" 
         }).then(response => {
             expect(response.statusCode).toBe(400);
-        }); 
+        });
     });
 });
 
 describe("registerAdmin", () => { 
+    
+    beforeEach(async () => {
+        await User.deleteMany({});
+    });
+
     // Administrator insertion tests
-    test('Regular admin Pippo registration: Test #1', async () => {
+    test('Regular admin registration: Test #1', async () => {
         await request(app).post("/api/admin").send({
             username : "PippoAdmin",
             email : "a239834@studenti.polito.it",
-            password : "12345" 
-        }).then(response => {
-            expect(response.statusCode).toBe(200);
-        }); 
-    });
-
-    test('Regular admin Pluto registration: Test #2', async () => {
-        await request(app).post("/api/admin").send({
-            username : "PlutoAdmin",
-            email : "a392892@studenti.polito.it",
             password : "12345" 
         }).then(response => {
             expect(response.statusCode).toBe(200);
@@ -130,6 +135,12 @@ describe("registerAdmin", () => {
     });
 
     test('Already existing admin username Pippo: Error test #1', async () => {
+        await User.create({
+            username : "PippoAdmin",
+            email : "a328281@studenti.polito.it",
+            password : "12345" 
+        });
+
         await request(app).post("/api/admin").send({
             username : "PippoAdmin",
             email : "a487828@studenti.polito.it",
@@ -140,6 +151,12 @@ describe("registerAdmin", () => {
     });
 
     test('Already existing admin email: Error test #1', async () => {
+        User.create({
+            username : "PippoAdmin",
+            email : "a239834@studenti.polito.it",
+            password : "12345" 
+        });
+
         await request(app).post("/api/admin").send({
             username : "TopolinoAdmin",
             email : "a239834@studenti.polito.it",
@@ -152,13 +169,23 @@ describe("registerAdmin", () => {
 
 describe('login', () => { 
 
+    beforeEach(async () => {
+        await User.deleteMany({});
+    });
+
     test('Log in: Test #1', async () => {
         // Sent credentials
         const registeredUserSent = {
             email : "s239834@studenti.polito.it",
             password : "12345"
         }
-        
+
+        await User.create({
+            username : "Paperino",
+            email : "s239834@studenti.polito.it",
+            password : await bcrypt.hash("12345", 12)
+        });
+
         await request(app).post("/api/login").send(registeredUserSent).then(response => {
             expect(response.statusCode).toBe(200);
         });
@@ -170,6 +197,12 @@ describe('login', () => {
             password : "12345"
         }
 
+        await User.create({
+            username : "Paperino",
+            email : "s239834@studenti.polito.it",
+            password : "12345" 
+        });
+        
         await request(app).post("/api/login").send(registeredUserSent).then(response => {
             expect(response.statusCode).toBe(400);
         });
@@ -182,6 +215,12 @@ describe('login', () => {
             password : ""
         }
 
+        await User.create({
+            username : "Paperino",
+            email : "s239834@studenti.polito.it",
+            password : "12345" 
+        });
+        
         await request(app).post("/api/login").send(registeredUserSent).then(response => {
             expect(response.statusCode).toBe(400);
         });
@@ -193,7 +232,22 @@ describe('login', () => {
             email : "s989899@studenti.polito.it",
             password : "12345"
         }
-        
+
+        await User.insertMany([{
+            username: "tester",
+            email: "tester@test.com",
+            password: "tester",
+        }, {
+            username: "admin",
+            email: "admin@email.com",
+            password: "admin",
+            role: "Admin"
+        }, {
+            username: "Paperino",
+            email: "s239834@studenti.polito.it",
+            password: "12345"
+        }]);
+
         await request(app).post("/api/login").send(registeredUserSent).then(response => {
             expect(response.statusCode).toBe(400);
         });
@@ -205,6 +259,21 @@ describe('login', () => {
             email : "s256652@studenti.polito.it",
             password : "456789"
         }
+
+        await User.insertMany([{
+            username: "tester",
+            email: "tester@test.com",
+            password: "tester",
+        }, {
+            username: "admin",
+            email: "admin@email.com",
+            password: "admin",
+            role: "Admin"
+        }, {
+            username: "Paperino",
+            email: "s256652@studenti.polito.it",
+            password: "12345"
+        }]);
         
         await request(app).post("/api/login").send(registeredUserSent).then(response => {
             expect(response.statusCode).toBe(400);
@@ -215,12 +284,22 @@ describe('login', () => {
 
 describe('logout', () => {
 
+    beforeEach(async () => {
+        await User.deleteMany({});
+    });
+
     test('Log out: Test #1', async () => {
         const registeredUserSent = {
             email : "s239834@studenti.polito.it",
             password : "12345"
         }
         
+        await User.create({
+            username : "Paperino",
+            email : "s239834@studenti.polito.it",
+            password : await bcrypt.hash("12345", 12)
+        });
+
         const response = await request(app).post("/api/login").send(registeredUserSent);
         const refreshToken = response.body.data.refreshToken;
 
@@ -233,13 +312,43 @@ describe('logout', () => {
     test("Log out error test: User not found #1", async () =>{
         const refreshToken = "error";
 
+        await User.insertMany([{
+            username: "tester",
+            email: "tester@test.com",
+            password: "tester",
+        }, {
+            username: "admin",
+            email: "admin@email.com",
+            password: "admin",
+            role: "Admin"
+        }, {
+            username: "Paperino",
+            email: "s239834@studenti.polito.it",
+            password: "12345"
+        }]);
+
         await request(app).get("/api/logout").set("Cookie", `refreshToken=${refreshToken}`)
             .then(response => {
                 expect(response.statusCode).toBe(400);
         });
     });
 
-    test("Log out error test: User not found #2", async () =>{        
+    test("Log out error test: User not found #2", async () =>{    
+        await User.insertMany([{
+            username: "tester",
+            email: "tester@test.com",
+            password: "tester",
+        }, {
+            username: "admin",
+            email: "admin@email.com",
+            password: "admin",
+            role: "Admin"
+        }, {
+            username: "Paperino",
+            email: "s239834@studenti.polito.it",
+            password: "12345"
+        }]);
+        
         await request(app).get("/api/logout").set("Cookie", "refreshToken=")
             .then(response => {
                 expect(response.statusCode).toBe(400);
