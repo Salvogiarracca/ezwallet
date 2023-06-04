@@ -2,6 +2,7 @@ import bcrypt from 'bcryptjs';
 import { User } from '../models/User.js';
 import jwt from 'jsonwebtoken';
 import { verifyAuth } from './utils.js';
+import { verifyEmail } from '../controllers/genericFunctions';
 
 /**
  * Register a new user in the system
@@ -42,7 +43,7 @@ export const register = async (req, res) => {
         
         if (!validMail)
             return res.status(400).json({ error: "The used email is not valid, please check it."});
-
+ 
         const hashedPassword = await bcrypt.hash(password, 12);
         const newUser = await User.create({
             username,
@@ -232,16 +233,4 @@ export const logout = async (req, res) => {
             res.status(400).json({ error: error})
         }
     }
-}
-
-/**
- * Perform email correctness verification
- * @param req : An object containing the 'email' parameter
- * @returns true if the email is compliant with the standard, false otherwise
- */
-export const verifyEmail = (req) => {
-
-    const mail_regexp = new RegExp(/[A-Za-z0-9_.-]+@([A-Za-z0-9.-]+\.)+[A-Za-z]{2,}/, "gm");
-
-    return mail_regexp.test(req.body.email);
 }

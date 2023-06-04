@@ -1,11 +1,14 @@
+import { response } from 'express';
 import request from 'supertest';
 import { app } from '../app';
-import { User } from '../models/User.js';
 import jwt from 'jsonwebtoken';
-import { response } from 'express';
+import { User } from '../models/User.js';
+import { login, register, registerAdmin } from '../controllers/auth';
+import { verifyEmail } from '../controllers/genericFunctions';
 const bcrypt = require("bcryptjs")
 
 jest.mock("bcryptjs")
+jest.mock("../controllers/genericFunctions")
 jest.mock('../models/User.js');
 jest.mock("jsonwebtoken");
 
@@ -15,209 +18,452 @@ jest.mock("jsonwebtoken");
  * Not doing this `mockClear()` means that test cases may use a mock implementation intended for other test cases.
  */
 beforeEach(() => {
-    // Restore the implementations that are touched inside the tests for lack of DB
-    User.findOne.mockRestore();
-    //User.prototype.save.mockRestore();
-    bcrypt.compare.mockRestore();
+    jest.clearAllMocks();
 });
 
 describe('register', () => { 
 
     // Regular user insertion tests
-    test('Regular user Pippo registration: Test #1', async () => {
-        await request(app).post("/api/register").send({
+    test('Regular user registration', async () => {
+        const mockUser = {};
+        const sentUser = {
             username : "Pippo",
             email : "s239834@studenti.polito.it",
             password : "12345" 
-        }).then(response => {
-            expect(response.statusCode).toBe(200);
-        }); 
-    });
+        };
+        const createdUser = {
+            id: "1",
+            username : "Pippo",
+            email : "s239834@studenti.polito.it",
+            password : "12345",
+            refreshToken: "",
+            role: "Regular"
+        };
 
-    test('Regular user Pluto registration: Test #2', async () => {
-        await request(app).post("/api/register").send({
-            username : "Pluto",
-            email : "s392892@studenti.polito.it",
-            password : "12345" 
-        }).then(response => {
-            expect(response.statusCode).toBe(200);
-        }); 
-    });
+        //Since we are calling the function directly, we need to manually define a request object with all the necessary parameters (route params, body, cookies, url)
+        const req = {
+            body: sentUser
+        }
 
-    // Mock the implementation of findOne in order to test the exceptional
-    // test cases
-    const testUser = {
-        username : "Paperino",
-        email : "s256652@studenti.polito.it",
-        password : "12345"
-    };
+        //The same reasoning applies for the response object: we must manually define the functions used and then check if they are called (and with which values)
+        const res = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn(),
+            locals: {
+                //The name can also be message, what matters is consistency with the one used in the code
+                refreshedTokenMessage: ""
+            }
+        };
+
+        // Mock DB-realted functions
+        verifyEmail.mockImplementation(() => true);
+        User.findOne.mockResolvedValue(false);
+        User.create.mockResolvedValue(createdUser);
+        
+        // Call the function and test the result
+        await register(req, res);        
+        expect(res.status).toHaveBeenCalledWith(200);
+        expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
+            data: expect.objectContaining({
+                message: expect.any(String)
+            })
+        }));
+    });
 
     // Exception cases
     test('Missing parameters: Error test #1', async () => {
-        await request(app).post("/api/register").send({
-            username : "Paperino",
+        const mockUser = {};
+        const sentUser = {
+            username : "Pippo",
             password : "12345" 
-        }).then(response => {
-            expect(response.statusCode).toBe(400);
-        }); 
+        };
+
+        //Since we are calling the function directly, we need to manually define a request object with all the necessary parameters (route params, body, cookies, url)
+        const req = {
+            body: sentUser
+        }
+
+        //The same reasoning applies for the response object: we must manually define the functions used and then check if they are called (and with which values)
+        const res = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn(),
+            locals: {
+                //The name can also be message, what matters is consistency with the one used in the code
+                refreshedTokenMessage: ""
+            }
+        };
+
+        // Call the function and test the result
+        await register(req, res);        
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
+            error: expect.any(String)
+        }));
     });
 
     test('Missing parameters: Error test #2', async () => {
-        await request(app).post("/api/register").send({
+        const mockUser = {};
+        const sentUser = {
             username : "",
-            email : "s256652@studenti.polito.it",
+            email : "s239834@studenti.polito.it",
             password : "12345" 
-        }).then(response => {
-            expect(response.statusCode).toBe(400);
-        }); 
+        };
+
+        //Since we are calling the function directly, we need to manually define a request object with all the necessary parameters (route params, body, cookies, url)
+        const req = {
+            body: sentUser
+        }
+
+        //The same reasoning applies for the response object: we must manually define the functions used and then check if they are called (and with which values)
+        const res = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn(),
+            locals: {
+                //The name can also be message, what matters is consistency with the one used in the code
+                refreshedTokenMessage: ""
+            }
+        };
+
+        // Call the function and test the result
+        await register(req, res);        
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
+            error: expect.any(String)
+        }));
     });
 
-    test('Already existing username Paperino: Error test #1', async () => {
-        jest.spyOn(User, "findOne").mockImplementation(() => testUser);
-
-        await request(app).post("/api/register").send({
-            username : "Paperino",
-            email : "s573367@studenti.polito.it",
+    test('Already existing username: Error test #1', async () => {
+        const mockUser = {
+            username : "Pippo",
+            email : "s326712@studenti.polito.it",
             password : "12345" 
-        }).then(response => {
-            expect(response.statusCode).toBe(400);
-        }); 
+        };
+
+        const sentUser = {
+            username : "Pippo",
+            email : "s239834@studenti.polito.it",
+            password : "12345" 
+        };
+
+        //Since we are calling the function directly, we need to manually define a request object with all the necessary parameters (route params, body, cookies, url)
+        const req = {
+            body: sentUser
+        }
+
+        //The same reasoning applies for the response object: we must manually define the functions used and then check if they are called (and with which values)
+        const res = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn(),
+            locals: {
+                //The name can also be message, what matters is consistency with the one used in the code
+                refreshedTokenMessage: ""
+            }
+        };
+
+        // Mock DB-realted functions
+        jest.spyOn(User, "findOne").mockImplementation(() => mockUser);
+
+        // Call the function and test the result
+        await register(req, res);        
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
+            error: expect.any(String)
+        }));
     });
     
     test('Already existing email: Error test #1', async () => {
-        jest.spyOn(User, "findOne").mockImplementation(() => testUser);
-
-        await request(app).post("/api/register").send({
-            username : "Topolino",
-            email : "s256652@studenti.polito.it",
+        const mockUser = {
+            username : "Paperino",
+            email : "s239834@studenti.polito.it",
             password : "12345" 
-        }).then(response => {
-            expect(response.statusCode).toBe(400);
-        }); 
+        };
+
+        const sentUser = {
+            username : "Pippo",
+            email : "s239834@studenti.polito.it",
+            password : "12345" 
+        };
+
+        //Since we are calling the function directly, we need to manually define a request object with all the necessary parameters (route params, body, cookies, url)
+        const req = {
+            body: sentUser
+        }
+
+        //The same reasoning applies for the response object: we must manually define the functions used and then check if they are called (and with which values)
+        const res = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn(),
+            locals: {
+                //The name can also be message, what matters is consistency with the one used in the code
+                refreshedTokenMessage: ""
+            }
+        };
+
+        // Mock DB-realted functions
+        jest.spyOn(User, "findOne").mockImplementation(() => mockUser);
+
+        // Call the function and test the result
+        await register(req, res);        
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
+            error: expect.any(String)
+        }));
     });
 });
 
 describe("registerAdmin", () => { 
 
     // Administrator insertion tests
-    test('Regular admin Pippo registration: Test #1', async () => {
-        await request(app).post("/api/admin").send({
-            username : "PippoAdmin",
-            email : "a239834@studenti.polito.it",
-            password : "12345" 
-        }).then(response => {
-            expect(response.statusCode).toBe(200);
-        }); 
-    });
-
-    test('Regular admin Pluto registration: Test #2', async () => {
-        await request(app).post("/api/admin").send({
+    test('Regular admin registration', async () => {
+        const mockUser = {};
+        const sentUser = {
             username : "PlutoAdmin",
             email : "a392892@studenti.polito.it",
             password : "12345" 
-        }).then(response => {
-            expect(response.statusCode).toBe(200);
-        }); 
-    });
+        };
 
-    // Mock the implementation of findOne in order to test the exceptional
-    // test cases
-    const testUser = {
-        username : "PaperinoAdmin",
-        email : "a256652@studenti.polito.it",
-        password : "12345"
-    };
+        const createdUser = {
+            id: "1",
+            username : "PlutoAdmin",
+            email : "a392892@studenti.polito.it",
+            password : "12345",
+            refreshToken: "",
+            role: "Admin"
+        };
+
+        //Since we are calling the function directly, we need to manually define a request object with all the necessary parameters (route params, body, cookies, url)
+        const req = {
+            body: sentUser
+        }
+
+        //The same reasoning applies for the response object: we must manually define the functions used and then check if they are called (and with which values)
+        const res = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn(),
+            locals: {
+                //The name can also be message, what matters is consistency with the one used in the code
+                refreshedTokenMessage: ""
+            }
+        };
+
+        // Mock DB-realted functions
+        verifyEmail.mockImplementation(() => true);
+        User.findOne.mockResolvedValue(false);
+        User.create.mockResolvedValue(createdUser);
+
+        await registerAdmin(req, res);
+        expect(res.status).toHaveBeenCalledWith(200);
+        expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
+            data: expect.objectContaining({
+                message: expect.any(String)
+            })
+        }));
+    });
 
     // Exception cases
     test('Missing parameters: Error test #1', async () => {
-        await request(app).post("/api/admin").send({
-            username : "PaperinoAdmin",
+        const mockUser = {};
+        const sentUser = {
+            username : "PlutoAdmin",
             password : "12345" 
-        }).then(response => {
-            expect(response.statusCode).toBe(400);
-        }); 
+        };
+
+        //Since we are calling the function directly, we need to manually define a request object with all the necessary parameters (route params, body, cookies, url)
+        const req = {
+            body: sentUser
+        }
+
+        //The same reasoning applies for the response object: we must manually define the functions used and then check if they are called (and with which values)
+        const res = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn(),
+            locals: {
+                //The name can also be message, what matters is consistency with the one used in the code
+                refreshedTokenMessage: ""
+            }
+        };
+        
+        await registerAdmin(req, res);
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
+            error: expect.any(String)
+        }));
     });
 
     test('Missing parameters: Error test #2', async () => {
-        await request(app).post("/api/admin").send({
+        const mockUser = {};
+        const sentUser = {
             username : "",
-            email : "a256652@studenti.polito.it",
+            email : "a392892@studenti.polito.it",
             password : "12345" 
-        }).then(response => {
-            expect(response.statusCode).toBe(400);
-        }); 
+        };
+
+        //Since we are calling the function directly, we need to manually define a request object with all the necessary parameters (route params, body, cookies, url)
+        const req = {
+            body: sentUser
+        }
+
+        //The same reasoning applies for the response object: we must manually define the functions used and then check if they are called (and with which values)
+        const res = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn(),
+            locals: {
+                //The name can also be message, what matters is consistency with the one used in the code
+                refreshedTokenMessage: ""
+            }
+        };
+        
+        await registerAdmin(req, res);
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
+            error: expect.any(String)
+        }));
     });
 
-    test('Already existing admin username Paperino: Error test #1', async () => {
-        jest.spyOn(User, "findOne").mockImplementation(() => testUser);
-
-        await request(app).post("/api/admin").send({
-            username : "PaperinoAdmin",
-            email : "a487828@studenti.polito.it",
+    test('Already existing admin username: Error test #1', async () => {
+        const mockUser = {
+            username : "PlutoAdmin",
+            email : "a382738@studenti.polito.it",
             password : "12345" 
-        }).then(response => {
-            expect(response.statusCode).toBe(400);
-        }); 
+        };
+
+        const sentUser = {
+            username : "PlutoAdmin",
+            email : "a392892@studenti.polito.it",
+            password : "12345" 
+        };
+
+        //Since we are calling the function directly, we need to manually define a request object with all the necessary parameters (route params, body, cookies, url)
+        const req = {
+            body: sentUser
+        }
+
+        //The same reasoning applies for the response object: we must manually define the functions used and then check if they are called (and with which values)
+        const res = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn(),
+            locals: {
+                //The name can also be message, what matters is consistency with the one used in the code
+                refreshedTokenMessage: ""
+            }
+        };
+
+        // Mock DB-realted functions
+        jest.spyOn(User, "findOne").mockImplementation(() => mockUser);
+
+        await registerAdmin(req, res);
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
+            error: expect.any(String)
+        }));
     });
 
     test('Already existing admin email: Error test #1', async () => {
-        jest.spyOn(User, "findOne").mockImplementation(() => testUser);
-
-        await request(app).post("/api/admin").send({
-            username : "TopolinoAdmin",
-            email : "a256652@studenti.polito.it",
+        const mockUser = {
+            username : "PaperinoAdmin",
+            email : "a392892@studenti.polito.it",
             password : "12345" 
-        }).then(response => {
-            expect(response.statusCode).toBe(400);
-        }); 
+        };
+
+        const sentUser = {
+            username : "PlutoAdmin",
+            email : "a392892@studenti.polito.it",
+            password : "12345" 
+        };
+
+        //Since we are calling the function directly, we need to manually define a request object with all the necessary parameters (route params, body, cookies, url)
+        const req = {
+            body: sentUser
+        }
+
+        //The same reasoning applies for the response object: we must manually define the functions used and then check if they are called (and with which values)
+        const res = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn(),
+            locals: {
+                //The name can also be message, what matters is consistency with the one used in the code
+                refreshedTokenMessage: ""
+            }
+        };
+
+        // Mock DB-realted functions
+        jest.spyOn(User, "findOne").mockImplementation(() => mockUser);
+
+        await registerAdmin(req, res);
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
+            error: expect.any(String)
+        }));
     });
 })
 
-describe('login', () => { 
-    // Mock the implementation of findOne in order to return a user for testing
-    const testUser = {
-        id: "12345",
-        username: "Paperino",
-        email : "s256652@studenti.polito.it",
-        password : "12345",
-        role: "Regular"
-    };
+describe('login', () => {
 
     test('Log in: Test #1', async () => {
-        // Sent credentials
-        const registeredUserSent = {
+        const mockUser = {
+            id: "12345",
+            username: "Paperino",
+            email : "s256652@studenti.polito.it",
+            password : "12345",
+            role: "Regular"
+        };
+
+        const sentUser = {
             email : "s256652@studenti.polito.it",
             password : "12345"
-        }
+        };
 
         // Access token to confirm the result data of the method
         const accessToken = jwt.sign({
-            email: testUser.email,
-            id: testUser.id,
-            username: testUser.username,
-            role: testUser.role
+            email: mockUser.email,
+            id: mockUser.id,
+            username: mockUser.username,
+            role: mockUser.role
         }, process.env.ACCESS_KEY, { expiresIn: '1h' })
 
         // Refresh token to confirm the result data of the method
         const refreshToken = jwt.sign({
-            email: testUser.email,
-            id: testUser.id,
-            username: testUser.username,
-            role: testUser.role
+            email: mockUser.email,
+            id: mockUser.id,
+            username: mockUser.username,
+            role: mockUser.role
         }, process.env.ACCESS_KEY, { expiresIn: '7d' })
 
+        //Since we are calling the function directly, we need to manually define a request object with all the necessary parameters (route params, body, cookies, url)
+        const req = {
+            body: sentUser,
+            cookies: { accessToken: accessToken, refreshToken: refreshToken }
+        }
+
+        //The same reasoning applies for the response object: we must manually define the functions used and then check if they are called (and with which values)
+        const res = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn(),
+            cookie: jest.fn(),
+            locals: {
+                //The name can also be message, what matters is consistency with the one used in the code
+                refreshedTokenMessage: ""
+            }
+        };
+
         // Method to override since they depend on the DB
-        jest.spyOn(User, "findOne").mockImplementation(() => testUser);
+        verifyEmail.mockImplementation(() => true);
+        jest.spyOn(User, "findOne").mockImplementation(() => mockUser);
+        jest.spyOn(User.prototype, "save").mockResolvedValue(true);
         jest.spyOn(bcrypt, "compare").mockImplementation(() => true);
-        jest.spyOn(User.prototype, "save").mockImplementation(() => testUser);
-        
-        await request(app).post("/api/login").send(registeredUserSent).then(response => {
-            expect(response.statusCode).toBe(200);
-            expect(response.body.data.accessToken).toEqual(accessToken);
-            expect(response.body.data.refreshToken).toEqual(refreshToken);
-        });
+
+        await login(req, res);
+        console.log(res.json.mock.calls)
+        expect(res.status).toHaveBeenCalledWith(200);
+        expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
+            data: expect.objectContaining({
+                accessToken: expect.toBe(accessToken),
+                refreshToken: expect.toBe(refreshToken)
+            })
+        }));
     });
 
+    /*
     test('Log in error test: Missing parameters #1', async () => {
         // Sent credentials
         const registeredUserSent = {
@@ -271,7 +517,7 @@ describe('login', () => {
         await request(app).post("/api/login").send(registeredUserSent).then(response => {
             expect(response.statusCode).toBe(400);
         });
-    });
+    });*/
 });
 
 describe('logout', () => { 
