@@ -1,6 +1,9 @@
 import request from 'supertest';
 import { app } from '../app';
 import { User } from '../models/User.js';
+import { getUsers } from "../controllers/users.js";
+import * as utils from "../controllers/utils.js"
+import { newToken } from "../controllers/genericFunctions.js"
 
 /**
  * In order to correctly mock the calls to external modules it is necessary to mock them using the following line.
@@ -16,30 +19,91 @@ jest.mock("../models/User.js")
  * Not doing this `mockClear()` means that test cases may use a mock implementation intended for other test cases.
  */
 beforeEach(() => {
-  User.find.mockClear()
+  jest.clearAllMocks();
+  jest.restoreAllMocks()
   //additional `mockClear()` must be placed here
 });
 
 describe("getUsers", () => {
   test("should return empty list if there are no users", async () => {
-    //any time the `User.find()` method is called jest will replace its actual implementation with the one defined below
-    jest.spyOn(User, "find").mockImplementation(() => [])
-    const response = await request(app)
-      .get("/api/users")
+    jest.spyOn(utils, "verifyAuth").mockReturnValue({ authorized: true, cause: "Authorized" })
+    const mockReq = {
+      cookies: {
+        accessToken: newToken("Admin"),
+        refreshToken: newToken("Admin")
+      }
+    };
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    }
 
-    expect(response.status).toBe(200)
-    expect(response.body).toEqual([])
+    jest.spyOn(User, "find").mockResolvedValue([]);
+    await getUsers(mockReq, mockRes);
+    expect(mockRes.status).toHaveBeenCalledWith(200);
+    expect(mockRes.json).toHaveBeenCalledWith(expect.objectContaining({
+      data: []
+    }))
   })
 
   test("should retrieve list of all users", async () => {
-    const retrievedUsers = [{ username: 'test1', email: 'test1@example.com', password: 'hashedPassword1' }, { username: 'test2', email: 'test2@example.com', password: 'hashedPassword2' }]
-    jest.spyOn(User, "find").mockImplementation(() => retrievedUsers)
-    const response = await request(app)
-      .get("/api/users")
+    jest.spyOn(utils, "verifyAuth").mockReturnValue( { authorized: true, cause: "Authorized" })
+    const fakeRes = [
+      {
+        username: "testUser1",
+        email: "testUser2@gmail.com",
+        password: "hashedPassword",
+        role: "Admin"
+      },
+      {
+        username: "testUser2",
+        email: "testUser2@gmail.com",
+        password: "hashedPassword",
+        role: "Regular"
+      }
+    ];
+    const mockReq = {
+      cookies:{
+        accessToken: newToken("Admin"),
+        refreshToken: newToken("Admin")
+      }
+    };
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn()
+    }
 
-    expect(response.status).toBe(200)
-    expect(response.body).toEqual(retrievedUsers)
+    jest.spyOn(User, "find").mockResolvedValueOnce(fakeRes);
+    await getUsers(mockReq, mockRes);
+    expect(mockRes.status).toHaveBeenCalledWith(200);
+    expect(mockRes.json).toHaveBeenCalledWith(expect.objectContaining({
+      data: fakeRes.map(user => {
+        return { username: user.username, email: user.email, role: user.role };
+      })
+    }))
   })
+
+  test("should be unauthorized if caller is not admin", async () => {
+    jest.spyOn(utils, "verifyAuth").mockReturnValue({ authorized: false, cause: "Unauthorized" })
+    const mockReq = {
+      cookies: {
+        accessToken: newToken("Regular"),
+        refreshToken: newToken("Regular")
+      }
+    };
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    }
+
+    await getUsers(mockReq, mockRes);
+    expect(mockRes.status).toHaveBeenCalledWith(401);
+    expect(mockRes.json).toHaveBeenCalledWith(expect.objectContaining({
+      error: "Unauthorized"
+    }))
+  })
+
+  //end describe getUsers
 })
 
 describe("getUser", () => { })

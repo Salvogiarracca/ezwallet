@@ -1,3 +1,5 @@
+import jwt from "jsonwebtoken";
+
 /**
  * Perform email correctness verification
  * @param req : An object containing the 'email' parameter
@@ -8,4 +10,21 @@ export function verifyEmail(req){
     const mail_regexp = new RegExp(/[A-Za-z0-9_.-]+@([A-Za-z0-9.-]+\.)+[A-Za-z]{2,}/, "gm");
 
     return mail_regexp.test(req.body.email);
+}
+
+///create a token on the fly passing "Admin" or "Regular"
+export function newToken(role){
+    const token = jwt.sign(
+        {
+            username: "testUser",
+            email: "testUser@example.com",
+            id: "123456789",
+            role: role
+        },
+        "EZWALLET",
+        {
+            expiresIn: "7d"
+        }
+    );
+    return token;
 }
