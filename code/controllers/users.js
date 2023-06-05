@@ -65,7 +65,7 @@ export const getUser = async (req, res) => {
     if(userAuth.authorized){
       // const user = await User.findOne({ refreshToken: cookie.refreshToken }).select( 'username email role -_id' );
       const user = await User.findOne({ username: username })
-      if (!user) return res.status(400).json({ message: "User not found" })
+      if (!user) return res.status(400).json({ error: "User not found" })
       return res.status(200).json({data: {username: user.username, email: user.email, role: user.role}, refreshedTokenMessage: res?.locals?.refreshedTokenMessage });
       ///if userAuth fails (Username mismatch) it means that a user want to retrieve info about another user
     } else {
@@ -73,7 +73,7 @@ export const getUser = async (req, res) => {
       ///if the user is an Admin ok, otherwise unauthorized
       if(adminAuth.authorized){
         const user = await User.findOne({ username }).select( 'username email role -_id' );
-        if (!user) return res.status(400).json({ message: "User not found" })
+        if (!user) return res.status(400).json({ error: "User not found" })
         return res.status(200).json({data: { username: user.username, email: user.email, role: user.role}, refreshedTokenMessage: res?.locals?.refreshedTokenMessage })
       } else {
         return res.status(401).json({ error: adminAuth.cause });

@@ -4,6 +4,9 @@ import { User } from '../models/User.js';
 import {getUser, getUsers} from "../controllers/users.js";
 import * as utils from "../controllers/utils.js"
 import { newToken } from "../controllers/genericFunctions.js"
+import * as util from "util";
+import {expectedError} from "@babel/core/lib/errors/rewrite-stack-trace.js";
+import {get} from "mongoose";
 
 /**
  * In order to correctly mock the calls to external modules it is necessary to mock them using the following line.
@@ -42,7 +45,8 @@ describe("getUsers", () => {
     await getUsers(mockReq, mockRes);
     expect(mockRes.status).toHaveBeenCalledWith(200);
     expect(mockRes.json).toHaveBeenCalledWith(expect.objectContaining({
-      data: []
+      data: [],
+      refreshedTokenMessage: mockRes?.locals?.refreshedTokenMessage
     }))
   })
 
@@ -79,7 +83,8 @@ describe("getUsers", () => {
     expect(mockRes.json).toHaveBeenCalledWith(expect.objectContaining({
       data: fakeRes.map(user => {
         return { username: user.username, email: user.email, role: user.role };
-      })
+      }),
+      refreshedTokenMessage: mockRes?.locals?.refreshedTokenMessage
     }))
   })
 
@@ -127,16 +132,108 @@ describe("getUser", () => {
       status: jest.fn().mockReturnThis(),
       json: jest.fn()
     }
-    jest.spyOn(User, "findOne").mockResolvedValueOnce(fakeRes.user)
+    jest.spyOn(User, "findOne").mockResolvedValue(fakeRes.user)
     await getUser(mockReq, mockRes)
     expect(mockRes.status).toHaveBeenCalledWith(200)
     expect(mockRes.json).toHaveBeenCalledWith(expect.objectContaining({
-      data: fakeRes.user
+      data: fakeRes.user,
+      refreshedTokenMessage: mockRes?.locals?.refreshedTokenMessage
     }))
   })
+
+  test("should return info of requested user if caller is admin", async () => {
+    jest.spyOn(utils, "verifyAuth").mockReturnValue({ authorized: true, cause: "Authorized" })
+    const fakeResUser = {
+      user: {
+        username: "testUser2",
+        email: "testUser2@example.com",
+        role: "Regular"
+      }
+    }
+    const fakeResAdmin = {
+      user: {
+        username: "testAdmin1",
+        email: "testAdmin1@example.com",
+        role: "Admin"
+      }
+    }
+    const mockReq = {
+      params: { username: "testUser2" },
+      cookies: {
+        accessToken: newToken("Admin"),
+        refreshToken: newToken("Admin")
+      }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn()
+    }
+    jest.spyOn(User, "findOne").mockResolvedValueOnce(fakeResUser.user).mockResolvedValueOnce(fakeResAdmin.user)
+    await getUser(mockReq, mockRes)
+    expect(mockRes.status).toHaveBeenCalledWith(200)
+    expect(mockRes.json).toHaveBeenCalledWith(expect.objectContaining({
+      data: fakeResUser.user,
+      refreshedTokenMessage: mockRes?.locals?.refreshedTokenMessage
+    }))
+
+  })
+
+  test("should fail if user does not exist", async () => {
+    jest.spyOn(utils, "verifyAuth").mockReturnValue({ authorized: true, cause: "Authorized" })
+    const fakeRes = {
+      error: "User not found"
+    }
+    const mockReq = {
+      params: { username: "testUser" },
+      cookies: {
+        accessToken: newToken("Regular"),
+        refreshToken: newToken("Regular")
+      }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn()
+    }
+    jest.spyOn(User, "findOne").mockResolvedValue(fakeRes.user)
+    await getUser(mockReq, mockRes)
+    expect(mockRes.status).toHaveBeenCalledWith(400)
+    expect(mockRes.json).toHaveBeenCalledWith(expect.objectContaining({
+      error: "User not found"
+    }))
+  })
+
+  test("should fail if Regular user requests other users info", async () => {
+    jest.spyOn(utils, "verifyAuth").mockReturnValue({ authorized: false, cause: "Unauthorized" })
+    const fakeUser = {
+      user: {
+        username: "testUser4",
+        email: "testUser4@example.com",
+        role: "Regular"
+      }
+    }
+    const mockReq = {
+      params: { username: "testUser" },
+      cookies: {
+        accessToken: newToken("Regular"),
+        refreshToken: newToken("Regular")
+      }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn()
+    }
+    jest.spyOn(User, "findOne").mockReturnValue(fakeUser.user)
+    await getUser(mockReq, mockRes)
+    expect(mockRes.status).toHaveBeenCalledWith(401)
+    expect(mockRes.json).toHaveBeenCalledWith(expect.objectContaining({
+      error: "Unauthorized"
+    }))
+  })
+
+  //end getUser
 })
 
-describe("createGroup", () => { })
+describe("createGroup", () => {})
 
 describe("getGroups", () => { })
 
