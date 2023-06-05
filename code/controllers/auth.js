@@ -2,7 +2,7 @@ import bcrypt from 'bcryptjs';
 import { User } from '../models/User.js';
 import jwt from 'jsonwebtoken';
 import { verifyAuth } from './utils.js';
-import { verifyEmail } from '../controllers/genericFunctions';
+import { verifyEmail } from '../controllers/genericFunctions.js';
 
 /**
  * Register a new user in the system

@@ -63,7 +63,8 @@ export const getUser = async (req, res) => {
     const userAuth = verifyAuth(req, res, { authType: "User", username: username });
     ///if userAuth return true, user can retrieve only info about himself
     if(userAuth.authorized){
-      const user = await User.findOne({ refreshToken: cookie.refreshToken }).select( 'username email role -_id' );
+      // const user = await User.findOne({ refreshToken: cookie.refreshToken }).select( 'username email role -_id' );
+      const user = await User.findOne({ username: username })
       if (!user) return res.status(400).json({ message: "User not found" })
       return res.status(200).json({data: {username: user.username, email: user.email, role: user.role}, refreshedTokenMessage: res?.locals?.refreshedTokenMessage });
       ///if userAuth fails (Username mismatch) it means that a user want to retrieve info about another user
@@ -79,7 +80,7 @@ export const getUser = async (req, res) => {
       }
     }
   } catch (error) {
-    res.status(500).json(error.message)
+    return res.status(500).json(error.message)
   }
 }
 

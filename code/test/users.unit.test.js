@@ -1,7 +1,7 @@
 import request from 'supertest';
 import { app } from '../app';
 import { User } from '../models/User.js';
-import { getUsers } from "../controllers/users.js";
+import {getUser, getUsers} from "../controllers/users.js";
 import * as utils from "../controllers/utils.js"
 import { newToken } from "../controllers/genericFunctions.js"
 
@@ -106,7 +106,35 @@ describe("getUsers", () => {
   //end describe getUsers
 })
 
-describe("getUser", () => { })
+describe("getUser", () => {
+  test("should return caller user info", async () => {
+    jest.spyOn(utils, "verifyAuth").mockReturnValue({ authorized: true, cause: "Authorized" })
+    const fakeRes = {
+      user: {
+        username: "testUser",
+        email: "testUser@example.com",
+        role: "Regular"
+      }
+    }
+    const mockReq = {
+      cookies: {
+        accessToken: newToken("Regular"),
+        refreshToken: newToken("Regular")
+      },
+      params: { username: "testUser" }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn()
+    }
+    jest.spyOn(User, "findOne").mockResolvedValueOnce(fakeRes.user)
+    await getUser(mockReq, mockRes)
+    expect(mockRes.status).toHaveBeenCalledWith(200)
+    expect(mockRes.json).toHaveBeenCalledWith(expect.objectContaining({
+      data: fakeRes.user
+    }))
+  })
+})
 
 describe("createGroup", () => { })
 
