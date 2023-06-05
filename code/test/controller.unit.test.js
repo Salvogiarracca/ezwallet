@@ -1,8 +1,25 @@
-import request from 'supertest';
-import { app } from '../app';
-import { categories, transactions } from '../models/model';
+import request from "supertest";
+import { app } from "../app";
+import { categories, transactions } from "../models/model";
+import jwt from "jsonwebtoken";
+import {
+  createTransaction,
+  deleteTransaction,
+  deleteTransactions,
+  getAllTransactions,
+  getTransactionsByGroup,
+  getTransactionsByGroupByCategory,
+  getTransactionsByUser,
+  getTransactionsByUserByCategory,
+} from "../controllers/controller";
+import { verifyAuth } from "../controllers/utils";
+import { Group, User } from "../models/User";
 
-jest.mock('../models/model');
+jest.mock("../models/model");
+jest.mock("jsonwebtoken");
+jest.mock("../controllers/utils.js", () => ({
+  verifyAuth: jest.fn(),
+}));
 
 beforeEach(() => {
   categories.find.mockClear();
@@ -13,74 +30,1981 @@ beforeEach(() => {
   transactions.prototype.save.mockClear();
 });
 
-describe("createCategory", () => { 
-    test('Dummy test, change it', () => {
-        expect(true).toBe(true);
-    });
-})
+describe("createCategory", () => {
+  test("Dummy test, change it", () => {
+    expect(true).toBe(true);
+  });
+});
 
-describe("updateCategory", () => { 
-    test('Dummy test, change it', () => {
-        expect(true).toBe(true);
-    });
-})
+describe("updateCategory", () => {
+  test("Dummy test, change it", () => {
+    expect(true).toBe(true);
+  });
+});
 
-describe("deleteCategory", () => { 
-    test('Dummy test, change it', () => {
-        expect(true).toBe(true);
-    });
-})
+describe("deleteCategory", () => {
+  test("Dummy test, change it", () => {
+    expect(true).toBe(true);
+  });
+});
 
-describe("getCategories", () => { 
-    test('Dummy test, change it', () => {
-        expect(true).toBe(true);
-    });
-})
+describe("getCategories", () => {
+  test("Dummy test, change it", () => {
+    expect(true).toBe(true);
+  });
+});
 
-describe("createTransaction", () => { 
-    test('Dummy test, change it', () => {
-        expect(true).toBe(true);
-    });
-})
+describe("createTransaction", () => {
+  test("Successful User [createTransaction] - Test #1", async () => {
+    const testTransaction = {
+      username: "Pippo",
+      amount: 3500,
+      type: "Personal",
+    };
+    const expectedResponse = {
+      data: testTransaction,
+      message: "Transaction created!",
+    };
+    const mockReq = {
+      body: testTransaction,
+      params: { username: "Pippo" },
+      cookies: {
+        accessToken: "adminAccessTokenValid",
+        refreshToken: "adminRefreshTokenValid",
+      },
+    };
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
 
-describe("getAllTransactions", () => { 
-    test('Dummy test, change it', () => {
-        expect(true).toBe(true);
+    jest
+      .spyOn(transactions.prototype, "save")
+      .mockResolvedValue(testTransaction);
+    verifyAuth.mockImplementation((mockReq, mockRes, params) => {
+      if (params.authType == "User") {
+        return { authorized: true, cause: "authorized" };
+      } else {
+        return { authorized: false, cause: "unauthorized" };
+      }
     });
-})
+    await createTransaction(mockReq, mockRes);
+    expect(mockRes.status).toHaveBeenCalledWith(200);
+    expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
+  });
 
-describe("getTransactionsByUser", () => { 
-    test('Dummy test, change it', () => {
-        expect(true).toBe(true);
-    });
-})
+  test("Unauthorized User [createTransaction] - Test #2", async () => {
+    const testTransaction = {
+      username: "Pippo",
+      amount: 3500,
+      type: "Personal",
+    };
+    const expectedResponse = {
+      message: "Unauthorized",
+    };
+    const mockReq = {
+      body: testTransaction,
+      params: { username: "Pippo" },
+      cookies: {
+        accessToken: "adminAccessTokenValid",
+        refreshToken: "adminRefreshTokenValid",
+      },
+    };
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
 
-describe("getTransactionsByUserByCategory", () => { 
-    test('Dummy test, change it', () => {
-        expect(true).toBe(true);
+    jest
+      .spyOn(transactions.prototype, "save")
+      .mockResolvedValue(testTransaction);
+    verifyAuth.mockImplementation((mockReq, mockRes, params) => {
+      if (params.authType == "User") {
+        return { authorized: false, cause: "unauthorized" };
+      } else {
+        return { authorized: false, cause: "unauthorized" };
+      }
     });
-})
+    await createTransaction(mockReq, mockRes);
+    expect(mockRes.status).toHaveBeenCalledWith(401);
+    expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
+  });
 
-describe("getTransactionsByGroup", () => { 
-    test('Dummy test, change it', () => {
-        expect(true).toBe(true);
-    });
-})
+  test("Different user [createTransaction] - Test #3", async () => {
+    const testTransaction = {
+      username: "Pippo",
+      amount: 3500,
+      type: "Personal",
+    };
+    const expectedResponse = {
+      message: "Username dosen't match transaction's username",
+    };
+    const mockReq = {
+      body: testTransaction,
+      params: { username: "Gianluca" },
+      cookies: {
+        accessToken: "adminAccessTokenValid",
+        refreshToken: "adminRefreshTokenValid",
+      },
+    };
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
 
-describe("getTransactionsByGroupByCategory", () => { 
-    test('Dummy test, change it', () => {
-        expect(true).toBe(true);
+    jest
+      .spyOn(transactions.prototype, "save")
+      .mockResolvedValue(testTransaction);
+    verifyAuth.mockImplementation((mockReq, mockRes, params) => {
+      if (params.authType == "User") {
+        return { authorized: true, cause: "authorized" };
+      } else {
+        return { authorized: false, cause: "unauthorized" };
+      }
     });
-})
+    await createTransaction(mockReq, mockRes);
+    expect(mockRes.status).toHaveBeenCalledWith(400);
+    expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
+  });
 
-describe("deleteTransaction", () => { 
-    test('Dummy test, change it', () => {
-        expect(true).toBe(true);
-    });
-})
+  test("Successful Admin transaction for different users [createTransaction] - Test #4", async () => {
+    const testTransaction = {
+      username: "Pippo",
+      amount: 3500,
+      type: "Personal",
+    };
+    const expectedResponse = {
+      data: testTransaction,
+      message: "Transaction created!",
+    };
+    const mockReq = {
+      body: testTransaction,
+      params: { username: "Gianluca" },
+      cookies: {
+        accessToken: "adminAccessTokenValid",
+        refreshToken: "adminRefreshTokenValid",
+      },
+    };
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
 
-describe("deleteTransactions", () => { 
-    test('Dummy test, change it', () => {
-        expect(true).toBe(true);
+    jest
+      .spyOn(transactions.prototype, "save")
+      .mockResolvedValue(testTransaction);
+    verifyAuth.mockImplementation((mockReq, mockRes, params) => {
+      if (params.authType == "User") {
+        return { authorized: false, cause: "unauthorized" };
+      } else {
+        return { authorized: true, cause: "authorized" };
+      }
     });
-})
+    await createTransaction(mockReq, mockRes);
+    expect(mockRes.status).toHaveBeenCalledWith(200);
+    expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
+  });
+
+  test("Missing transaction attributes [createTransaction] - Test #5", async () => {
+    const testTransaction = {
+      username: "Pippo",
+      amount: 3500,
+    };
+    const expectedResponse = {};
+    const mockReq = {
+      body: testTransaction,
+      params: { username: "Pippo" },
+      cookies: {
+        accessToken: "adminAccessTokenValid",
+        refreshToken: "adminRefreshTokenValid",
+      },
+    };
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+
+    jest
+      .spyOn(transactions.prototype, "save")
+      .mockResolvedValue(testTransaction);
+    verifyAuth.mockImplementation(() => {
+      return { authorized: true, cause: "authorized" };
+    });
+    await createTransaction(mockReq, mockRes);
+    expect(mockRes.status).toHaveBeenCalledWith(401);
+    //expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
+  });
+
+  test("Database Error Transaction Request [createTransaction] - Test #6", async () => {
+    const testTransaction = {
+      username: "Pippo",
+      amount: 3500,
+      type: "Personal",
+    };
+    const expectedResponse = {
+      error: "Database Error",
+    };
+    const mockReq = {
+      body: testTransaction,
+      params: { username: "Pippo" },
+      cookies: {
+        accessToken: "adminAccessTokenValid",
+        refreshToken: "adminRefreshTokenValid",
+      },
+    };
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+
+    jest.spyOn(transactions.prototype, "save").mockImplementation(() => {
+      throw new Error("Database Error");
+    });
+    verifyAuth.mockImplementation((mockReq, mockRes, params) => {
+      if (params.authType == "User") {
+        return { authorized: true, cause: "authorized" };
+      } else {
+        return { authorized: false, cause: "unauthorized" };
+      }
+    });
+    await createTransaction(mockReq, mockRes);
+    expect(mockRes.status).toHaveBeenCalledWith(500);
+    expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
+  });
+});
+
+describe("getAllTransactions", () => {
+  test("Successful Request [getAllTransactions] - Test #1", async () => {
+    const mockReq = {
+      params: { username: "testuser" },
+      cookies: {
+        accessToken: "adminAccessTokenValid",
+        refreshToken: "adminRefreshTokenValid",
+      },
+    };
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+    const retrievedTransactions = [
+      {
+        _id: 1,
+        username: "Pippo",
+        amount: 3500,
+        type: "Personal",
+        categories_info: { color: "testColor" },
+        date: "2023/4/3",
+      },
+      {
+        _id: 2,
+        username: "Gianluca",
+        amount: 12000,
+        type: "Personal",
+        categories_info: { color: "testColor" },
+        date: "2023/4/3",
+      },
+      {
+        _id: 3,
+        username: "Robert",
+        amount: 34,
+        type: "Personal",
+        categories_info: { color: "testColor" },
+        date: "2023/4/3",
+      },
+    ];
+    const expectedResponse = {
+      data: retrievedTransactions.map((v) =>
+        Object.assign(
+          {},
+          {
+            _id: v._id,
+            username: v.username,
+            amount: v.amount,
+            type: v.type,
+            color: v.categories_info.color,
+            date: v.date,
+          }
+        )
+      ),
+      message: "authorized",
+    };
+    verifyAuth.mockImplementation((mockReq, mockRes, params) => {
+      if (params.authType == "User") {
+        return { authorized: false, cause: "authorized" };
+      } else {
+        return { authorized: true, cause: "authorized" };
+      }
+    });
+    jest
+      .spyOn(transactions, "aggregate")
+      .mockResolvedValue(retrievedTransactions);
+    await getAllTransactions(mockReq, mockRes);
+    expect(transactions.aggregate).toHaveBeenCalled();
+    expect(mockRes.status).toHaveBeenCalledWith(200);
+    expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
+  });
+
+  test("Unauthorized Request [getAllTransactions] - Test #2", async () => {
+    const mockReq = {
+      params: { username: "testuser" },
+      cookies: {
+        accessToken: "adminAccessTokenValid",
+        refreshToken: "adminRefreshTokenValid",
+      },
+    };
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+    const retrievedTransactions = [
+      {
+        _id: 1,
+        username: "Pippo",
+        amount: 3500,
+        type: "Personal",
+        categories_info: { color: "testColor" },
+        date: "2023/4/3",
+      },
+      {
+        _id: 2,
+        username: "Gianluca",
+        amount: 12000,
+        type: "Personal",
+        categories_info: { color: "testColor" },
+        date: "2023/4/3",
+      },
+      {
+        _id: 3,
+        username: "Robert",
+        amount: 34,
+        type: "Personal",
+        categories_info: { color: "testColor" },
+        date: "2023/4/3",
+      },
+    ];
+    const expectedResponse = {
+      message: "unauthorized",
+    };
+    verifyAuth.mockImplementation((mockReq, mockRes, params) => {
+      if (params.authType == "User") {
+        return { authorized: true, cause: "unauthorized" };
+      } else {
+        return { authorized: false, cause: "unauthorized" };
+      }
+    });
+    jest
+      .spyOn(transactions, "aggregate")
+      .mockResolvedValue(retrievedTransactions);
+    await getAllTransactions(mockReq, mockRes);
+    expect(transactions.aggregate).not.toHaveBeenCalled();
+    expect(mockRes.status).toHaveBeenCalledWith(401);
+    expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
+  });
+
+  test("Empty Request [getAllTransactions] - Test #3", async () => {
+    const mockReq = {
+      params: { username: "testuser" },
+      cookies: {
+        accessToken: "adminAccessTokenValid",
+        refreshToken: "adminRefreshTokenValid",
+      },
+    };
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+    const retrievedTransactions = [];
+    const expectedResponse = {
+      data: retrievedTransactions.map((v) =>
+        Object.assign(
+          {},
+          {
+            _id: v._id,
+            username: v.username,
+            amount: v.amount,
+            type: v.type,
+            color: v.categories_info.color,
+            date: v.date,
+          }
+        )
+      ),
+      message: "authorized",
+    };
+    verifyAuth.mockImplementation((mockReq, mockRes, params) => {
+      if (params.authType == "User") {
+        return { authorized: false, cause: "authorized" };
+      } else {
+        return { authorized: true, cause: "authorized" };
+      }
+    });
+    jest
+      .spyOn(transactions, "aggregate")
+      .mockResolvedValue(retrievedTransactions);
+    await getAllTransactions(mockReq, mockRes);
+    expect(transactions.aggregate).toHaveBeenCalled();
+    expect(mockRes.status).toHaveBeenCalledWith(200);
+    expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
+  });
+
+  test("Database Error Request [getAllTransactions] - Test #4", async () => {
+    const mockReq = {
+      params: { username: "testuser" },
+      cookies: {
+        accessToken: "adminAccessTokenValid",
+        refreshToken: "adminRefreshTokenValid",
+      },
+    };
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+    const expectedResponse = {
+      error: "Database Error",
+    };
+    verifyAuth.mockImplementation((mockReq, mockRes, params) => {
+      if (params.authType == "User") {
+        return { authorized: false, cause: "authorized" };
+      } else {
+        return { authorized: true, cause: "authorized" };
+      }
+    });
+    jest.spyOn(transactions, "aggregate").mockImplementation(() => {
+      throw new Error("Database Error");
+    });
+    await getAllTransactions(mockReq, mockRes);
+    expect(transactions.aggregate).toHaveBeenCalled();
+    expect(mockRes.status).toHaveBeenCalledWith(500);
+    expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
+  });
+});
+
+describe("getTransactionsByUser", () => {
+  test("Successful User Request [getTransactionsByUser] - Test #1", async () => {
+    const mockReq = {
+      params: { username: "Pippo" },
+      cookies: {
+        accessToken: "adminAccessTokenValid",
+        refreshToken: "adminRefreshTokenValid",
+      },
+    };
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+    const retrievedTransactions = [
+      {
+        _id: 1,
+        username: "Pippo",
+        amount: 3500,
+        type: "Personal",
+        categories_info: { color: "testColor" },
+        date: "2023/4/3",
+      },
+      {
+        _id: 2,
+        username: "Pippo",
+        amount: 12000,
+        type: "Personal",
+        categories_info: { color: "testColor" },
+        date: "2023/4/3",
+      },
+      {
+        _id: 3,
+        username: "Pippo",
+        amount: 34,
+        type: "Personal",
+        categories_info: { color: "testColor" },
+        date: "2023/4/3",
+      },
+    ];
+    const expectedResponse = {
+      data: retrievedTransactions.map((v) =>
+        Object.assign(
+          {},
+          {
+            _id: v._id,
+            username: v.username,
+            amount: v.amount,
+            type: v.type,
+            color: v.categories_info.color,
+            date: v.date,
+          }
+        )
+      ),
+      message: "authorized",
+    };
+    verifyAuth.mockImplementation((mockReq, mockRes, params) => {
+      if (params.authType == "User") {
+        return { authorized: true, cause: "authorized" };
+      } else {
+        return { authorized: false, cause: "unauthorized" };
+      }
+    });
+    jest
+      .spyOn(transactions, "aggregate")
+      .mockResolvedValue(retrievedTransactions);
+    await getTransactionsByUser(mockReq, mockRes);
+    expect(transactions.aggregate).toHaveBeenCalled();
+    expect(mockRes.status).toHaveBeenCalledWith(200);
+    expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
+  });
+
+  test("Unauthorized User Request [getTransactionsByUser] - Test #2", async () => {
+    const mockReq = {
+      params: { username: "Gianluca" },
+      cookies: {
+        accessToken: "adminAccessTokenValid",
+        refreshToken: "adminRefreshTokenValid",
+      },
+    };
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+    const expectedResponse = {
+      message: "unauthorized",
+    };
+    verifyAuth.mockImplementation((mockReq, mockRes, params) => {
+      if (params.authType == "User") {
+        return { authorized: false, cause: "unauthorized" };
+      } else {
+        return { authorized: false, cause: "unauthorized" };
+      }
+    });
+    await getTransactionsByUser(mockReq, mockRes);
+    expect(transactions.aggregate).not.toHaveBeenCalled();
+    expect(mockRes.status).toHaveBeenCalledWith(401);
+    expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
+  });
+
+  test("Successful Admin Request [getTransactionsByUser] - Test #3", async () => {
+    const mockReq = {
+      params: { username: "Pippo" },
+      cookies: {
+        accessToken: "adminAccessTokenValid",
+        refreshToken: "adminRefreshTokenValid",
+      },
+    };
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+    const retrievedTransactions = [
+      {
+        _id: 1,
+        username: "Pippo",
+        amount: 3500,
+        type: "Personal",
+        categories_info: { color: "testColor" },
+        date: "2023/4/3",
+      },
+      {
+        _id: 2,
+        username: "Pippo",
+        amount: 12000,
+        type: "Personal",
+        categories_info: { color: "testColor" },
+        date: "2023/4/3",
+      },
+      {
+        _id: 3,
+        username: "Pippo",
+        amount: 34,
+        type: "Personal",
+        categories_info: { color: "testColor" },
+        date: "2023/4/3",
+      },
+    ];
+    const expectedResponse = {
+      data: retrievedTransactions.map((v) =>
+        Object.assign(
+          {},
+          {
+            _id: v._id,
+            username: v.username,
+            amount: v.amount,
+            type: v.type,
+            color: v.categories_info.color,
+            date: v.date,
+          }
+        )
+      ),
+      message: "authorized",
+    };
+    verifyAuth.mockImplementation((mockReq, mockRes, params) => {
+      if (params.authType == "User") {
+        return { authorized: false, cause: "unauthorized" };
+      } else {
+        return { authorized: true, cause: "authorized" };
+      }
+    });
+    jest
+      .spyOn(transactions, "aggregate")
+      .mockResolvedValue(retrievedTransactions);
+    jest.spyOn(User, "findOne").mockReturnValue({
+      select: jest.fn().mockResolvedValue({
+        username: "mockedUsername",
+        email: "mockedEmail",
+        role: "mockedRole",
+      }),
+    });
+    await getTransactionsByUser(mockReq, mockRes);
+    expect(transactions.aggregate).toHaveBeenCalled();
+    expect(mockRes.status).toHaveBeenCalledWith(200);
+    expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
+  });
+
+  test("Inexistent User Request [getTransactionsByUser] - Test #4", async () => {
+    const mockReq = {
+      params: { username: "Pippo" },
+      cookies: {
+        accessToken: "adminAccessTokenValid",
+        refreshToken: "adminRefreshTokenValid",
+      },
+    };
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+    const retrievedTransactions = [
+      {
+        _id: 1,
+        username: "Pippo",
+        amount: 3500,
+        type: "Personal",
+        categories_info: { color: "testColor" },
+        date: "2023/4/3",
+      },
+      {
+        _id: 2,
+        username: "Pippo",
+        amount: 12000,
+        type: "Personal",
+        categories_info: { color: "testColor" },
+        date: "2023/4/3",
+      },
+      {
+        _id: 3,
+        username: "Pippo",
+        amount: 34,
+        type: "Personal",
+        categories_info: { color: "testColor" },
+        date: "2023/4/3",
+      },
+    ];
+    const expectedResponse = {
+      message: "User not found",
+    };
+    verifyAuth.mockImplementation((mockReq, mockRes, params) => {
+      if (params.authType == "User") {
+        return { authorized: false, cause: "unauthorized" };
+      } else {
+        return { authorized: true, cause: "authorized" };
+      }
+    });
+    jest
+      .spyOn(transactions, "aggregate")
+      .mockResolvedValue(retrievedTransactions);
+    jest.spyOn(User, "findOne").mockReturnValue({
+      select: jest.fn().mockResolvedValue(undefined),
+    });
+    await getTransactionsByUser(mockReq, mockRes);
+    expect(transactions.aggregate).not.toHaveBeenCalled();
+    expect(mockRes.status).toHaveBeenCalledWith(401);
+    expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
+  });
+
+  test("Database Error Request [getTransactionsByUser] - Test #5", async () => {
+    const mockReq = {
+      params: { username: "Pippo" },
+      cookies: {
+        accessToken: "adminAccessTokenValid",
+        refreshToken: "adminRefreshTokenValid",
+      },
+    };
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+    const expectedResponse = {
+      error: "Database Error",
+    };
+    verifyAuth.mockImplementation((mockReq, mockRes, params) => {
+      if (params.authType == "User") {
+        return { authorized: true, cause: "authorized" };
+      } else {
+        return { authorized: false, cause: "unauthorized" };
+      }
+    });
+    jest.spyOn(transactions, "aggregate").mockImplementation(() => {
+      throw new Error("Database Error");
+    });
+    await getTransactionsByUser(mockReq, mockRes);
+    expect(transactions.aggregate).toHaveBeenCalled();
+    expect(mockRes.status).toHaveBeenCalledWith(500);
+    expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
+  });
+});
+
+describe("getTransactionsByUserByCategory", () => {
+  test("Successful User Request [getTransactionsByUserByCategory] - Test #1", async () => {
+    const mockReq = {
+      params: { username: "Pippo" },
+      cookies: {
+        accessToken: "adminAccessTokenValid",
+        refreshToken: "adminRefreshTokenValid",
+      },
+    };
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+    const retrievedTransactions = [
+      {
+        _id: 1,
+        username: "Pippo",
+        amount: 3500,
+        type: "Personal",
+        categories_info: { color: "testColor" },
+        date: "2023/4/3",
+      },
+      {
+        _id: 2,
+        username: "Pippo",
+        amount: 12000,
+        type: "Personal",
+        categories_info: { color: "testColor" },
+        date: "2023/4/3",
+      },
+      {
+        _id: 3,
+        username: "Pippo",
+        amount: 34,
+        type: "Personal",
+        categories_info: { color: "testColor" },
+        date: "2023/4/3",
+      },
+    ];
+    const expectedResponse = {
+      data: retrievedTransactions.map((v) =>
+        Object.assign(
+          {},
+          {
+            _id: v._id,
+            username: v.username,
+            amount: v.amount,
+            type: v.type,
+            color: v.categories_info.color,
+            date: v.date,
+          }
+        )
+      ),
+      message: "authorized",
+    };
+    verifyAuth.mockImplementation((mockReq, mockRes, params) => {
+      if (params.authType == "User") {
+        return { authorized: true, cause: "authorized" };
+      } else {
+        return { authorized: false, cause: "unauthorized" };
+      }
+    });
+    jest
+      .spyOn(transactions, "aggregate")
+      .mockResolvedValue(retrievedTransactions);
+    await getTransactionsByUserByCategory(mockReq, mockRes);
+    expect(transactions.aggregate).toHaveBeenCalled();
+    expect(mockRes.status).toHaveBeenCalledWith(200);
+    expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
+  });
+
+  test("Unauthorized User Request [getTransactionsByUserByCategory] - Test #2", async () => {
+    const mockReq = {
+      params: { username: "Gianluca" },
+      cookies: {
+        accessToken: "adminAccessTokenValid",
+        refreshToken: "adminRefreshTokenValid",
+      },
+    };
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+    const expectedResponse = {
+      message: "unauthorized",
+    };
+    verifyAuth.mockImplementation((mockReq, mockRes, params) => {
+      if (params.authType == "User") {
+        return { authorized: false, cause: "unauthorized" };
+      } else {
+        return { authorized: false, cause: "unauthorized" };
+      }
+    });
+    await getTransactionsByUserByCategory(mockReq, mockRes);
+    expect(transactions.aggregate).not.toHaveBeenCalled();
+    expect(mockRes.status).toHaveBeenCalledWith(401);
+    expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
+  });
+
+  test("Successful Admin Request [getTransactionsByUserByCategory] - Test #3", async () => {
+    const mockReq = {
+      params: { username: "Pippo" },
+      cookies: {
+        accessToken: "adminAccessTokenValid",
+        refreshToken: "adminRefreshTokenValid",
+      },
+    };
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+    const retrievedTransactions = [
+      {
+        _id: 1,
+        username: "Pippo",
+        amount: 3500,
+        type: "Personal",
+        categories_info: { color: "testColor" },
+        date: "2023/4/3",
+      },
+      {
+        _id: 2,
+        username: "Pippo",
+        amount: 12000,
+        type: "Personal",
+        categories_info: { color: "testColor" },
+        date: "2023/4/3",
+      },
+      {
+        _id: 3,
+        username: "Pippo",
+        amount: 34,
+        type: "Personal",
+        categories_info: { color: "testColor" },
+        date: "2023/4/3",
+      },
+    ];
+    const expectedResponse = {
+      data: retrievedTransactions.map((v) =>
+        Object.assign(
+          {},
+          {
+            _id: v._id,
+            username: v.username,
+            amount: v.amount,
+            type: v.type,
+            color: v.categories_info.color,
+            date: v.date,
+          }
+        )
+      ),
+      message: "authorized",
+    };
+    verifyAuth.mockImplementation((mockReq, mockRes, params) => {
+      if (params.authType == "User") {
+        return { authorized: false, cause: "unauthorized" };
+      } else {
+        return { authorized: true, cause: "authorized" };
+      }
+    });
+    jest
+      .spyOn(transactions, "aggregate")
+      .mockResolvedValue(retrievedTransactions);
+    jest.spyOn(User, "findOne").mockReturnValue({
+      select: jest.fn().mockResolvedValue({
+        username: "mockedUsername",
+        email: "mockedEmail",
+        role: "mockedRole",
+      }),
+    });
+    await getTransactionsByUserByCategory(mockReq, mockRes);
+    expect(transactions.aggregate).toHaveBeenCalled();
+    expect(mockRes.status).toHaveBeenCalledWith(200);
+    expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
+  });
+
+  test("Inexistent User Request [getTransactionsByUserByCategory] - Test #4", async () => {
+    const mockReq = {
+      params: { username: "Pippo" },
+      cookies: {
+        accessToken: "adminAccessTokenValid",
+        refreshToken: "adminRefreshTokenValid",
+      },
+    };
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+    const retrievedTransactions = [
+      {
+        _id: 1,
+        username: "Pippo",
+        amount: 3500,
+        type: "Personal",
+        categories_info: { color: "testColor" },
+        date: "2023/4/3",
+      },
+      {
+        _id: 2,
+        username: "Pippo",
+        amount: 12000,
+        type: "Personal",
+        categories_info: { color: "testColor" },
+        date: "2023/4/3",
+      },
+      {
+        _id: 3,
+        username: "Pippo",
+        amount: 34,
+        type: "Personal",
+        categories_info: { color: "testColor" },
+        date: "2023/4/3",
+      },
+    ];
+    const expectedResponse = {
+      message: "User not found",
+    };
+    verifyAuth.mockImplementation((mockReq, mockRes, params) => {
+      if (params.authType == "User") {
+        return { authorized: false, cause: "unauthorized" };
+      } else {
+        return { authorized: true, cause: "authorized" };
+      }
+    });
+    jest
+      .spyOn(transactions, "aggregate")
+      .mockResolvedValue(retrievedTransactions);
+    jest.spyOn(User, "findOne").mockReturnValue({
+      select: jest.fn().mockResolvedValue(undefined),
+    });
+    await getTransactionsByUserByCategory(mockReq, mockRes);
+    expect(transactions.aggregate).not.toHaveBeenCalled();
+    expect(mockRes.status).toHaveBeenCalledWith(401);
+    expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
+  });
+
+  test("Database Error Request [getTransactionsByUserByCategory] - Test #5", async () => {
+    const mockReq = {
+      params: { username: "Pippo" },
+      cookies: {
+        accessToken: "adminAccessTokenValid",
+        refreshToken: "adminRefreshTokenValid",
+      },
+    };
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+    const expectedResponse = {
+      error: "Database Error",
+    };
+    verifyAuth.mockImplementation((mockReq, mockRes, params) => {
+      if (params.authType == "User") {
+        return { authorized: true, cause: "authorized" };
+      } else {
+        return { authorized: false, cause: "unauthorized" };
+      }
+    });
+    jest.spyOn(transactions, "aggregate").mockImplementation(() => {
+      throw new Error("Database Error");
+    });
+    await getTransactionsByUserByCategory(mockReq, mockRes);
+    expect(transactions.aggregate).toHaveBeenCalled();
+    expect(mockRes.status).toHaveBeenCalledWith(500);
+    expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
+  });
+});
+
+describe("getTransactionsByGroup", () => {
+  test("Successful User Request [getTransactionsByGroup] - Test #1", async () => {
+    const mockReq = {
+      params: { name: "testGroup" },
+      cookies: {
+        accessToken: "adminAccessTokenValid",
+        refreshToken: "adminRefreshTokenValid",
+      },
+    };
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+    const retrievedTransactions = [
+      {
+        _id: 1,
+        username: "Pippo",
+        amount: 3500,
+        type: "Personal",
+        categories_info: { color: "testColor" },
+        date: "2023/4/3",
+      },
+      {
+        _id: 2,
+        username: "Pippo",
+        amount: 12000,
+        type: "Personal",
+        categories_info: { color: "testColor" },
+        date: "2023/4/3",
+      },
+      {
+        _id: 3,
+        username: "Pippo",
+        amount: 34,
+        type: "Personal",
+        categories_info: { color: "testColor" },
+        date: "2023/4/3",
+      },
+    ];
+    const expectedResponse = {
+      data: retrievedTransactions.map((v) =>
+        Object.assign(
+          {},
+          {
+            _id: v._id,
+            username: v.username,
+            amount: v.amount,
+            type: v.type,
+            color: v.categories_info.color,
+            date: v.date,
+          }
+        )
+      ),
+      message: "authorized",
+    };
+    verifyAuth.mockImplementation((mockReq, mockRes, params) => {
+      if (params.authType == "Group") {
+        return { authorized: true, cause: "authorized" };
+      } else {
+        return { authorized: false, cause: "unauthorized" };
+      }
+    });
+    jest
+      .spyOn(transactions, "aggregate")
+      .mockResolvedValue(retrievedTransactions);
+    jest.spyOn(Group, "findOne").mockResolvedValue(new Group());
+    jest.spyOn(User, "find").mockResolvedValue([new User(), new User()]);
+    await getTransactionsByGroup(mockReq, mockRes);
+    expect(transactions.aggregate).toHaveBeenCalled();
+    expect(mockRes.status).toHaveBeenCalledWith(200);
+    expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
+  });
+
+  test("Unauthorized User Request [getTransactionsByGroup] - Test #2", async () => {
+    const mockReq = {
+      params: { name: "testGroup" },
+      cookies: {
+        accessToken: "adminAccessTokenValid",
+        refreshToken: "adminRefreshTokenValid",
+      },
+    };
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+    const retrievedTransactions = [
+      {
+        _id: 1,
+        username: "Pippo",
+        amount: 3500,
+        type: "Personal",
+        categories_info: { color: "testColor" },
+        date: "2023/4/3",
+      },
+      {
+        _id: 2,
+        username: "Pippo",
+        amount: 12000,
+        type: "Personal",
+        categories_info: { color: "testColor" },
+        date: "2023/4/3",
+      },
+      {
+        _id: 3,
+        username: "Pippo",
+        amount: 34,
+        type: "Personal",
+        categories_info: { color: "testColor" },
+        date: "2023/4/3",
+      },
+    ];
+    const expectedResponse = {
+      message: "unauthorized",
+    };
+    verifyAuth.mockImplementation((mockReq, mockRes, params) => {
+      if (params.authType == "Group") {
+        return { authorized: false, cause: "unauthorized" };
+      } else {
+        return { authorized: false, cause: "unauthorized" };
+      }
+    });
+    jest
+      .spyOn(transactions, "aggregate")
+      .mockResolvedValue(retrievedTransactions);
+    jest.spyOn(Group, "findOne").mockResolvedValue(new Group());
+    jest.spyOn(User, "find").mockResolvedValue([new User(), new User()]);
+    await getTransactionsByGroup(mockReq, mockRes);
+    expect(transactions.aggregate).not.toHaveBeenCalled();
+    expect(mockRes.status).toHaveBeenCalledWith(401);
+    expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
+  });
+
+  test("Successful Admin Request [getTransactionsByGroup] - Test #3", async () => {
+    const mockReq = {
+      params: { name: "testGroup" },
+      cookies: {
+        accessToken: "adminAccessTokenValid",
+        refreshToken: "adminRefreshTokenValid",
+      },
+    };
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+    const retrievedTransactions = [
+      {
+        _id: 1,
+        username: "Pippo",
+        amount: 3500,
+        type: "Personal",
+        categories_info: { color: "testColor" },
+        date: "2023/4/3",
+      },
+      {
+        _id: 2,
+        username: "Pippo",
+        amount: 12000,
+        type: "Personal",
+        categories_info: { color: "testColor" },
+        date: "2023/4/3",
+      },
+      {
+        _id: 3,
+        username: "Pippo",
+        amount: 34,
+        type: "Personal",
+        categories_info: { color: "testColor" },
+        date: "2023/4/3",
+      },
+    ];
+    const expectedResponse = {
+      data: retrievedTransactions.map((v) =>
+        Object.assign(
+          {},
+          {
+            _id: v._id,
+            username: v.username,
+            amount: v.amount,
+            type: v.type,
+            color: v.categories_info.color,
+            date: v.date,
+          }
+        )
+      ),
+      message: "authorized",
+    };
+    verifyAuth.mockImplementation((mockReq, mockRes, params) => {
+      if (params.authType == "Group") {
+        return { authorized: false, cause: "unauthorized" };
+      } else {
+        return { authorized: true, cause: "authorized" };
+      }
+    });
+    jest
+      .spyOn(transactions, "aggregate")
+      .mockResolvedValue(retrievedTransactions);
+    jest.spyOn(Group, "findOne").mockResolvedValue(new Group());
+    jest.spyOn(User, "find").mockResolvedValue([new User(), new User()]);
+    await getTransactionsByGroup(mockReq, mockRes);
+    expect(transactions.aggregate).toHaveBeenCalled();
+    expect(mockRes.status).toHaveBeenCalledWith(200);
+    expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
+  });
+
+  test("Inexistent Group Request [getTransactionsByGroup] - Test #4", async () => {
+    const mockReq = {
+      params: { name: "testGroup" },
+      cookies: {
+        accessToken: "adminAccessTokenValid",
+        refreshToken: "adminRefreshTokenValid",
+      },
+    };
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+    const expectedResponse = {
+      message: "Group does not exist",
+    };
+    jest.spyOn(Group, "findOne").mockResolvedValue(undefined);
+    await getTransactionsByGroup(mockReq, mockRes);
+    expect(transactions.aggregate).not.toHaveBeenCalled();
+    expect(mockRes.status).toHaveBeenCalledWith(401);
+    expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
+  });
+
+  test("Database Error (Group) Request [getTransactionsByGroup] - Test #5", async () => {
+    const mockReq = {
+      params: { name: "testGroup" },
+      cookies: {
+        accessToken: "adminAccessTokenValid",
+        refreshToken: "adminRefreshTokenValid",
+      },
+    };
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+    const expectedResponse = {
+      message: "Database Error",
+    };
+    jest.spyOn(Group, "findOne").mockImplementation(() => {
+      throw new Error("Database Error");
+    });
+    await getTransactionsByGroup(mockReq, mockRes);
+    expect(transactions.aggregate).not.toHaveBeenCalled();
+    expect(mockRes.status).toHaveBeenCalledWith(500);
+    expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
+  });
+
+  test("Database Error (User) Request [getTransactionsByGroup] - Test #6", async () => {
+    const mockReq = {
+      params: { name: "testGroup" },
+      cookies: {
+        accessToken: "adminAccessTokenValid",
+        refreshToken: "adminRefreshTokenValid",
+      },
+    };
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+    const expectedResponse = {
+      message: "Database Error",
+    };
+    jest.spyOn(User, "find").mockImplementation(() => {
+      throw new Error("Database Error");
+    });
+    jest.spyOn(Group, "findOne").mockResolvedValue(new Group());
+    await getTransactionsByGroup(mockReq, mockRes);
+    expect(transactions.aggregate).not.toHaveBeenCalled();
+    expect(mockRes.status).toHaveBeenCalledWith(500);
+    expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
+  });
+
+  test("Database Error (Aggregate) Request [getTransactionsByGroup] - Test #7", async () => {
+    const mockReq = {
+      params: { name: "testGroup" },
+      cookies: {
+        accessToken: "adminAccessTokenValid",
+        refreshToken: "adminRefreshTokenValid",
+      },
+    };
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+    const expectedResponse = {
+      message: "Database Error",
+    };
+    verifyAuth.mockImplementation((mockReq, mockRes, params) => {
+      if (params.authType == "Group") {
+        return { authorized: true, cause: "authorized" };
+      } else {
+        return { authorized: false, cause: "unauthorized" };
+      }
+    });
+    jest.spyOn(transactions, "aggregate").mockImplementation(() => {
+      throw new Error("Database Error");
+    });
+    jest.spyOn(Group, "findOne").mockResolvedValue(new Group());
+    jest.spyOn(User, "find").mockResolvedValue([new User(), new User()]);
+    await getTransactionsByGroup(mockReq, mockRes);
+    expect(transactions.aggregate).toHaveBeenCalled();
+    expect(mockRes.status).toHaveBeenCalledWith(500);
+    expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
+  });
+});
+
+describe("getTransactionsByGroupByCategory", () => {
+  test("Successful User Request [getTransactionsByGroupByCategory] - Test #1", async () => {
+    const mockReq = {
+      params: { name: "testGroup", category: "Home" },
+      cookies: {
+        accessToken: "adminAccessTokenValid",
+        refreshToken: "adminRefreshTokenValid",
+      },
+    };
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+    const retrievedTransactions = [
+      {
+        _id: 1,
+        username: "Pippo",
+        amount: 3500,
+        type: "Personal",
+        categories_info: { color: "testColor" },
+        date: "2023/4/3",
+      },
+      {
+        _id: 2,
+        username: "Pippo",
+        amount: 12000,
+        type: "Personal",
+        categories_info: { color: "testColor" },
+        date: "2023/4/3",
+      },
+      {
+        _id: 3,
+        username: "Pippo",
+        amount: 34,
+        type: "Personal",
+        categories_info: { color: "testColor" },
+        date: "2023/4/3",
+      },
+    ];
+    const expectedResponse = {
+      data: retrievedTransactions.map((v) =>
+        Object.assign(
+          {},
+          {
+            _id: v._id,
+            username: v.username,
+            amount: v.amount,
+            type: v.type,
+            color: v.categories_info.color,
+            date: v.date,
+          }
+        )
+      ),
+      message: "authorized",
+    };
+    verifyAuth.mockImplementation((mockReq, mockRes, params) => {
+      if (params.authType == "Group") {
+        return { authorized: true, cause: "authorized" };
+      } else {
+        return { authorized: false, cause: "unauthorized" };
+      }
+    });
+    jest
+      .spyOn(transactions, "aggregate")
+      .mockResolvedValue(retrievedTransactions);
+    jest.spyOn(Group, "findOne").mockResolvedValue(new Group());
+    jest.spyOn(User, "find").mockResolvedValue([new User(), new User()]);
+    await getTransactionsByGroupByCategory(mockReq, mockRes);
+    expect(transactions.aggregate).toHaveBeenCalled();
+    expect(mockRes.status).toHaveBeenCalledWith(200);
+    expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
+  });
+
+  test("Unauthorized User Request [getTransactionsByGroupByCategory] - Test #2", async () => {
+    const mockReq = {
+      params: { name: "testGroup", category: "Home" },
+      cookies: {
+        accessToken: "adminAccessTokenValid",
+        refreshToken: "adminRefreshTokenValid",
+      },
+    };
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+    const retrievedTransactions = [
+      {
+        _id: 1,
+        username: "Pippo",
+        amount: 3500,
+        type: "Personal",
+        categories_info: { color: "testColor" },
+        date: "2023/4/3",
+      },
+      {
+        _id: 2,
+        username: "Pippo",
+        amount: 12000,
+        type: "Personal",
+        categories_info: { color: "testColor" },
+        date: "2023/4/3",
+      },
+      {
+        _id: 3,
+        username: "Pippo",
+        amount: 34,
+        type: "Personal",
+        categories_info: { color: "testColor" },
+        date: "2023/4/3",
+      },
+    ];
+    const expectedResponse = {
+      message: "unauthorized",
+    };
+    verifyAuth.mockImplementation((mockReq, mockRes, params) => {
+      if (params.authType == "Group") {
+        return { authorized: false, cause: "unauthorized" };
+      } else {
+        return { authorized: false, cause: "unauthorized" };
+      }
+    });
+    jest
+      .spyOn(transactions, "aggregate")
+      .mockResolvedValue(retrievedTransactions);
+    jest.spyOn(Group, "findOne").mockResolvedValue(new Group());
+    jest.spyOn(User, "find").mockResolvedValue([new User(), new User()]);
+    await getTransactionsByGroupByCategory(mockReq, mockRes);
+    expect(transactions.aggregate).not.toHaveBeenCalled();
+    expect(mockRes.status).toHaveBeenCalledWith(401);
+    expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
+  });
+
+  test("Successful Admin Request [getTransactionsByGroupByCategory] - Test #3", async () => {
+    const mockReq = {
+      params: { name: "testGroup", category: "Home" },
+      cookies: {
+        accessToken: "adminAccessTokenValid",
+        refreshToken: "adminRefreshTokenValid",
+      },
+    };
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+    const retrievedTransactions = [
+      {
+        _id: 1,
+        username: "Pippo",
+        amount: 3500,
+        type: "Personal",
+        categories_info: { color: "testColor" },
+        date: "2023/4/3",
+      },
+      {
+        _id: 2,
+        username: "Pippo",
+        amount: 12000,
+        type: "Personal",
+        categories_info: { color: "testColor" },
+        date: "2023/4/3",
+      },
+      {
+        _id: 3,
+        username: "Pippo",
+        amount: 34,
+        type: "Personal",
+        categories_info: { color: "testColor" },
+        date: "2023/4/3",
+      },
+    ];
+    const expectedResponse = {
+      data: retrievedTransactions.map((v) =>
+        Object.assign(
+          {},
+          {
+            _id: v._id,
+            username: v.username,
+            amount: v.amount,
+            type: v.type,
+            color: v.categories_info.color,
+            date: v.date,
+          }
+        )
+      ),
+      message: "authorized",
+    };
+    verifyAuth.mockImplementation((mockReq, mockRes, params) => {
+      if (params.authType == "Group") {
+        return { authorized: false, cause: "unauthorized" };
+      } else {
+        return { authorized: true, cause: "authorized" };
+      }
+    });
+    jest
+      .spyOn(transactions, "aggregate")
+      .mockResolvedValue(retrievedTransactions);
+    jest.spyOn(Group, "findOne").mockResolvedValue(new Group());
+    jest.spyOn(User, "find").mockResolvedValue([new User(), new User()]);
+    await getTransactionsByGroupByCategory(mockReq, mockRes);
+    expect(transactions.aggregate).toHaveBeenCalled();
+    expect(mockRes.status).toHaveBeenCalledWith(200);
+    expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
+  });
+
+  test("Inexistent Group Request [getTransactionsByGroupByCategory] - Test #4", async () => {
+    const mockReq = {
+      params: { name: "testGroup", category: "Home" },
+      cookies: {
+        accessToken: "adminAccessTokenValid",
+        refreshToken: "adminRefreshTokenValid",
+      },
+    };
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+    const expectedResponse = {
+      message: "Group does not exist",
+    };
+    jest.spyOn(Group, "findOne").mockResolvedValue(undefined);
+    await getTransactionsByGroupByCategory(mockReq, mockRes);
+    expect(transactions.aggregate).not.toHaveBeenCalled();
+    expect(mockRes.status).toHaveBeenCalledWith(400);
+    expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
+  });
+
+  test("Database Error (Group) Request [getTransactionsByGroupByCategory] - Test #5", async () => {
+    const mockReq = {
+      params: { name: "testGroup", category: "Home" },
+      cookies: {
+        accessToken: "adminAccessTokenValid",
+        refreshToken: "adminRefreshTokenValid",
+      },
+    };
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+    const expectedResponse = {
+      message: "Database Error",
+    };
+    jest.spyOn(Group, "findOne").mockImplementation(() => {
+      throw new Error("Database Error");
+    });
+    await getTransactionsByGroupByCategory(mockReq, mockRes);
+    expect(transactions.aggregate).not.toHaveBeenCalled();
+    expect(mockRes.status).toHaveBeenCalledWith(500);
+    expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
+  });
+
+  test("Database Error (User) Request [getTransactionsByGroupByCategory] - Test #6", async () => {
+    const mockReq = {
+      params: { name: "testGroup" },
+      cookies: {
+        accessToken: "adminAccessTokenValid",
+        refreshToken: "adminRefreshTokenValid",
+      },
+    };
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+    const expectedResponse = {
+      message: "Database Error",
+    };
+    jest.spyOn(User, "find").mockImplementation(() => {
+      throw new Error("Database Error");
+    });
+    jest.spyOn(Group, "findOne").mockResolvedValue(new Group());
+    await getTransactionsByGroupByCategory(mockReq, mockRes);
+    expect(transactions.aggregate).not.toHaveBeenCalled();
+    expect(mockRes.status).toHaveBeenCalledWith(500);
+    expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
+  });
+
+  test("Database Error (Aggregate) Request [getTransactionsByGroupByCategory] - Test #7", async () => {
+    const mockReq = {
+      params: { name: "testGroup", category: "Home" },
+      cookies: {
+        accessToken: "adminAccessTokenValid",
+        refreshToken: "adminRefreshTokenValid",
+      },
+    };
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+    const expectedResponse = {
+      message: "Database Error",
+    };
+    verifyAuth.mockImplementation((mockReq, mockRes, params) => {
+      if (params.authType == "Group") {
+        return { authorized: true, cause: "authorized" };
+      } else {
+        return { authorized: false, cause: "unauthorized" };
+      }
+    });
+    jest.spyOn(transactions, "aggregate").mockImplementation(() => {
+      throw new Error("Database Error");
+    });
+    jest.spyOn(Group, "findOne").mockResolvedValue(new Group());
+    jest.spyOn(User, "find").mockResolvedValue([new User(), new User()]);
+    await getTransactionsByGroupByCategory(mockReq, mockRes);
+    expect(transactions.aggregate).toHaveBeenCalled();
+    expect(mockRes.status).toHaveBeenCalledWith(500);
+    expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
+  });
+});
+
+describe("deleteTransaction", () => {
+  test("Successful delete Transaction [deleteTransaction] - Test #1", async () => {
+    const testTransaction = {
+      username: "Pippo",
+      amount: 3500,
+      type: "test",
+    };
+    const expectedResponse = {
+      data: testTransaction,
+      message: "deleted",
+    };
+    const mockReq = {
+      body: { _id: "testID" },
+      params: { username: "Pippo" },
+      cookies: {
+        accessToken: "adminAccessTokenValid",
+        refreshToken: "adminRefreshTokenValid",
+      },
+    };
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+
+    jest.spyOn(transactions, "deleteOne").mockResolvedValue(testTransaction);
+    verifyAuth.mockImplementation((mockReq, mockRes, params) => {
+      if (params.authType == "User") {
+        return { authorized: true, cause: "authorized" };
+      } else {
+        return { authorized: false, cause: "unauthorized" };
+      }
+    });
+    await deleteTransaction(mockReq, mockRes);
+    expect(mockRes.status).toHaveBeenCalledWith(200);
+    expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
+  });
+
+  test("Unauthorized User [deleteTransaction] - Test #2", async () => {
+    const testTransaction = {
+      username: "Pippo",
+      amount: 3500,
+      type: "Personal",
+    };
+    const expectedResponse = {
+      message: "Unauthorized",
+    };
+    const mockReq = {
+      body: { _id: "test" },
+      params: { username: "Pippo" },
+      cookies: {
+        accessToken: "adminAccessTokenValid",
+        refreshToken: "adminRefreshTokenValid",
+      },
+    };
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+
+    jest.spyOn(transactions, "deleteOne").mockResolvedValue(testTransaction);
+    verifyAuth.mockImplementation((mockReq, mockRes, params) => {
+      if (params.authType == "User") {
+        return { authorized: false, cause: "unauthorized" };
+      } else {
+        return { authorized: false, cause: "unauthorized" };
+      }
+    });
+    await deleteTransaction(mockReq, mockRes);
+    expect(mockRes.status).toHaveBeenCalledWith(401);
+    expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
+  });
+
+  test("Successful Admin transaction for different users [deleteTransaction] - Test #3", async () => {
+    const testTransaction = {
+      username: "Pippo",
+      amount: 3500,
+      type: "Personal",
+    };
+    const expectedResponse = {
+      data: testTransaction,
+      message: "deleted",
+    };
+    const mockReq = {
+      body: { _id: "test" },
+      params: { username: "Gianluca" },
+      cookies: {
+        accessToken: "adminAccessTokenValid",
+        refreshToken: "adminRefreshTokenValid",
+      },
+    };
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+
+    jest.spyOn(transactions, "deleteOne").mockResolvedValue(testTransaction);
+    verifyAuth.mockImplementation((mockReq, mockRes, params) => {
+      if (params.authType == "User") {
+        return { authorized: false, cause: "unauthorized" };
+      } else {
+        return { authorized: true, cause: "authorized" };
+      }
+    });
+    await deleteTransaction(mockReq, mockRes);
+    expect(mockRes.status).toHaveBeenCalledWith(200);
+    expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
+  });
+
+  test("Missing transaction attributes [deleteTransaction] - Test #4", async () => {
+    const testTransaction = {
+      username: "Pippo",
+      amount: 3500,
+    };
+    const expectedResponse = {};
+    const mockReq = {
+      body: {},
+      params: { username: "Pippo" },
+      cookies: {
+        accessToken: "adminAccessTokenValid",
+        refreshToken: "adminRefreshTokenValid",
+      },
+    };
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+
+    jest.spyOn(transactions, "deleteOne").mockResolvedValue(testTransaction);
+    verifyAuth.mockImplementation(() => {
+      return { authorized: true, cause: "authorized" };
+    });
+    await deleteTransaction(mockReq, mockRes);
+    expect(mockRes.status).toHaveBeenCalledWith(401);
+    //expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
+  });
+
+  test("Database Error Transaction Request [deleteTransaction] - Test #5", async () => {
+    const expectedResponse = {
+      error: "Database Error",
+    };
+    const mockReq = {
+      body: { _id: "test" },
+      params: { username: "Pippo" },
+      cookies: {
+        accessToken: "adminAccessTokenValid",
+        refreshToken: "adminRefreshTokenValid",
+      },
+    };
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+
+    jest.spyOn(transactions, "deleteOne").mockImplementation(() => {
+      throw new Error("Database Error");
+    });
+    verifyAuth.mockImplementation((mockReq, mockRes, params) => {
+      if (params.authType == "User") {
+        return { authorized: true, cause: "authorized" };
+      } else {
+        return { authorized: false, cause: "unauthorized" };
+      }
+    });
+    await deleteTransaction(mockReq, mockRes);
+    expect(mockRes.status).toHaveBeenCalledWith(500);
+    expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
+  });
+});
+
+describe("deleteTransactions", () => {
+  test("Successful Request [deleteTransactions] - Test #1", async () => {
+    const mockReq = {
+      body:{_id:["testID1","testID2","testID3"]},
+      params: { username: "testuser" },
+      cookies: {
+        accessToken: "adminAccessTokenValid",
+        refreshToken: "adminRefreshTokenValid",
+      },
+    };
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+    const testTransactions = [
+      {
+        _id: 1,
+        username: "Pippo",
+        amount: 3500,
+        type: "Personal",
+        categories_info: { color: "testColor" },
+        date: "2023/4/3",
+      },
+      {
+        _id: 2,
+        username: "Pippo",
+        amount: 12000,
+        type: "Personal",
+        categories_info: { color: "testColor" },
+        date: "2023/4/3",
+      },
+      {
+        _id: 3,
+        username: "Pippo",
+        amount: 34,
+        type: "Personal",
+        categories_info: { color: "testColor" },
+        date: "2023/4/3",
+      },
+    ];
+    const expectedResponse = {
+      data: testTransactions,
+      message: "deleted",
+    };
+    verifyAuth.mockImplementation((mockReq, mockRes, params) => {
+      if (params.authType == "User") {
+        return { authorized: false, cause: "authorized" };
+      } else {
+        return { authorized: true, cause: "authorized" };
+      }
+    });
+    jest
+      .spyOn(transactions, "deleteMany")
+      .mockResolvedValue(testTransactions);
+    await deleteTransactions(mockReq, mockRes);
+    //expect(transactions.deleteOne).toHaveBeenCalled();
+    expect(mockRes.status).toHaveBeenCalledWith(200);
+    expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
+  });
+
+  test("Unauthorized Request [deleteTransactions] - Test #2", async () => {
+    const mockReq = {
+      body:{_id:["testID1","testID2","testID3"]},
+      params: { username: "testuser" },
+      cookies: {
+        accessToken: "adminAccessTokenValid",
+        refreshToken: "adminRefreshTokenValid",
+      },
+    };
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+    const testTransactions = [
+      {
+        _id: 1,
+        username: "Pippo",
+        amount: 3500,
+        type: "Personal",
+        categories_info: { color: "testColor" },
+        date: "2023/4/3",
+      },
+      {
+        _id: 2,
+        username: "Pippo",
+        amount: 12000,
+        type: "Personal",
+        categories_info: { color: "testColor" },
+        date: "2023/4/3",
+      },
+      {
+        _id: 3,
+        username: "Pippo",
+        amount: 34,
+        type: "Personal",
+        categories_info: { color: "testColor" },
+        date: "2023/4/3",
+      },
+    ];
+    const expectedResponse = {
+      message: "unauthorized",
+    };
+    verifyAuth.mockImplementation((mockReq, mockRes, params) => {
+      if (params.authType == "User") {
+        return { authorized: false, cause: "unauthorized" };
+      } else {
+        return { authorized: false, cause: "unauthorized" };
+      }
+    });
+    jest
+      .spyOn(transactions, "deleteMany")
+      .mockResolvedValue(testTransactions);
+    await deleteTransactions(mockReq, mockRes);
+    //expect(transactions.deleteOne).toHaveBeenCalled();
+    expect(mockRes.status).toHaveBeenCalledWith(401);
+    expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
+  });
+
+  test("Empty Request [deleteTransactions] - Test #3", async () => {
+    const mockReq = {
+      body:{},
+      params: { username: "testuser" },
+      cookies: {
+        accessToken: "adminAccessTokenValid",
+        refreshToken: "adminRefreshTokenValid",
+      },
+    };
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+    const testTransactions = [
+      {
+        _id: 1,
+        username: "Pippo",
+        amount: 3500,
+        type: "Personal",
+        categories_info: { color: "testColor" },
+        date: "2023/4/3",
+      },
+      {
+        _id: 2,
+        username: "Pippo",
+        amount: 12000,
+        type: "Personal",
+        categories_info: { color: "testColor" },
+        date: "2023/4/3",
+      },
+      {
+        _id: 3,
+        username: "Pippo",
+        amount: 34,
+        type: "Personal",
+        categories_info: { color: "testColor" },
+        date: "2023/4/3",
+      },
+    ];
+    const expectedResponse = {
+      message: "Missing parameters",
+    };
+    verifyAuth.mockImplementation((mockReq, mockRes, params) => {
+      if (params.authType == "User") {
+        return { authorized: false, cause: "unauthorized" };
+      } else {
+        return { authorized: true, cause: "unauthorized" };
+      }
+    });
+    jest
+      .spyOn(transactions, "deleteMany")
+      .mockResolvedValue(testTransactions);
+    await deleteTransactions(mockReq, mockRes);
+    //expect(transactions.deleteOne).toHaveBeenCalled();
+    expect(mockRes.status).toHaveBeenCalledWith(401);
+    expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
+  });
+
+  test("Database Error Request [deleteTransactions] - Test #4", async () => {
+    const mockReq = {
+      body:{_id:["testID1","testID2","testID3"]},
+      params: { username: "testuser" },
+      cookies: {
+        accessToken: "adminAccessTokenValid",
+        refreshToken: "adminRefreshTokenValid",
+      },
+    };
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+    const expectedResponse = {
+      error: "Database Error",
+    };
+    verifyAuth.mockImplementation((mockReq, mockRes, params) => {
+      if (params.authType == "User") {
+        return { authorized: false, cause: "authorized" };
+      } else {
+        return { authorized: true, cause: "authorized" };
+      }
+    });
+    jest.spyOn(transactions, "deleteMany").mockImplementation(() => {
+      throw new Error("Database Error");
+    });
+    await deleteTransactions(mockReq, mockRes);
+    expect(mockRes.status).toHaveBeenCalledWith(500);
+    expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
+  });
+});

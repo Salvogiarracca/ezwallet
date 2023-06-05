@@ -38,43 +38,54 @@ export const createCategory = (req, res) => {
     - error 401 returned if the specified category does not exist
     - error 401 is returned if new parameters have invalid values
  */
-    export const updateCategory = async (req, res) => {
-      try {
-          const cookie = req.cookies
-          if (!cookie.accessToken) {
-              return res.status(401).json({ message: "Unauthorized" }) // unauthorized
-          }
-          //to add: control of admin (even for deleteCategory)
-          const { type: newType, color: newColor } = req.body;
-          const oldType = req.params.type;
-          if(!newType || !newColor){
-              return res.status(400).json({ message: "Missing attributes!"});
-          }
-          
-          if(typeof(newType) !== "string" || typeof(newColor) !== "string"){   //check input
-              return res.status(400).json({ message: "Mismatched types in request body!"});
-          }
-          
-          if( newColor.length !== 7 || newColor[1] !== '#'){
-              return res.status(400).json({ message: "Wrong format for color" });
-          }
-  
-          const alreadyExists = await categories.findOne({ type: newType });   //if new type value refers to an existing category, fails
-          if(alreadyExists){
-              return res.status(400).json({ message: "new type invalid, category already exists"});
-          }
-          
-          const updated = await categories.findOneAndUpdate({type: oldType}, { type: newType, color: newColor});  //update category
-          const updTransactions = await transactions.updateMany({type: oldType}, { $set: {type: newType}});
-          const nUpdated = updTransactions.modifiedCount;
-  
-          return res.status(200).json({ message: "Update completed successfully",
-                  count: nUpdated});
-          
-      } catch (error) {
-          res.status(400).json({ error: error.message });
-      }
-  };
+export const updateCategory = async (req, res) => {
+  try {
+    const cookie = req.cookies;
+    if (!cookie.accessToken) {
+      return res.status(401).json({ message: "Unauthorized" }); // unauthorized
+    }
+    //to add: control of admin (even for deleteCategory)
+    const { type: newType, color: newColor } = req.body;
+    const oldType = req.params.type;
+    if (!newType || !newColor) {
+      return res.status(400).json({ message: "Missing attributes!" });
+    }
+
+    if (typeof newType !== "string" || typeof newColor !== "string") {
+      //check input
+      return res
+        .status(400)
+        .json({ message: "Mismatched types in request body!" });
+    }
+
+    if (newColor.length !== 7 || newColor[1] !== "#") {
+      return res.status(400).json({ message: "Wrong format for color" });
+    }
+
+    const alreadyExists = await categories.findOne({ type: newType }); //if new type value refers to an existing category, fails
+    if (alreadyExists) {
+      return res
+        .status(400)
+        .json({ message: "new type invalid, category already exists" });
+    }
+
+    const updated = await categories.findOneAndUpdate(
+      { type: oldType },
+      { type: newType, color: newColor }
+    ); //update category
+    const updTransactions = await transactions.updateMany(
+      { type: oldType },
+      { $set: { type: newType } }
+    );
+    const nUpdated = updTransactions.modifiedCount;
+
+    return res
+      .status(200)
+      .json({ message: "Update completed successfully", count: nUpdated });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
 
 /**
  * Delete a category
@@ -84,65 +95,78 @@ export const createCategory = (req, res) => {
     - error 401 is returned if the specified category does not exist
  */
 export const deleteCategory = async (req, res) => {
-    try {
-        const cookie = req.cookies;
-        if (!cookie.accessToken) {
-          return res.status(401).json({ message: "Unauthorized" }); // unauthorized
-        }
-        
-        const {types} = req.body;
-        if(types.length === 0){ //empty input
-            return res.status(400).json({ message: "Missing attributes"});
-        }  
-
-        const nCat = await categories.countDocuments({});
-        if (nCat === 1){   //one category in db, deletion not possible
-            return res.status(400).json({ message: "Only one category, deletion not possible!"});
-        }
-
-        for (const str of types) {  //check array in req.body
-            if(str === ""){  //empty "type" string
-                return res.status(400).json({ message: "Empty string in array"});
-            }
-            const exists = await categories.findOne({type: str});
-            if (!exists) {   // type not found in db
-                return res.status(400).json({ message: "Category does not exist, deletion not possible!"});
-            }
-        }
-        const nT = types.length;
-        const oldestCat = await categories.find().sort({_id: 1}).limit(1);
-        if (nCat > nT) {   // N > T
-            let nUpd = 0;  //count of affected transactions
-            for (const str of types){
-                const removed = await categories.findOneAndRemove({type: str});  //category removed
-                const updated = await transactions.updateMany(   //update of transactions
-                    {type: str}, 
-                    {$set: {$type: oldestCat.type}});
-                    nUpd += updated.modifiedCount;
-            }
-        }
-
-        if (nCat === nT){   // N == T
-            let nUpd = 0;
-            for (const str of types){
-                if(str !== oldestCat.type){  // if str is === to oldestCategory, skipped (then it's the same as N > T)
-                    const removed = await categories.findOneAndRemove({type: str});
-                    const updated = await transactions.updateMany(
-                        {type: str}, 
-                        {$set: {$type: oldestCat.type}});
-                        nUpd += updated.modifiedCount;
-                }
-            }
-        }
-        return res.status(200).json({
-                    message: "Deletion completed successfully",
-                    count: nUpd
-        });
-
-        
-    }catch (error) {
-        res.status(400).json({ error: error.message })
+  try {
+    const cookie = req.cookies;
+    if (!cookie.accessToken) {
+      return res.status(401).json({ message: "Unauthorized" }); // unauthorized
     }
+
+    const { types } = req.body;
+    if (types.length === 0) {
+      //empty input
+      return res.status(400).json({ message: "Missing attributes" });
+    }
+
+    const nCat = await categories.countDocuments({});
+    if (nCat === 1) {
+      //one category in db, deletion not possible
+      return res
+        .status(400)
+        .json({ message: "Only one category, deletion not possible!" });
+    }
+
+    for (const str of types) {
+      //check array in req.body
+      if (str === "") {
+        //empty "type" string
+        return res.status(400).json({ message: "Empty string in array" });
+      }
+      const exists = await categories.findOne({ type: str });
+      if (!exists) {
+        // type not found in db
+        return res
+          .status(400)
+          .json({ message: "Category does not exist, deletion not possible!" });
+      }
+    }
+    const nT = types.length;
+    const oldestCat = await categories.find().sort({ _id: 1 }).limit(1);
+    if (nCat > nT) {
+      // N > T
+      let nUpd = 0; //count of affected transactions
+      for (const str of types) {
+        const removed = await categories.findOneAndRemove({ type: str }); //category removed
+        const updated = await transactions.updateMany(
+          //update of transactions
+          { type: str },
+          { $set: { $type: oldestCat.type } }
+        );
+        nUpd += updated.modifiedCount;
+      }
+    }
+
+    if (nCat === nT) {
+      // N == T
+      let nUpd = 0;
+      for (const str of types) {
+        if (str !== oldestCat.type) {
+          // if str is === to oldestCategory, skipped (then it's the same as N > T)
+          const removed = await categories.findOneAndRemove({ type: str });
+          const updated = await transactions.updateMany(
+            { type: str },
+            { $set: { $type: oldestCat.type } }
+          );
+          nUpd += updated.modifiedCount;
+        }
+      }
+    }
+    return res.status(200).json({
+      message: "Deletion completed successfully",
+      count: nUpd,
+    });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
 };
 
 /**
@@ -179,20 +203,49 @@ export const getCategories = async (req, res) => {
  */
 export const createTransaction = async (req, res) => {
   try {
-    const cookie = req.cookies;
+    /* const cookie = req.cookies;
     if (!cookie.accessToken) {
       return res.status(401).json({ message: "Unauthorized" }); // unauthorized
-    }
+    } */
     const { username, amount, type } = req.body;
-    const new_transactions = new transactions({ username, amount, type });
-    new_transactions
-      .save()
-      .then((data) => res.json(data))
-      .catch((err) => {
-        throw err;
-      });
+    if (!username || !type) {
+      return res.status(401).json({ message: "Missing parameters" }); // unauthorized
+    }
+    const caller_username = req.params.username;
+    const userAuth = verifyAuth(req, res, {
+      authType: "User",
+      username: caller_username,
+    });
+    ///if userAuth return true, user can retrieve only info about himself
+    if (userAuth.authorized) {
+      if (caller_username == username) {
+        const new_transactions = new transactions({ username, amount, type });
+        new_transactions
+          .save()
+          .then((data) =>
+            res.status(200).json({ data, message: "Transaction created!" })
+          );
+      } else {
+        return res
+          .status(400)
+          .json({ message: "Username dosen't match transaction's username" });
+      }
+    } else {
+      const adminAuth = verifyAuth(req, res, { authType: "Admin" });
+      ///if the user is an Admin ok, otherwise unauthorized
+      if (adminAuth.authorized) {
+        const new_transactions = new transactions({ username, amount, type });
+        new_transactions
+          .save()
+          .then((data) =>
+            res.status(200).json({ data, message: "Transaction created!" })
+          );
+      } else {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+    }
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    res.status(500).json({ error: error.message });
   }
 };
 
@@ -205,20 +258,15 @@ export const createTransaction = async (req, res) => {
  */
 export const getAllTransactions = async (req, res) => {
   try {
-    const cookie = req.cookies;
-    if (!cookie.accessToken) {
-      return res.status(401).json({ message: "Unauthorized" }); // unauthorized
-    }
     /**
      * MongoDB equivalent to the query "SELECT * FROM transactions, categories WHERE transactions.type = categories.type"
      */
     const username = req.params.username;
-    const userAuth = verifyAuth(req, res, {
-      authType: "User",
+    ///if userAuth return true, user can retrieve only info about himself
+    const adminAuth = verifyAuth(req, res, {
+      authType: "Admin",
       username: username,
     });
-    ///if userAuth return true, user can retrieve only info about himself
-    const adminAuth = verifyAuth(req, res, { authType: "Admin" });
     ///if the user is an Admin ok, otherwise unauthorized
     if (adminAuth.authorized) {
       transactions
@@ -248,15 +296,12 @@ export const getAllTransactions = async (req, res) => {
             )
           );
           return res.status(200).json({ data, message: adminAuth.cause });
-        })
-        .catch((error) => {
-          throw error;
         });
     } else {
-      return res.status(401).json({ error: adminAuth.cause });
+      return res.status(401).json({ message: adminAuth.cause });
     }
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    res.status(500).json({ error: error.message });
   }
 };
 
@@ -308,9 +353,6 @@ export const getTransactionsByUser = async (req, res) => {
             )
           );
           res.status(200).json({ data, message: userAuth.cause });
-        })
-        .catch((error) => {
-          throw error;
         });
       ///if userAuth fails (Username mismatch) it means that a user want to retrieve info about another user
     } else {
@@ -351,16 +393,13 @@ export const getTransactionsByUser = async (req, res) => {
               )
             );
             res.status(200).json({ data, message: adminAuth.cause });
-          })
-          .catch((error) => {
-            throw error;
           });
       } else {
-        return res.status(401).json({ error: adminAuth.cause });
+        return res.status(401).json({ message: adminAuth.cause });
       }
     }
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    res.status(500).json({ error: error.message });
   }
 };
 
@@ -411,9 +450,6 @@ export const getTransactionsByUserByCategory = async (req, res) => {
             )
           );
           res.status(200).json({ data, message: userAuth.cause });
-        })
-        .catch((error) => {
-          throw error;
         });
       ///if userAuth fails (Username mismatch) it means that a user want to retrieve info about another user
     } else {
@@ -454,16 +490,13 @@ export const getTransactionsByUserByCategory = async (req, res) => {
               )
             );
             res.status(200).json({ data, message: adminAuth.cause });
-          })
-          .catch((error) => {
-            throw error;
           });
       } else {
-        return res.status(401).json({ error: adminAuth.cause });
+        return res.status(401).json({ message: adminAuth.cause });
       }
     }
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    res.status(500).json({ error: error.message });
   }
 };
 
@@ -477,22 +510,14 @@ export const getTransactionsByUserByCategory = async (req, res) => {
  */
 export const getTransactionsByGroup = async (req, res) => {
   try {
-    const cookie = req.cookies;
-    if (!cookie.accessToken) {
-      return res.status(401).json({ message: "Unauthorized" }); // unauthorized
-    }
     const name = req.params.name;
     const group = await Group.findOne({ name });
-    const emails = group.members.map((member) => member.email);
-    const usernames = (await User.find({ email: emails })).map(
-      (user) => user.username
-    );
-    const usersTransactions = await transactions.find({ username: usernames });
-    console.log(usersTransactions);
-
     if (!group) {
-      return res.status(400).json({ error: "Group does not exist" });
+      return res.status(401).json({ message: "Group does not exist" });
     } else {
+      const emails = group.members.map((member) => member.email);
+      let usernames = await User.find({ email: emails });
+      usernames = usernames.map((user) => user.username);
       const groupAuth = verifyAuth(req, res, {
         authType: "Group",
         emails: group.members.map((member) => member.email),
@@ -503,7 +528,7 @@ export const getTransactionsByGroup = async (req, res) => {
             {
               $match: {
                 username: {
-                  $in:usernames
+                  $in: usernames,
                 },
               },
             },
@@ -541,7 +566,7 @@ export const getTransactionsByGroup = async (req, res) => {
               {
                 $match: {
                   username: {
-                    $in:usernames
+                    $in: usernames,
                   },
                 },
               },
@@ -572,12 +597,12 @@ export const getTransactionsByGroup = async (req, res) => {
               return res.status(200).json({ data, message: adminAuth.cause });
             });
         } else {
-          return res.status(401).json({ error: adminAuth.cause });
+          return res.status(401).json({ message: adminAuth.cause });
         }
       }
     }
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    return res.status(500).json({ message: error.message });
   }
 };
 
@@ -591,22 +616,18 @@ export const getTransactionsByGroup = async (req, res) => {
  */
 export const getTransactionsByGroupByCategory = async (req, res) => {
   try {
-    const cookie = req.cookies;
+    /* const cookie = req.cookies;
     if (!cookie.accessToken) {
       return res.status(401).json({ message: "Unauthorized" }); // unauthorized
-    }
+    } */
     const name = req.params.name;
     const group = await Group.findOne({ name });
-    const emails = group.members.map((member) => member.email);
-    const usernames = (await User.find({ email: emails })).map(
-      (user) => user.username
-    );
-    const usersTransactions = await transactions.find({ username: usernames });
-    console.log(usersTransactions);
-
     if (!group) {
       return res.status(400).json({ error: "Group does not exist" });
     } else {
+      const emails = group.members.map((member) => member.email);
+      let usernames = await User.find({ email: emails });
+      usernames = usernames.map((user) => user.username);
       const groupAuth = verifyAuth(req, res, {
         authType: "Group",
         emails: group.members.map((member) => member.email),
@@ -617,9 +638,9 @@ export const getTransactionsByGroupByCategory = async (req, res) => {
             {
               $match: {
                 username: {
-                  $in:usernames
+                  $in: usernames,
                 },
-                type: req.params.category
+                type: req.params.category,
               },
             },
             {
@@ -656,9 +677,9 @@ export const getTransactionsByGroupByCategory = async (req, res) => {
               {
                 $match: {
                   username: {
-                    $in:usernames
+                    $in: usernames,
                   },
-                  type: req.params.category
+                  type: req.params.category,
                 },
               },
               {
@@ -688,12 +709,12 @@ export const getTransactionsByGroupByCategory = async (req, res) => {
               return res.status(200).json({ data, message: adminAuth.cause });
             });
         } else {
-          return res.status(401).json({ error: adminAuth.cause });
+          return res.status(401).json({ message: adminAuth.cause });
         }
       }
     }
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    return res.status(500).json({ message: error.message });
   }
 };
 
@@ -706,14 +727,35 @@ export const getTransactionsByGroupByCategory = async (req, res) => {
  */
 export const deleteTransaction = async (req, res) => {
   try {
-    const cookie = req.cookies;
+    /* const cookie = req.cookies;
     if (!cookie.accessToken) {
       return res.status(401).json({ message: "Unauthorized" }); // unauthorized
+    } */
+    const id = req.body._id;
+    if (!id) {
+      return res.status(401).json({ message: "Missing parameters" }); // unauthorized
     }
-    let data = await transactions.deleteOne({ _id: req.body._id });
-    return res.json("deleted");
+    const caller_username = req.params.username;
+    const userAuth = verifyAuth(req, res, {
+      authType: "User",
+      username: caller_username,
+    });
+    ///if userAuth return true, user can retrieve only info about himself
+    if (userAuth.authorized) {
+      const data = await transactions.deleteOne({ _id: id });
+      return res.status(200).json({ data: data, message: "deleted" });
+    } else {
+      const adminAuth = verifyAuth(req, res, { authType: "Admin" });
+      ///if the user is an Admin ok, otherwise unauthorized
+      if (adminAuth.authorized) {
+        const data = await transactions.deleteOne({ _id: id });
+        return res.status(200).json({ data: data, message: "deleted" });
+      } else {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+    }
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    res.status(500).json({ error: error.message });
   }
 };
 
@@ -726,13 +768,22 @@ export const deleteTransaction = async (req, res) => {
  */
 export const deleteTransactions = async (req, res) => {
   try {
-    const cookie = req.cookies;
+    /* const cookie = req.cookies;
     if (!cookie.accessToken) {
       return res.status(401).json({ message: "Unauthorized" }); // unauthorized
+    } */
+    if (req.body._id) {
+      const adminAuth = verifyAuth(req, res, { authType: "Admin" });
+      if (adminAuth.authorized) {
+        const data = await transactions.deleteMany({ _id: req.body._id });
+        return res.status(200).json({ data: data, message: "deleted" });
+      } else {
+        return res.status(401).json({ message: adminAuth.cause });
+      }
+    } else {
+      return res.status(401).json({ message: "Missing parameters" });
     }
-    let data = await transactions.deleteMany({ _id: req.body._id });
-    return res.json("deleted");
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    return res.status(500).json({ error: error.message });
   }
 };
