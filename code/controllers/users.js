@@ -6,7 +6,7 @@ function isValidEmail(email) {
   /// Test if empty string
   if(!email) return false;
 
-  const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  const emailPattern = new RegExp(/[A-Za-z0-9_.-]+@([A-Za-z0-9.-]+\.)+[A-Za-z]{2,}/, "gm");
 
   /// Test if is valid
   return emailPattern.test(email);
@@ -114,6 +114,10 @@ export const createGroup = async (req, res) => {
       if(memberEmails.some(member => !isValidEmail(member))) {
         return res.status(400).json({ error: 'at least one of the members emails is not in a valid email format or is an empty string' });
       }
+      // for(const email of memberEmails){
+      //   if(!isValidEmail(email.email))
+      //     return res.status(400).json({ error: 'at least one of the members emails is not in a valid email format or is an empty string' });
+      // }
 
       if (!name || !memberEmails || name === "") return res.status(400).json({ error: 'request body does not contain all the necessary attributes'})
 

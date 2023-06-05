@@ -1,12 +1,13 @@
 import request from 'supertest';
 import { app } from '../app';
-import { User } from '../models/User.js';
-import {getUser, getUsers} from "../controllers/users.js";
+import {Group, User} from '../models/User.js';
+import {createGroup, getUser, getUsers} from "../controllers/users.js";
 import * as utils from "../controllers/utils.js"
 import { newToken } from "../controllers/genericFunctions.js"
 import * as util from "util";
 import {expectedError} from "@babel/core/lib/errors/rewrite-stack-trace.js";
 import {get} from "mongoose";
+import {verifyAuth} from "../controllers/utils.js";
 
 /**
  * In order to correctly mock the calls to external modules it is necessary to mock them using the following line.
@@ -233,7 +234,67 @@ describe("getUser", () => {
   //end getUser
 })
 
-describe("createGroup", () => {})
+describe("createGroup", () => {
+  // test("should create a new group", async () => {
+  //   jest.spyOn(utils, "verifyAuth").mockReturnValue({ authorized: true, cause: "Authorized" })
+  //   const mockReq = {
+  //     body: {
+  //       name: "testGroup",
+  //       memberEmails: [
+  //         "testUser@example.com",
+  //         "testUser1@example.com",
+  //         "testUser2@example.com"
+  //       ]
+  //     },
+  //     cookies: {
+  //       accessToken: newToken("Regular"),
+  //       refreshToken: newToken("Regular")
+  //     }
+  //   }
+  //   const mockRes = {
+  //     status: jest.fn().mockReturnThis(),
+  //     json: jest.fn()
+  //   }
+  //   jest.spyOn(Group, "count").mockResolvedValueOnce(0)
+  //       .mockResolvedValueOnce(0)
+  //       .mockResolvedValueOnce(0)
+  //       .mockResolvedValueOnce(1)
+  //   const user = {
+  //     username: "test",
+  //     email: "test@example.com",
+  //     role: "Regular"
+  //   }
+  //   jest.spyOn(User, "findOne").mockResolvedValueOnce(user)
+  //       .mockResolvedValueOnce({
+  //         username: "testUser",
+  //         email: "testUser@example.com",
+  //         role: "Regular" })
+  //       .mockResolvedValueOnce(null)
+  //       .mockResolvedValueOnce({
+  //         username: "testUser2",
+  //         email: "testUser2@example.com",
+  //         role: "Regular"})
+  //   const fakeRes = {
+  //     name: "testGroup",
+  //     members: [
+  //       { email: "testUser@example.com" },
+  //       { email: user.email }
+  //     ]
+  //   }
+  //   jest.spyOn(Group, "create").mockResolvedValueOnce(fakeRes)
+  //   await createGroup(mockReq, mockRes)
+  //   expect(mockRes.status).toHaveBeenCalledWith(200)
+  //   expect(mockRes.json).toHaveBeenCalledWith(expect.objectContaining({
+  //     data: {
+  //       group: fakeRes,
+  //       alreadyInGroup: [{ email: "testUser2@example.com" }],
+  //       membersNotFound: [{ email: "testUser1@example.com" }],
+  //     }
+  //
+  //   }))
+  // })
+
+})
 
 describe("getGroups", () => { })
 
