@@ -1,6 +1,7 @@
 import { Group, User } from "../models/User.js";
 import { transactions } from "../models/model.js";
 import { verifyAuth } from "./utils.js";
+import {re} from "@babel/core/lib/vendor/import-meta-resolve.js";
 
 function isValidEmail(email) {
   /// Test if empty string
@@ -110,26 +111,20 @@ export const createGroup = async (req, res) => {
     if(simpleAuth.authorized){
       const { name, memberEmails } = req.body;
 
+      if (!name || !memberEmails || name === "") return res.status(400).json({ error: 'request body does not contain all the necessary attributes' })
+
       /// check if all provided emails are valid or an empty string
       if(memberEmails.some(member => !isValidEmail(member))) {
         return res.status(400).json({ error: 'at least one of the members emails is not in a valid email format or is an empty string' });
       }
-      // for(const email of memberEmails){
-      //   if(!isValidEmail(email.email))
-      //     return res.status(400).json({ error: 'at least one of the members emails is not in a valid email format or is an empty string' });
-      // }
-
-      if (!name || !memberEmails || name === "") return res.status(400).json({ error: 'request body does not contain all the necessary attributes'})
 
       ///if a group with the same name already exists, error 401 is returned
       const group = await Group.findOne({ name });
       if(group){
         return res.status(400).json({ error: 'Group already exists' });
       }
-
-      ///retrieve all the email of group members
-      const groups = await Group.find({}, {'members.email': 1, _id: 0} );
-      const emailsInGroup = groups.flatMap(group => group.members.map(member => member.email));
+      const groups = await Group.find();
+      const emailsInGroup = groups.flatMap(group => group.members.map(member => member.email))
 
       const req_issuer = await User.findOne({ refreshToken: req.cookies.refreshToken });
       if(emailsInGroup.includes(req_issuer.email)){
@@ -141,23 +136,26 @@ export const createGroup = async (req, res) => {
       const membersList = [];
 
 
-      membersList.push({ email: req_issuer.email });
+      membersList.push({ email: req_issuer.email, user: req_issuer._id });
 
       for (const member of memberEmails){
         const user = await User.findOne({ email: member });
         if(!user){
           ///if user does not exist
-          notFoundEmails.push(member);
+          notFoundEmails.push({ email: member });
+
+        } else if (member === req_issuer.email){
+          //do nothing
         } else if(emailsInGroup.includes(member)){
           ///if user is already in a group
-          alreadyInGroup.push(member);
+          alreadyInGroup.push({ email: member });
           ///if user does not belong to any group
         } else {
-          membersList.push({ email: member });
+          membersList.push({ email: member, user: user._id });
         }
       }
 
-      ///if memberList contains at least two members, then create the group, otherwise error 400 is returned
+      ///if memberList contains at least one member, then create the group, otherwise error 400 is returned
       if(membersList.length < 2){
         return res.status(400).json({
           error: 'all the members either do not exist or are already in a group',
@@ -188,11 +186,11 @@ export const createGroup = async (req, res) => {
         });
       }
     } else {
-      return res.status(401).json(simpleAuth.cause);
+      return res.status(401).json({ error: simpleAuth.cause });
     }
 
   } catch (err) {
-    res.status(500).json(err.message)
+    res.  status(500).json(err.message)
   }
 }
 /**

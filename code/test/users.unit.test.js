@@ -4,9 +4,7 @@ import {Group, User} from '../models/User.js';
 import {createGroup, getUser, getUsers} from "../controllers/users.js";
 import * as utils from "../controllers/utils.js"
 import { newToken } from "../controllers/genericFunctions.js"
-import * as util from "util";
-import {expectedError} from "@babel/core/lib/errors/rewrite-stack-trace.js";
-import {get} from "mongoose";
+
 import {verifyAuth} from "../controllers/utils.js";
 
 /**
@@ -235,64 +233,321 @@ describe("getUser", () => {
 })
 
 describe("createGroup", () => {
-  // test("should create a new group", async () => {
-  //   jest.spyOn(utils, "verifyAuth").mockReturnValue({ authorized: true, cause: "Authorized" })
-  //   const mockReq = {
-  //     body: {
-  //       name: "testGroup",
-  //       memberEmails: [
-  //         "testUser@example.com",
-  //         "testUser1@example.com",
-  //         "testUser2@example.com"
-  //       ]
-  //     },
-  //     cookies: {
-  //       accessToken: newToken("Regular"),
-  //       refreshToken: newToken("Regular")
-  //     }
-  //   }
-  //   const mockRes = {
-  //     status: jest.fn().mockReturnThis(),
-  //     json: jest.fn()
-  //   }
-  //   jest.spyOn(Group, "count").mockResolvedValueOnce(0)
-  //       .mockResolvedValueOnce(0)
-  //       .mockResolvedValueOnce(0)
-  //       .mockResolvedValueOnce(1)
-  //   const user = {
-  //     username: "test",
-  //     email: "test@example.com",
-  //     role: "Regular"
-  //   }
-  //   jest.spyOn(User, "findOne").mockResolvedValueOnce(user)
-  //       .mockResolvedValueOnce({
-  //         username: "testUser",
-  //         email: "testUser@example.com",
-  //         role: "Regular" })
-  //       .mockResolvedValueOnce(null)
-  //       .mockResolvedValueOnce({
-  //         username: "testUser2",
-  //         email: "testUser2@example.com",
-  //         role: "Regular"})
-  //   const fakeRes = {
-  //     name: "testGroup",
-  //     members: [
-  //       { email: "testUser@example.com" },
-  //       { email: user.email }
-  //     ]
-  //   }
-  //   jest.spyOn(Group, "create").mockResolvedValueOnce(fakeRes)
-  //   await createGroup(mockReq, mockRes)
-  //   expect(mockRes.status).toHaveBeenCalledWith(200)
-  //   expect(mockRes.json).toHaveBeenCalledWith(expect.objectContaining({
-  //     data: {
-  //       group: fakeRes,
-  //       alreadyInGroup: [{ email: "testUser2@example.com" }],
-  //       membersNotFound: [{ email: "testUser1@example.com" }],
-  //     }
-  //
-  //   }))
-  // })
+  test("should create a new group", async () => {
+    const user1 = {
+      _id: "11111",
+      username: "testUser1",
+      email: "testUser1@example.com",
+      role: "Regular"
+    }
+    const user2 = {
+      _id: "22222",
+      username: "testUser2",
+      email: "testUser2@example.com",
+      role: "Regular"
+    }
+    const user3 = {
+      _id: "33333",
+      username: "testUser3",
+      email: "testUser3@example.com",
+      role: "Regular"
+    }
+    const user4 = {
+      _id: "44444",
+      username: "testUser4",
+      email: "testUser4@example.com",
+      role: "Regular"
+    }
+    jest.spyOn(utils, "verifyAuth").mockReturnValue({ authorized: true, cause: "Authorized" })
+    const mockReq = {
+      body: {
+        name: "testGroup",
+        memberEmails: [
+          "testUser2@example.com",
+          "testUser3@example.com",
+          "testUser4@example.com"
+        ]
+      },
+      cookies: {
+        accessToken: newToken("Regular"),
+        refreshToken: newToken("Regular")
+      }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn()
+    }
+    jest.spyOn(Group, "findOne").mockResolvedValueOnce(undefined)
+    jest.spyOn(User, "findOne").mockResolvedValueOnce(user1)
+    jest.spyOn(Group, "find").mockResolvedValueOnce(
+        [{
+          name: "testGroup2",
+          members: [{ email: 'testUser2@example.com', user: "12345" }]
+        }])
+
+
+    jest.spyOn(User, "findOne").mockResolvedValueOnce(user1)
+        .mockResolvedValueOnce(user3) //toadd
+        .mockResolvedValueOnce(null) //notExist
+        .mockResolvedValueOnce(user2) //inGroup
+    const fakeRes = {
+      name: "testGroup",
+      members: [
+        { email: user1.email },
+        { email: user3.email }
+      ]
+    }
+    jest.spyOn(Group, "create").mockResolvedValue(fakeRes)
+    await createGroup(mockReq, mockRes)
+    expect(mockRes.status).toHaveBeenCalledWith(200)
+    expect(mockRes.json).toHaveBeenCalledWith(expect.objectContaining({
+      data: {
+        group: fakeRes,
+        alreadyInGroup: [{ email: user2.email }],
+        membersNotFound: [{ email: user4.email }],
+      }
+
+    }))
+  })
+
+  test("should fail if user is not authenticated", async () => {
+    jest.spyOn(utils, "verifyAuth").mockReturnValue({ authorized: false, cause: "Unauthorized" })
+    const user1 = {
+      _id: "11111",
+      username: "testUser1",
+      email: "testUser1@example.com",
+      role: "Regular"
+    }
+    const user2 = {
+      _id: "22222",
+      username: "testUser2",
+      email: "testUser2@example.com",
+      role: "Regular"
+    }
+    const mockReq = {
+      body: {
+        name: "testGroup",
+        memberEmails: [
+            user1.email,
+            user2.email
+        ]
+      }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn()
+    }
+    await createGroup(mockReq, mockRes);
+    expect(mockRes.status).toHaveBeenCalledWith(401);
+    expect(mockRes.json).toHaveBeenCalledWith({ error: "Unauthorized" });
+  })
+
+  test("should fail if missing attributes", async () => {
+    jest.spyOn(utils, "verifyAuth").mockReturnValue({ authorized: true, cause: "Authorized" })
+    const mockReq = {
+      body: {
+        name: "testGroup"
+      }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn()
+    }
+    await createGroup(mockReq, mockRes);
+    expect(mockRes.status).toHaveBeenCalledWith(400);
+    expect(mockRes.json).toHaveBeenCalledWith({ error: 'request body does not contain all the necessary attributes' });
+  })
+
+  test("should fail if name is an empty string", async () => {
+    jest.spyOn(utils, "verifyAuth").mockReturnValue({ authorized: true, cause: "Authorized" })
+    const mockReq = {
+      body: {
+        name: "",
+        memberEmails: [
+          "testUser2@example.com",
+          "testUser3@example.com",
+          "testUser4@example.com"
+        ]
+      }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn()
+    }
+    await createGroup(mockReq, mockRes);
+    expect(mockRes.status).toHaveBeenCalledWith(400);
+    expect(mockRes.json).toHaveBeenCalledWith({ error: 'request body does not contain all the necessary attributes' });
+  })
+
+  test("should fail if an email is an empty string or invalid", async () => {
+    jest.spyOn(utils, "verifyAuth").mockReturnValue({ authorized: true, cause: "Authorized" })
+    const mockReq = {
+      body: {
+        name: "testGroup",
+        memberEmails: [
+          "testUser2@example.com",
+          "testUser3@example.com",
+          ""
+        ]
+      }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn()
+    }
+    await createGroup(mockReq, mockRes);
+    expect(mockRes.status).toHaveBeenCalledWith(400);
+    expect(mockRes.json).toHaveBeenCalledWith({ error: 'at least one of the members emails is not in a valid email format or is an empty string' });
+  })
+
+  test("should fail if calling user is already in a group", async () => {
+    jest.spyOn(utils, "verifyAuth").mockReturnValue({ authorized: true, cause: "Authorized" })
+    const user1 = {
+      _id: "11111",
+      username: "testUser1",
+      email: "testUser1@example.com",
+      role: "Regular"
+    }
+    const mockReq = {
+      body: {
+        name: "testGroup",
+        memberEmails: [
+          "testUser2@example.com",
+          "testUser3@example.com",
+          "testUser4@example.com"
+        ]
+      },
+      cookies: {
+        accessToken: newToken("Regular"),
+        refreshToken: newToken("Regular")
+      }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn()
+    }
+    jest.spyOn(Group, "findOne").mockResolvedValueOnce(undefined)
+    jest.spyOn(User, "findOne").mockResolvedValueOnce(user1)
+    jest.spyOn(Group, "find").mockResolvedValueOnce(
+        [{
+          name: "testGroup2",
+          members: [
+            { email: 'testUser1@example.com', user: "11111" },
+            { email: 'testUser3@example.com', user: "33333" }]
+        }])
+
+    await createGroup(mockReq, mockRes)
+    expect(mockRes.status).toHaveBeenCalledWith(400)
+    expect(mockRes.json).toHaveBeenCalledWith(expect.objectContaining({
+      error: 'You are already in a group'
+    }))
+  })
+
+  test("should fail if all the members either do not exist or are already in a group", async () => {
+    const user1 = {
+      _id: "11111",
+      username: "testUser1",
+      email: "testUser1@example.com",
+      role: "Regular"
+    }
+    const user2 = {
+      _id: "22222",
+      username: "testUser2",
+      email: "testUser2@example.com",
+      role: "Regular"
+    }
+    const user3 = {
+      _id: "33333",
+      username: "testUser3",
+      email: "testUser3@example.com",
+      role: "Regular"
+    }
+    const user4 = {
+      _id: "44444",
+      username: "testUser4",
+      email: "testUser4@example.com",
+      role: "Regular"
+    }
+    jest.spyOn(utils, "verifyAuth").mockReturnValue({ authorized: true, cause: "Authorized" })
+    const mockReq = {
+      body: {
+        name: "testGroup",
+        memberEmails: [
+          "testUser2@example.com",
+          "testUser3@example.com",
+          "testUser4@example.com"
+        ]
+      },
+      cookies: {
+        accessToken: newToken("Regular"),
+        refreshToken: newToken("Regular")
+      }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn()
+    }
+    jest.spyOn(Group, "findOne").mockResolvedValueOnce(undefined)
+    jest.spyOn(User, "findOne").mockResolvedValueOnce(user1)
+    jest.spyOn(Group, "find").mockResolvedValueOnce(
+        [{
+          name: "testGroup2",
+          members: [
+              { email: 'testUser2@example.com', user: "22222" },
+              { email: 'testUser3@example.com', user: "33333" }]
+        }])
+    jest.spyOn(User, "findOne")
+        .mockResolvedValueOnce(user3)
+        .mockResolvedValueOnce(user2)
+        .mockResolvedValueOnce(null)
+
+    await createGroup(mockReq, mockRes)
+    expect(mockRes.status).toHaveBeenCalledWith(400)
+    expect(mockRes.json).toHaveBeenCalledWith(expect.objectContaining({
+      error: 'all the members either do not exist or are already in a group',
+      alreadyInGroup: [
+        { email: user2.email },
+        { email: user3.email }
+      ],
+      membersNotFound: [{ email: user4.email }],
+
+    }))
+  })
+
+  test('should fail if a group with the same name already exists', async () => {
+    jest.spyOn(utils, "verifyAuth").mockReturnValue({ authorized: true, cause: "Authorized" })
+    const mockReq = {
+      body: {
+        name: "testGroup",
+        memberEmails: [
+          "testUser2@example.com",
+          "testUser3@example.com",
+          "testUser4@example.com"
+        ]
+      },
+      cookies: {
+        accessToken: newToken("Regular"),
+        refreshToken: newToken("Regular")
+      }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn()
+    }
+    jest.spyOn(Group, "findOne").mockResolvedValueOnce({
+      name: "testGroup",
+      memberEmails: [
+        "testUser2@example.com",
+        "testUser3@example.com",
+        "testUser4@example.com"
+      ]
+    })
+    await createGroup(mockReq, mockRes)
+    expect(mockRes.status).toHaveBeenCalledWith(400)
+    expect(mockRes.json).toHaveBeenCalledWith(expect.objectContaining({
+      error: 'Group already exists'
+    }))
+  })
 
 })
 
