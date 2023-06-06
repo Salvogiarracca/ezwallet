@@ -34,6 +34,33 @@ function newToken(res, refreshToken){
  * - Throws an error if the value of any of the three query parameters is not a string that represents a date in the format **YYYY-MM-DD**
  */
 export const handleDateFilterParams = (req) => {
+    const cookie = req.cookies;
+    if (!cookie.accessToken || !cookie.refreshToken) {
+        return { authorized: false, cause: "Unauthorized" };
+    }
+    const {from, upTo, date} = req.query;
+
+    if(!date && !from && !upTo) {
+        return {};
+    }
+    if((date && upTo) || (date && from)){
+        throw new Error('Invalid attribute date in query');
+    }
+    if(upTo){
+        checkDateValue(upTo);
+        return `{date: {$lte: ${upTo}T23:59:59.000Z}}`
+    }
+    if(from){
+        checkDateValue(from);
+        return `{date: {$lte: ${from}T00:00:00.000Z}}`
+
+    } 
+    if(upTo && from){
+        checkDateValue(from);
+        checkDateValue(upTo);
+        return `{date: {$gte: ${from}T00:00:00.000Z}, $lte: ${upTo}T23:59:59.000Z}`;
+    
+    }
 }
 
 /**
@@ -161,4 +188,30 @@ export const verifyAuth = (req, res, info) => {
  * - Throws an error if the value of any of the two query parameters is not a numerical value
  */
 export const handleAmountFilterParams = (req) => {
+}
+
+//this function checks if date matches a regexp and if all the values are correct
+function checkDateValue(value) {
+    const regExp = /^\d{4}-\d{2}-\d{2}$/;
+    if(!regExp.test(value)){
+        throw new Error(`Invalid date format: ${value}. Expected format: YYYY-MM-DD`);
+    }
+    const {yyyy, mm, dd} = value.match(regExp);
+    if(isNaN(yyyy) || isNaN(dd) || isNaN(mm)){
+        throw new Error('One or more query params are not a number!');
+    }
+    if(dd > 31){
+        throw new Error('Invalid date');
+    }
+    if(mm > 12){
+        throw new Error('Invalid date');
+    }
+    if(mm === 2 && dd > 28){
+        if(!((yyyy%4 === 0) && dd === 29)){
+            throw new Error('Invalid date');
+        }
+    }
+    if((mm === 4 || mm === 6 || mm === 9 || mm === 11) && (dd > 30)){
+        throw new Error('Invalid date');
+    }
 }
