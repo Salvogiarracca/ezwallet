@@ -189,6 +189,35 @@ export const verifyAuth = (req, res, info) => {
  * - Throws an error if the value of any of the two query parameters is not a numerical value
  */
 export const handleAmountFilterParams = (req) => {
+    const cookie = req.cookies
+    if (!cookie.accessToken || !cookie.refreshToken) {
+        return { authorized: false, cause: "Unauthorized" };
+    }
+    const {min, max} = req.query;
+    if(!min || !max){
+        throw new Error('No parameters specified');
+    }
+    if(min && max){
+        if(isNaN(min) || isNaN(max)){
+            throw new Error('One or more parameters are not a number!');
+        }
+        if(min > max){
+            throw new Error("min can't be bigger than max!");
+        }
+        return `{amount: {$gte: ${min}, $lte: ${max}} }`;
+    }
+    else if(min){
+        if(isNaN(min)){
+            throw new Error("min is not a number!");
+        }
+        return `{amount: {$gte: ${min}} }`;
+    }
+    else if(max){
+        if(isNaN(max)){
+            throw new Error("min is not a number!");
+        }
+        return `{amount: {$lte: ${max}} }`;
+    }
 }
 
 //this function checks if date matches a regexp and if all the values are correct
