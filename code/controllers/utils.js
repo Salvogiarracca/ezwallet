@@ -190,7 +190,7 @@ export const verifyAuth = (req, res, info) => {
 export const handleAmountFilterParams = (req) => {
 }
 
-//this function checks if date matches a regexp and if all the values are correct
+//this function checks if date matches a regexp and if all the values are correct, check if upTo is gt than from?
 function checkDateValue(value) {
     const regExp = /^\d{4}-\d{2}-\d{2}$/;
     if(!regExp.test(value)){
