@@ -209,7 +209,7 @@ export const getGroups = async (req, res) => {
     ///only admin can perform this operation!
     const adminAuth = verifyAuth(req, res, { authType: "Admin" });
     if(adminAuth.authorized){
-       const groups = await Group.find().select( 'name members -_id' );
+       const groups = await Group.find();
       const data = groups.map(group => {
         return {
           name: group.name,
