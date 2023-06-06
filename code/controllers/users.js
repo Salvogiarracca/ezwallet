@@ -339,7 +339,7 @@ export const addToGroup = async (req, res) => {
               } else if(emailsInGroup.includes(member)){
                 alreadyInGroup.push(member);
               } else {
-                group.members.push({ email: member });
+                group.members.push({ email: member, user: user._id });
               }
             }
 
@@ -350,7 +350,7 @@ export const addToGroup = async (req, res) => {
                 membersNotFound: notFoundEmails
               });
             } else {
-              await group.save();
+              await Group.findOneAndUpdate(group)
               return res.status(200).json({
                 data: {
                   group: {
@@ -383,7 +383,7 @@ export const addToGroup = async (req, res) => {
                 } else if(emailsInGroup.includes(member)){
                   alreadyInGroup.push(member);
                 } else {
-                  group.members.push({ email: member });
+                  group.members.push({ email: member, user: user._id });
                 }
               }
 
@@ -394,7 +394,7 @@ export const addToGroup = async (req, res) => {
                   membersNotFound: notFoundEmails
                 });
               } else {
-                await group.save();
+                await Group.findOneAndUpdate(group)
                 return res.status(200).json({
                   data: {
                     group: {

@@ -1,7 +1,7 @@
 import request from 'supertest';
 import { app } from '../app';
 import {Group, User} from '../models/User.js';
-import {createGroup, getGroup, getGroups, getUser, getUsers} from "../controllers/users.js";
+import {addToGroup, createGroup, getGroup, getGroups, getUser, getUsers} from "../controllers/users.js";
 import * as utils from "../controllers/utils.js"
 import { newToken } from "../controllers/genericFunctions.js"
 
@@ -775,7 +775,87 @@ describe("getGroup", () => {
 })
 
 describe("addToGroup", () => {
+  test("should add users to own group (User)", async () => {
+    const user1 = {
+      _id: "11111",
+      username: "testUser1",
+      email: "testUser1@example.com",
+      role: "Regular"
+    }
+    const user2 = {
+      _id: "22222",
+      username: "testUser2",
+      email: "testUser2@example.com",
+      role: "Regular"
+    }
+    const user3 = {
+      _id: "33333",
+      username: "testUser3",
+      email: "testUser3@example.com",
+      role: "Regular"
+    }
+    const user4 = {
+      _id: "44444",
+      username: "testUser4",
+      email: "testUser4@example.com",
+      role: "Regular"
+    }
 
+    const group1 = {
+      name: "testGroup1",
+      members: [
+        {email: "testUser1@example.com"}
+      ]
+    }
+    const group2 = {
+      name: "testGroup2",
+      members: [
+        {email: "testUser2@example.com"},
+        {email: "testUser5@example.com"}
+      ]
+    }
+    jest.spyOn(utils, "verifyAuth").mockReturnValue({authorized: true, cause: "Authorized"})
+    const mockReq = {
+      originalUrl: `/api/groups/${group1.name}/add`,
+      cookies: {
+        accessToken: newToken("Regular"),
+        refreshToken: newToken("Regular")
+      },
+      body: {
+        emails: [
+            user1.email,
+            user2.email,
+            user3.email,
+            user4.email
+        ]
+      },
+      params: { name: group1.name }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      locals: jest.fn().mockReturnThis(),
+      refreshedTokenMessage: jest.fn()
+    }
+    jest.spyOn(Group, "findOne").mockResolvedValueOnce(group1)
+    jest.spyOn(Group, "find").mockResolvedValueOnce([group1, group2])
+    jest.spyOn(User, "findOne").mockResolvedValueOnce(user1)
+        .mockResolvedValueOnce(user2)
+        .mockResolvedValueOnce(user3)
+        .mockResolvedValueOnce(null)
+    jest.spyOn(Group, "findByIdAndUpdate").mockResolvedValueOnce(group1)
+    await addToGroup(mockReq, mockRes)
+    expect(mockRes.status).toHaveBeenCalledWith(200)
+    expect(mockRes.json).toHaveBeenCalledWith(expect.objectContaining({
+      data:{
+        group:group1,
+        alreadyInGroup: [user1.email, user2.email],
+        membersNotFound: [user4.email]
+      },
+      refreshedTokenMessage: mockRes?.locals?.refreshedTokenMessage
+    }))
+
+  })
 })
 
 describe("removeFromGroup", () => { })
