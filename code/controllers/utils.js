@@ -58,7 +58,8 @@ export const handleDateFilterParams = (req) => {
     if(upTo && from){
         checkDateValue(from);
         checkDateValue(upTo);
-        return `{date: {$gte: ${from}T00:00:00.000Z}, $lte: ${upTo}T23:59:59.000Z}`;
+        if(checkTimeDates(from, upTo))
+         return `{date: {$gte: ${from}T00:00:00.000Z}, $lte: ${upTo}T23:59:59.000Z}`;
     
     }
 }
@@ -190,7 +191,7 @@ export const verifyAuth = (req, res, info) => {
 export const handleAmountFilterParams = (req) => {
 }
 
-//this function checks if date matches a regexp and if all the values are correct, check if upTo is gt than from?
+//this function checks if date matches a regexp and if all the values are correct
 function checkDateValue(value) {
     const regExp = /^\d{4}-\d{2}-\d{2}$/;
     if(!regExp.test(value)){
@@ -214,4 +215,24 @@ function checkDateValue(value) {
     if((mm === 4 || mm === 6 || mm === 9 || mm === 11) && (dd > 30)){
         throw new Error('Invalid date');
     }
+    return true;
+}
+
+//function that checks if date upTo is gte from, throws Error if conditions are not satisfied, returns true if all the checks are fine
+function checkTimeDates(from, upTo){
+    const regExp = /^\d{4}-\d{2}-\d{2}$/;
+    const {y1, m1, d1} = from.match(regExp);
+    const {y2, m2, d2} = upTo.match(regExp);
+    if(y1 > y2){
+        throw new Error("date from is after date upTo");
+    }else if(y1 === y2){
+        if(m1 > m2){
+            throw new Error("date from is after date upTo");
+        }else if (m1 === m2){
+            if(d1 > d2){
+                throw new Error("date from is after date upTo");
+            }
+        }
+    }
+    return true;
 }
