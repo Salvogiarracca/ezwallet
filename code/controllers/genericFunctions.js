@@ -28,3 +28,19 @@ export function newToken(role){
     );
     return token;
 }
+
+export function newTokenAdHoc(username, role){
+    const token = jwt.sign(
+        {
+            username: username,
+            email: `${username}@example.com`,
+            id: "123456789",
+            role: role
+        },
+        "EZWALLET",
+        {
+            expiresIn: "7d"
+        }
+    );
+    return token;
+}

@@ -59,7 +59,6 @@ export const getUsers = async (req, res) => {
  */
 export const getUser = async (req, res) => {
   try {
-    const cookie = req.cookies;
     const username = req.params.username;
     const userAuth = verifyAuth(req, res, { authType: "User", username: username });
     ///if userAuth return true, user can retrieve only info about himself

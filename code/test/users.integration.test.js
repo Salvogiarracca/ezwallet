@@ -4,6 +4,7 @@ import { User, Group } from '../models/User.js';
 import { transactions, categories } from '../models/model';
 import mongoose, { Model } from 'mongoose';
 import dotenv from 'dotenv';
+import {newToken, newTokenAdHoc} from "../controllers/genericFunctions.js";
 
 /**
  * Necessary setup in order to create a new database for testing purposes before starting the execution of test cases.
@@ -38,40 +39,147 @@ describe("getUsers", () => {
     await User.deleteMany({})
   })
 
-  // test("should return empty list if there are no users", (done) => {
-  //   request(app)
-  //     .get("/api/users")
-  //     .then((response) => {
-  //       expect(response.status).toBe(200)
-  //       expect(response.body).toHaveLength(0)
-  //       done()
-  //     })
-  //     .catch((err) => done(err))
-  // })
+  test("should return empty list if ther are no users", async () => {
+    const res = await request(app)
+        .get('/api/users')
+        .set("Cookie", [
+            `accessToken=${newTokenAdHoc(user1.username, "Admin")}`,
+            `refreshToken=${newTokenAdHoc(user1.username, "Admin")}`
+        ])
+    expect(res.status).toBe(200)
+    expect(res.body).toEqual({ data : [] })
+  })
 
-  // test("should retrieve list of all users", (done) => {
-  //   User.create({
-  //     username: "tester",
-  //     email: "test@test.com",
-  //     password: "tester",
-  //   }).then(() => {
-  //     request(app)
-  //       .get("/api/users")
-  //       .then((response) => {
-  //         expect(response.status).toBe(200)
-  //         expect(response.body).toHaveLength(1)
-  //         expect(response.body[0].username).toEqual("tester")
-  //         expect(response.body[0].email).toEqual("test@test.com")
-  //         expect(response.body[0].password).toEqual("tester")
-  //         expect(response.body[0].role).toEqual("Regular")
-  //         done() // Notify Jest that the test is complete
-  //       })
-  //       .catch((err) => done(err))
-  //   })
-  // })
+  test("should return list of all users", async () => {
+    const user1 = {
+      username: "testUser1",
+      email: "testUser1@example.com",
+      password: "password",
+      role: "Regular"
+    }
+    const user4 = {
+      username: "testUser4",
+      email: "testUser4@example.com",
+      password: "password",
+      role: "Regular"
+    }
+    await User.create(user1)
+    await User.create(user4)
+    const res = await request(app)
+        .get('/api/users')
+        .set("Cookie", [
+          `accessToken=${newTokenAdHoc(user1.username, "Admin")}`,
+          `refreshToken=${newTokenAdHoc(user1.username, "Admin")}`
+        ])
+    expect(res.status).toBe(200)
+    expect(res.body).toEqual({
+      data: [
+        {...user1, password: undefined},
+        {...user4, password: undefined}
+      ]
+    })
+  })
 })
 
-describe("getUser", () => { })
+describe("getUser", () => {
+  beforeEach(async () => {
+    await User.deleteMany()
+  })
+  test("should be not authorized if no cookies are provided", async () => {
+    const res = await request(app)
+        .get('/api/users/:someUser')
+    expect(res.status).toBe(401)
+    expect(res.body).toEqual({ error: "Unauthorized" })
+  })
+  test("should be not authorized if asking for other user info (Regular user)", async () => {
+    const user1 = {
+      username: "testUser1",
+      email: "testUser1@example.com",
+      password: "password",
+      role: "Regular"
+    }
+    await User.create(user1)
+    const res = await request(app)
+        .get('/api/users/:notCurrentUser')
+        .set("Cookie", [
+          `accessToken=${newTokenAdHoc(user1.username, "Regular")}`,
+          `refreshToken=${newTokenAdHoc(user1.username, "Regular")}`
+        ])
+    expect(res.status).toBe(401)
+    expect(res.body).toEqual({ error: "Unauthorized" })
+  })
+  test("should get own user info", async () => {
+    const user1 = {
+      username: "testUser1",
+      email: "testUser1@example.com",
+      password: "password",
+      role: "Regular"
+    }
+    await User.create(user1)
+    const res = await request(app)
+        .get(`/api/users/${user1.username}`)
+        .set("Cookie", [
+          `accessToken=${newTokenAdHoc(user1.username, "Regular")}`,
+          `refreshToken=${newTokenAdHoc(user1.username, "Regular")}`
+        ])
+    expect(res.status).toBe(200)
+    expect(res.body).toEqual({
+      data: {
+        username: user1.username,
+        email: user1.email,
+        role: user1.role
+      }
+    })
+  })
+  test("should fail if resquested user does not exist (Admin)", async () => {
+    const user1 = {
+      username: "testUser1",
+      email: "testUser1@example.com",
+      password: "password",
+      role: "Admin"
+    }
+    const user = User.create(user1)
+    const res = await request(app)
+        .get(`/api/users/NotAUser}`)
+        .set("Cookie", [
+          `accessToken=${newTokenAdHoc(user1.username, "Admin")}`,
+          `refreshToken=${newTokenAdHoc(user1.username, "Admin")}`
+        ])
+    expect(res.status).toBe(400)
+    expect(res.body).toEqual({ error: "User not found" })
+  })
+  test("should return other user data (Admin)", async () => {
+    const user1 = {
+      username: "testUser1",
+      email: "testUser1@example.com",
+      password: "password",
+      role: "Admin"
+    }
+    const user2 = {
+      username: "testUser2",
+      email: "testUser2@example.com",
+      password: "password",
+      role: "Regular"
+    }
+    await User.create(user1)
+    await User.create(user2)
+    const res = await request(app)
+        .get(`/api/users/${user2.username}`)
+        .set("Cookie", [
+          `accessToken=${newTokenAdHoc(user1.username, "Admin")}`,
+          `refreshToken=${newTokenAdHoc(user1.username, "Admin")}`
+        ])
+    expect(res.status).toBe(200)
+    expect(res.body).toEqual({
+      data: {
+        username: user2.username,
+        email: user2.email,
+        role: user2.role
+      }
+    })
+  })
+
+})
 
 describe("createGroup", () => { })
 
