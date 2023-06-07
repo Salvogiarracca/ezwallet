@@ -466,7 +466,7 @@ export const removeFromGroup = async (req, res) => {
       return res.status(400).json({ error: 'Group does not exist' });
     } else {
       const groupMembers = group.members.map(member => member.email);
-      if(groupMembers < 2){
+      if(groupMembers.length < 2){
         return res.status(400).json({ error: 'the group contains only one member' })
       }
 
@@ -491,17 +491,18 @@ export const removeFromGroup = async (req, res) => {
 
             if(notFoundEmails.length + notInGroup.length === emails.length){
               return res.status(400).json({
-                error: 'all the members either do not exist or are already in a group',
+                error: 'all the members either do not exist or not in the group',
                 notInGroup: notInGroup,
                 membersNotFound: notFoundEmails
               });
             } else {
-              await group.save();
+              // await group.save();
+              await Group.updateOne(group)
               return res.status(200).json({
                 data: {
                   group: {
                     name: group.name,
-                    members: group.members.map(member => member.email)
+                    members: group.members.map(member => ({email: member.email}))
                   },
                   notInGroup: notInGroup,
                   membersNotFound: notFoundEmails
@@ -541,12 +542,13 @@ export const removeFromGroup = async (req, res) => {
                 membersNotFound: notFoundEmails
               });
             } else {
-              await group.save();
+              await Group.updateOne(group)
+              // await group.save();
               return res.status(200).json({
                 data: {
                   group: {
                     name: group.name,
-                    members: group.members.map(member => member.email)
+                    members: group.members.map(member => ({email: member.email}))
                   },
                   notInGroup: notInGroup,
                   membersNotFound: notFoundEmails

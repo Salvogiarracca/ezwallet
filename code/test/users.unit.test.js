@@ -1,7 +1,15 @@
 import request from 'supertest';
 import { app } from '../app';
 import {Group, User} from '../models/User.js';
-import {addToGroup, createGroup, getGroup, getGroups, getUser, getUsers} from "../controllers/users.js";
+import {
+  addToGroup,
+  createGroup,
+  getGroup,
+  getGroups,
+  getUser,
+  getUsers,
+  removeFromGroup
+} from "../controllers/users.js";
 import * as utils from "../controllers/utils.js"
 import { newToken } from "../controllers/genericFunctions.js"
 
@@ -1344,7 +1352,474 @@ describe("addToGroup", () => {
   })
 })
 
-describe("removeFromGroup", () => { })
+describe("removeFromGroup", () => {
+  beforeEach(() => { jest.restoreAllMocks()})
+
+  test("should remove a member of own group (User)", async () => {
+    const user1 = {
+      _id: "11111",
+      username: "testUser1",
+      email: "testUser1@example.com",
+      role: "Admin"
+    }
+    const user2 = {
+      _id: "22222",
+      username: "testUser2",
+      email: "testUser2@example.com",
+      role: "Regular"
+    }
+    const user3 = {
+      _id: "33333",
+      username: "testUser3",
+      email: "testUser3@example.com",
+      role: "Regular"
+    }
+    const user4 = {
+      _id: "44444",
+      username: "testUser4",
+      email: "testUser4@example.com",
+      role: "Regular"
+    }
+
+    const group1 = {
+      name: "testGroup1",
+      members: [
+        {email: "testUser1@example.com", user: "11111"},
+        {email: "testUser3@example.com", user: "33333"}
+      ]
+    }
+    const group2 = {
+      name: "testGroup2",
+      members: [
+        {email: "testUser2@example.com", user: "22222"},
+        {email: "testUser4@example.com", user: "44444"},
+        {email: "testUser5@example.com", user: "55555"}
+      ]
+    }
+    const auth = jest.spyOn(utils, "verifyAuth").mockReturnValueOnce({ authorized: true, cause: "Authorized" })
+    const mockReq = {
+      originalUrl: `/api/groups/${group2.name}/remove`,
+      cookies: {
+        accessToken: newToken("Regular"),
+        refreshToken: newToken("Regular")
+      },
+      body: {
+        emails: [
+            user1.email,
+            user4.email,
+            "notFoundEmail@example.com"
+        ]
+      },
+      params: { name: group2.name }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      locals: jest.fn().mockReturnThis(),
+      refreshedTokenMessage: jest.fn()
+    }
+    jest.spyOn(Group, "findOne").mockResolvedValueOnce(group2)
+    jest.spyOn(User, "findOne").mockResolvedValueOnce(user1)
+        .mockResolvedValueOnce(user4)
+        .mockResolvedValueOnce(null)
+    jest.spyOn(Group, "updateOne").mockResolvedValueOnce(group2)
+    await removeFromGroup(mockReq, mockRes)
+    expect(mockRes.status).toHaveBeenCalledWith(200)
+    expect(auth).toHaveBeenCalledWith(mockReq, mockRes, {
+      authType: "Group",
+      emails: [
+        "testUser2@example.com",
+        "testUser4@example.com",
+        "testUser5@example.com",
+      ]
+    })
+    expect(mockRes.json).toHaveBeenCalledWith(expect.objectContaining({
+      data:{
+        group:{
+          name: group2.name,
+          members: group2.members.map(member => ({email: member.email}))
+        },
+        notInGroup: [user1.email],
+        membersNotFound: ["notFoundEmail@example.com"]
+      },
+      refreshedTokenMessage: mockRes?.locals?.refreshedTokenMessage
+    }))
+  })
+
+  test("should remove a member of a group (Admin)", async () => {
+    const user1 = {
+      _id: "11111",
+      username: "testUser1",
+      email: "testUser1@example.com",
+      role: "Admin"
+    }
+    const user2 = {
+      _id: "22222",
+      username: "testUser2",
+      email: "testUser2@example.com",
+      role: "Regular"
+    }
+    const user3 = {
+      _id: "33333",
+      username: "testUser3",
+      email: "testUser3@example.com",
+      role: "Regular"
+    }
+    const user4 = {
+      _id: "44444",
+      username: "testUser4",
+      email: "testUser4@example.com",
+      role: "Regular"
+    }
+
+    const group1 = {
+      name: "testGroup1",
+      members: [
+        {email: "testUser1@example.com", user: "11111"},
+        {email: "testUser3@example.com", user: "33333"}
+      ]
+    }
+    const group2 = {
+      name: "testGroup2",
+      members: [
+        {email: "testUser2@example.com", user: "22222"},
+        {email: "testUser4@example.com", user: "44444"},
+        {email: "testUser5@example.com", user: "55555"}
+      ]
+    }
+    const auth = jest.spyOn(utils, "verifyAuth").mockReturnValueOnce({ authorized: true, cause: "Authorized" })
+    const mockReq = {
+      originalUrl: `/api/groups/${group2.name}/pull`,
+      cookies: {
+        accessToken: newToken("Admin"),
+        refreshToken: newToken("Admin")
+      },
+      body: {
+        emails: [
+          user1.email,
+          user4.email,
+          "notFoundEmail@example.com"
+        ]
+      },
+      params: { name: group2.name }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      locals: jest.fn().mockReturnThis(),
+      refreshedTokenMessage: jest.fn()
+    }
+    jest.spyOn(Group, "findOne").mockResolvedValueOnce(group2)
+    jest.spyOn(User, "findOne").mockResolvedValueOnce(user1)
+        .mockResolvedValueOnce(user4)
+        .mockResolvedValueOnce(null)
+    jest.spyOn(Group, "updateOne").mockResolvedValueOnce(group2)
+    await removeFromGroup(mockReq, mockRes)
+    expect(mockRes.status).toHaveBeenCalledWith(200)
+    expect(auth).toHaveBeenCalledWith(mockReq, mockRes, {
+      authType: "Admin"
+    })
+    expect(mockRes.json).toHaveBeenCalledWith(expect.objectContaining({
+      data:{
+        group:{
+          name: group2.name,
+          members: group2.members.map(member => ({email: member.email}))
+        },
+        notInGroup: [user1.email],
+        membersNotFound: ["notFoundEmail@example.com"]
+      },
+      refreshedTokenMessage: mockRes?.locals?.refreshedTokenMessage
+    }))
+  })
+
+  test("should fail if the user is not part of the group (Group)", async () => {
+    const user1 = {
+      _id: "11111",
+      username: "testUser1",
+      email: "testUser1@example.com",
+      role: "Admin"
+    }
+    const user2 = {
+      _id: "22222",
+      username: "testUser2",
+      email: "testUser2@example.com",
+      role: "Regular"
+    }
+    const user3 = {
+      _id: "33333",
+      username: "testUser3",
+      email: "testUser3@example.com",
+      role: "Regular"
+    }
+    const user4 = {
+      _id: "44444",
+      username: "testUser4",
+      email: "testUser4@example.com",
+      role: "Regular"
+    }
+
+    const group1 = {
+      name: "testGroup1",
+      members: [
+        {email: "testUser1@example.com", user: "11111"},
+        {email: "testUser3@example.com", user: "33333"}
+      ]
+    }
+    const group2 = {
+      name: "testGroup2",
+      members: [
+        {email: "testUser2@example.com", user: "22222"},
+        {email: "testUser4@example.com", user: "44444"},
+        {email: "testUser5@example.com", user: "55555"}
+      ]
+    }
+    const auth = jest.spyOn(utils, "verifyAuth").mockReturnValueOnce({ authorized: false, cause: "Unauthorized" })
+    const mockReq = {
+      originalUrl: `/api/groups/${group2.name}/remove`,
+      cookies: {
+        accessToken: newToken("Regular"),
+        refreshToken: newToken("Regular")
+      },
+      body: {
+        emails: [
+          user1.email,
+          user4.email,
+          "notFoundEmail@example.com"
+        ]
+      },
+      params: { name: group2.name }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      locals: jest.fn().mockReturnThis(),
+      refreshedTokenMessage: jest.fn()
+    }
+    jest.spyOn(Group, "findOne").mockResolvedValueOnce(group2)
+    await removeFromGroup(mockReq, mockRes)
+    expect(auth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Group", emails: group2.members.map(member => member.email) })
+    expect(mockRes.status).toHaveBeenCalledWith(401)
+    expect(mockRes.json).toHaveBeenCalledWith(expect.objectContaining({
+      error: "Unauthorized, you are not a member of requested group"
+    }))
+  })
+
+  test("should fail if user is not an admin", async () => {
+    const auth = jest.spyOn(utils, "verifyAuth").mockReturnValueOnce({ authorized: false, cause: "Unauthorized" })
+    const group1 = {
+      name: "testGroup1",
+      members: [
+        {email: "testUser1@example.com", user: "11111"},
+        {email: "testUser3@example.com", user: "33333"}
+      ]
+    }
+    const mockReq = {
+      originalUrl: `/api/groups/${group1.name}/pull`,
+      cookies: {
+        accessToken: newToken("Regular"),
+        refreshToken: newToken("Regular")
+      },
+      body: {
+        emails:["example1@example.com", "example2@example.com"],
+      },
+      params: { name: group1.name }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      locals: jest.fn().mockReturnThis(),
+      refreshedTokenMessage: jest.fn()
+    }
+    jest.spyOn(Group, "findOne").mockResolvedValueOnce(group1)
+    await removeFromGroup(mockReq, mockRes)
+    expect(mockRes.status).toHaveBeenCalledWith(401)
+    expect(auth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Admin" })
+    expect(mockRes.json).toHaveBeenCalledWith(expect.objectContaining({
+      error: "Unauthorized, you are not an admin"
+    }))
+  })
+
+  test("should fail if group does not exist", async () => {
+    const auth = jest.spyOn(utils, "verifyAuth").mockReturnValueOnce({ authorized: true, cause: "Authorized" })
+    const mockReq = {
+      originalUrl: `/api/groups/NotAGroup/remove`,
+      cookies: {
+        accessToken: newToken("Regular"),
+        refreshToken: newToken("Regular")
+      },
+      body: {
+        emails:["example1@example.com", "example2@example.com"],
+      },
+      params: { name: "NotAGroup" }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      locals: jest.fn().mockReturnThis(),
+      refreshedTokenMessage: jest.fn()
+    }
+    jest.spyOn(Group, "findOne").mockResolvedValueOnce(null)
+    await removeFromGroup(mockReq, mockRes)
+    expect(mockRes.status).toHaveBeenCalledWith(400)
+    expect(auth).not.toHaveBeenCalled()
+    expect(mockRes.json).toHaveBeenCalledWith(expect.objectContaining({
+      error: "Group does not exist"
+    }))
+  })
+
+  test("shoud fail if request body does not contain all the necessary attributes", async () => {
+    const mockReq = {
+      originalUrl: `/api/groups/NotAGroup/remove`,
+      cookies: {
+        accessToken: newToken("Regular"),
+        refreshToken: newToken("Regular")
+      },
+      body: {
+        emails:[],
+      },
+      params: { name: "NotAGroup" }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      locals: jest.fn().mockReturnThis(),
+      refreshedTokenMessage: jest.fn()
+    }
+    await removeFromGroup(mockReq, mockRes)
+    expect(mockRes.status).toHaveBeenCalledWith(400)
+    expect(mockRes.json).toHaveBeenCalledWith(expect.objectContaining({
+      error: "Request body does not contain all the necessary attributes"
+    }))
+  })
+
+  test("should fail if at least one email is an empty string is not valid", async () => {
+    const mockReq = {
+      originalUrl: `/api/groups/NotAGroup/remove`,
+      cookies: {
+        accessToken: newToken("Regular"),
+        refreshToken: newToken("Regular")
+      },
+      body: {
+        emails:["example1@example.com", ""],
+      },
+      params: { name: "NotAGroup" }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      locals: jest.fn().mockReturnThis(),
+      refreshedTokenMessage: jest.fn()
+    }
+    await removeFromGroup(mockReq, mockRes)
+    expect(mockRes.status).toHaveBeenCalledWith(400)
+    expect(mockRes.json).toHaveBeenCalledWith(expect.objectContaining({
+      error: "at least one of the members emails is not in a valid email format or is an empty string"
+    }))
+  })
+
+  test("should fail if all the members either do not exist or not in the group", async () => {
+    const user1 = {
+      _id: "11111",
+      username: "testUser1",
+      email: "testUser1@example.com",
+      role: "Regular"
+    }
+    const user4 = {
+      _id: "44444",
+      username: "testUser4",
+      email: "testUser4@example.com",
+      role: "Regular"
+    }
+    const user5 = {
+      _id: "55555",
+      username: "testUser5",
+      email: "testUser5@example.com",
+      role: "Regular"
+    }
+
+    const group1 = {
+      name: "testGroup1",
+      members: [
+        {email: "testUser1@example.com", user: "11111"},
+        {email: "testUser3@example.com", user: "33333"}
+      ]
+    }
+    const group2 = {
+      name: "testGroup2",
+      members: [
+        {email: "testUser2@example.com", user: "22222"},
+        {email: "testUser4@example.com", user: "44444"},
+        {email: "testUser5@example.com", user: "55555"}
+      ]
+    }
+    const auth = jest.spyOn(utils, "verifyAuth").mockReturnValueOnce({ authorized: true, cause: "Authorized" })
+    const mockReq = {
+      originalUrl: `/api/groups/${group1.name}/remove`,
+      cookies: {
+        accessToken: newToken("Regular"),
+        refreshToken: newToken("Regular")
+      },
+      body: {
+        emails: [
+          "testUser5@example.com",
+          user4.email,
+          "notFoundEmail@example.com"
+        ]
+      },
+      params: { name: group1.name }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      locals: jest.fn().mockReturnThis(),
+      refreshedTokenMessage: jest.fn()
+    }
+    jest.spyOn(Group, "findOne").mockResolvedValueOnce(group1)
+    jest.spyOn(User, "findOne").mockResolvedValueOnce(user5)
+        .mockResolvedValueOnce(user4)
+        .mockResolvedValueOnce(null)
+    await removeFromGroup(mockReq, mockRes)
+    expect(mockRes.status).toHaveBeenCalledWith(400)
+    expect(auth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Group", emails: group1.members.map(member => member.email) })
+    expect(mockRes.json).toHaveBeenCalledWith(expect.objectContaining({
+      error: "all the members either do not exist or not in the group",
+      notInGroup: [user5.email, user4.email],
+      membersNotFound: ["notFoundEmail@example.com"]
+    }))
+  })
+
+  test("should fail if group contains only one member", async () => {
+    const group1 = {
+      name: "testGroup1",
+      members: [
+        {email: "testUser1@example.com", user: "11111"}
+      ]
+    }
+    const mockReq = {
+      originalUrl: `/api/groups/${group1.name}/pull`,
+      cookies: {
+        accessToken: newToken("Admin"),
+        refreshToken: newToken("Admin")
+      },
+      body: {
+        emails:["example1@example.com", "example2@example.com", "example3@example.com"],
+      },
+      params: { name: group1.name }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      locals: jest.fn().mockReturnThis(),
+      refreshedTokenMessage: jest.fn()
+    }
+    jest.spyOn(Group, "findOne").mockResolvedValueOnce(group1)
+    await removeFromGroup(mockReq, mockRes)
+    expect(mockRes.status).toHaveBeenCalledWith(400)
+    expect(mockRes.json).toHaveBeenCalledWith(expect.objectContaining({
+      error: "the group contains only one member"
+    }))
+  })
+})
 
 describe("deleteUser", () => { })
 
