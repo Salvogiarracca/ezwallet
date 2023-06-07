@@ -11,39 +11,44 @@ import {
   - Request Body Content: An object having attributes `type` and `color`
   - Response `data` Content: An object having attributes `type` and `color`
  */
-  export const createCategory = (req, res) => {
-    try {
-      const username = req.params.username;
-      const cookie = req.cookies;
-      if (!cookie.accessToken) {
-        return res.status(401).json({ message: "Unauthorized" }); // unauthorized
-      }
-      const adminAuth = verifyAuth(req, res, {
-        authType: "Admin",
-        username: username
-      });
-      if(!adminAuth.authorized){
-        return res.status(401).json({message: "Unauthorized"});
-      }
-      const { type, color } = req.body;
-      if(!type || !color){
-        throw new Error("Missing attributes");
-      }
-      if(categories.findOne({type: type})){
-        throw new Error("Category already exists")
-      }
-      const new_categories = new categories({ type, color });
-      new_categories
-        .save()
-        .then((data) => res.json(data))
-        .catch((err) => {
-          throw err;
-        });
-      res.status(200).json({data: {type: type, color: color}, message: "Category created!"});
-    } catch (error) {
-      res.status(400).json({ error: error.message });
+export const createCategory = (req, res) => {
+  try {
+    const username = req.params.username;
+    const cookie = req.cookies;
+    if (!cookie.accessToken) {
+      return res.status(401).json({ message: "Unauthorized" }); // unauthorized
     }
-  };
+    const adminAuth = verifyAuth(req, res, {
+      authType: "Admin",
+      username: username,
+    });
+    if (!adminAuth.authorized) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+    const { type, color } = req.body;
+    if (!type || !color) {
+      throw new Error("Missing attributes");
+    }
+    if (categories.findOne({ type: type })) {
+      throw new Error("Category already exists");
+    }
+    const new_categories = new categories({ type, color });
+    new_categories
+      .save()
+      .then((data) => res.json(data))
+      .catch((err) => {
+        throw err;
+      });
+    res
+      .status(200)
+      .json({
+        data: { type: type, color: color },
+        message: "Category created!",
+      });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
 
 /**
  * Edit a category's type or color
@@ -191,31 +196,31 @@ export const deleteCategory = async (req, res) => {
   - Optional behavior:
     - empty array is returned if there are no categories
  */
-    export const getCategories = async (req, res) => {
-      try {
-        const username = req.params.username;
-        const cookie = req.cookies;
-        if (!cookie.accessToken) {
-          return res.status(401).json({ message: "Unauthorized" }); // unauthorized
-        }
-        const auth = verifyAuth(req, res, {
-          authType: "Simple",
-          username: username,
-        });
-        if(!auth.authorized){
-          return res.status(401).json({message: "Unauthorized"});
-        }
-        let data = await categories.find({});
-    
-        let filter = data.map((v) =>
-          Object.assign({}, { type: v.type, color: v.color })
-        );
-    
-        return res.status(200).json({data: filter, message: "authorized"});
-      } catch (error) {
-        res.status(400).json({ error: error.message });
-      }
-    };
+export const getCategories = async (req, res) => {
+  try {
+    const username = req.params.username;
+    const cookie = req.cookies;
+    if (!cookie.accessToken) {
+      return res.status(401).json({ message: "Unauthorized" }); // unauthorized
+    }
+    const auth = verifyAuth(req, res, {
+      authType: "Simple",
+      username: username,
+    });
+    if (!auth.authorized) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+    let data = await categories.find({});
+
+    let filter = data.map((v) =>
+      Object.assign({}, { type: v.type, color: v.color })
+    );
+
+    return res.status(200).json({ data: filter, message: "authorized" });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
 
 /**
  * Create a new transaction made by a specific user
@@ -226,64 +231,93 @@ export const deleteCategory = async (req, res) => {
  */
 export const createTransaction = async (req, res) => {
   try {
-    /* const cookie = req.cookies;
-    if (!cookie.accessToken) {
-      return res.status(401).json({ message: "Unauthorized" }); // unauthorized
-    } */
     const { username, amount, type } = req.body;
-    if (!username || !type) {
-      return res.status(401).json({ message: "Missing parameters" }); // unauthorized
+    if (
+      !username ||
+      !type ||
+      !amount ||
+      username === "" ||
+      type === "" ||
+      amount === ""
+    ) {
+      return res.status(400).json({
+        message: "Invalid parameters",
+        refreshedTokenMessage: res.locals.refreshedTokenMessage,
+      });
+    }
+    if (parseFloat(amount) === NaN) {
+      return res.status(400).json({
+        message: "Unable to convert amount to float",
+        refreshedTokenMessage: res.locals.refreshedTokenMessage,
+      });
     }
     const caller_username = req.params.username;
     const userAuth = verifyAuth(req, res, {
       authType: "User",
       username: caller_username,
     });
-    ///if userAuth return true, user can retrieve only info about himself
-    if (userAuth.authorized) {
-      if (caller_username === username) {
-        const new_transactions = new transactions({ username, amount, type });
-        new_transactions
-          .save()
-          .then((data) =>
-            res.status(200).json({ data, message: "Transaction created!" })
+    const category = await categories.findOne({ type: type });
+    const user_body = await User.findOne({ username: username });
+    const user_params = await User.findOne({ username: caller_username });
+    if (category && user_body && user_params) {
+      if (userAuth.authorized) {
+        if (caller_username == username) {
+          const new_transactions = new transactions({ username, amount, type });
+          new_transactions.save().then((data) =>
+            res.status(200).json({
+              data,
+              message: "Transaction created",
+              refreshedTokenMessage: res.locals.refreshedTokenMessage,
+            })
           );
+        } else {
+          return res.status(400).json({
+            refreshedTokenMessage: res.locals.refreshedTokenMessage,
+            message: "Username dosen't match transaction's username",
+          });
+        }
       } else {
-        return res
-          .status(400)
-          .json({ message: "Username dosen't match transaction's username" });
+        const adminAuth = verifyAuth(req, res, { authType: "Admin" });
+        ///if the user is an Admin ok, otherwise unauthorized
+        if (adminAuth.authorized) {
+          const new_transactions = new transactions({ username, amount, type });
+          new_transactions.save().then((data) =>
+            res.status(200).json({
+              data,
+              message: "Transaction created",
+              refreshedTokenMessage: res.locals.refreshedTokenMessage,
+            })
+          );
+        } else {
+          return res.status(401).json({
+            refreshedTokenMessage: res.locals.refreshedTokenMessage,
+            message: "Unauthorized",
+          });
+        }
       }
     } else {
-      const adminAuth = verifyAuth(req, res, { authType: "Admin" });
-      ///if the user is an Admin ok, otherwise unauthorized
-      if (adminAuth.authorized) {
-        const new_transactions = new transactions({ username, amount, type });
-        new_transactions
-          .save()
-          .then((data) =>
-            res.status(200).json({ data, message: "Transaction created!" })
-          );
-      } else {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
+      return res.status(400).json({
+        refreshedTokenMessage: res.locals.refreshedTokenMessage,
+        message: "Category or User dosen't exist",
+      }); // unauthorized
     }
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({
+      refreshedTokenMessage: res.locals.refreshedTokenMessage,
+      error: error.message,
+    });
   }
 };
 
 /**
- * Return all transactions made by all users
-  - Request Body Content: None
-  - Response `data` Content: An array of objects, each one having attributes `username`, `type`, `amount`, `date` and `color`
-  - Optional behavior:
-    - empty array must be returned if there are no transactions
- */
+     * Return all transactions made by all users
+      - Request Body Content: None
+      - Response `data` Content: An array of objects, each one having attributes `username`, `type`, `amount`, `date` and `color`
+      - Optional behavior:
+        - empty array must be returned if there are no transactions
+     */
 export const getAllTransactions = async (req, res) => {
   try {
-    /**
-     * MongoDB equivalent to the query "SELECT * FROM transactions, categories WHERE transactions.type = categories.type"
-     */
     const username = req.params.username;
     ///if userAuth return true, user can retrieve only info about himself
     const adminAuth = verifyAuth(req, res, {
@@ -318,271 +352,344 @@ export const getAllTransactions = async (req, res) => {
               }
             )
           );
-          return res.status(200).json({ data, message: adminAuth.cause });
+          return res.status(200).json({
+            data,
+            refreshedTokenMessage: res.locals.refreshedTokenMessage,
+            message: adminAuth.cause,
+          });
         });
     } else {
-      return res.status(401).json({ message: adminAuth.cause });
+      return res.status(401).json({
+        message: adminAuth.cause,
+        refreshedTokenMessage: res.locals.refreshedTokenMessage,
+      });
     }
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({
+      refreshedTokenMessage: res.locals.refreshedTokenMessage,
+      error: error.message,
+    });
   }
 };
 
 /**
- * Return all transactions made by a specific user
-  - Request Body Content: None
-  - Response `data` Content: An array of objects, each one having attributes `username`, `type`, `amount`, `date` and `color`
-  - Optional behavior:
-    - error 401 is returned if the user does not exist
-    - empty array is returned if there are no transactions made by the user
-    - if there are query parameters and the function has been called by a Regular user then the returned transactions must be filtered according to the query parameters
- */
+     * Return all transactions made by a specific user
+      - Request Body Content: None
+      - Response `data` Content: An array of objects, each one having attributes `username`, `type`, `amount`, `date` and `color`
+      - Optional behavior:
+        - error 401 is returned if the user does not exist
+        - empty array is returned if there are no transactions made by the user
+        - if there are query parameters and the function has been called by a Regular user then the returned transactions must be filtered according to the query parameters
+     */
 export const getTransactionsByUser = async (req, res) => {
   try {
     const username = req.params.username;
-    const userAuth = verifyAuth(req, res, {
-      authType: "User",
-      username: username,
-    });
-    ///if userAuth return true, user can retrieve only info about himself
-    if (userAuth.authorized) {
-      transactions
-        .aggregate([
-          {
-            $match: { username: username },
-          },
-          {
-            $lookup: {
-              from: "categories",
-              localField: "type",
-              foreignField: "type",
-              as: "categories_info",
-            },
-          },
-          { $unwind: "$categories_info" },
-        ])
-        .then((result) => {
-          let data = result.map((v) =>
-            Object.assign(
-              {},
-              {
-                _id: v._id,
-                username: v.username,
-                amount: v.amount,
-                type: v.type,
-                color: v.categories_info.color,
-                date: v.date,
-              }
-            )
-          );
-          res.status(200).json({ data, message: userAuth.cause });
+    const user = await User.findOne({ username: username });
+    if (user) {
+      console.log(req.url);
+      if (req.url.includes("/users/" + username + "/transactions")) {
+        const userAuth = verifyAuth(req, res, {
+          authType: "User",
+          username: username,
         });
-      ///if userAuth fails (Username mismatch) it means that a user want to retrieve info about another user
-    } else {
-      const adminAuth = verifyAuth(req, res, { authType: "Admin" });
-      ///if the user is an Admin ok, otherwise unauthorized
-      if (adminAuth.authorized) {
-        const user = await User.findOne({ username: username }).select(
-          "username email role"
-        );
-        if (!user) return res.status(401).json({ message: "User not found" });
-        transactions
-          .aggregate([
-            {
-              $match: { username: username },
-            },
-            {
-              $lookup: {
-                from: "categories",
-                localField: "type",
-                foreignField: "type",
-                as: "categories_info",
+
+        if (userAuth.authorized) {
+          transactions
+            .aggregate([
+              {
+                $match: { username: username },
               },
-            },
-            { $unwind: "$categories_info" },
-          ])
-          .then((result) => {
-            let data = result.map((v) =>
-              Object.assign(
-                {},
-                {
-                  _id: v._id,
-                  username: v.username,
-                  amount: v.amount,
-                  type: v.type,
-                  color: v.categories_info.color,
-                  date: v.date,
-                }
-              )
-            );
-            res.status(200).json({ data, message: adminAuth.cause });
+              {
+                $lookup: {
+                  from: "categories",
+                  localField: "type",
+                  foreignField: "type",
+                  as: "categories_info",
+                },
+              },
+              { $unwind: "$categories_info" },
+            ])
+            .then((result) => {
+              let data = result.map((v) =>
+                Object.assign(
+                  {},
+                  {
+                    _id: v._id,
+                    username: v.username,
+                    amount: v.amount,
+                    type: v.type,
+                    color: v.categories_info.color,
+                    date: v.date,
+                  }
+                )
+              );
+              res.status(200).json({
+                refreshedTokenMessage: res.locals.refreshedTokenMessage,
+                data,
+                message: userAuth.cause,
+              });
+            });
+          ///if userAuth fails (Username mismatch) it means that a user want to retrieve info about another user
+        } else {
+          return res.status(401).json({
+            refreshedTokenMessage: res.locals.refreshedTokenMessage,
+            message: userAuth.cause,
           });
+        }
       } else {
-        return res.status(401).json({ message: adminAuth.cause });
+        const adminAuth = verifyAuth(req, res, { authType: "Admin" });
+        ///if the user is an Admin ok, otherwise unauthorized
+        if (adminAuth.authorized) {
+          transactions
+            .aggregate([
+              {
+                $match: { username: username },
+              },
+              {
+                $lookup: {
+                  from: "categories",
+                  localField: "type",
+                  foreignField: "type",
+                  as: "categories_info",
+                },
+              },
+              { $unwind: "$categories_info" },
+            ])
+            .then((result) => {
+              let data = result.map((v) =>
+                Object.assign(
+                  {},
+                  {
+                    _id: v._id,
+                    username: v.username,
+                    amount: v.amount,
+                    type: v.type,
+                    color: v.categories_info.color,
+                    date: v.date,
+                  }
+                )
+              );
+              res.status(200).json({
+                data,
+                refreshedTokenMessage: res.locals.refreshedTokenMessage,
+                message: adminAuth.cause,
+              });
+            });
+        } else {
+          return res.status(401).json({
+            refreshedTokenMessage: res.locals.refreshedTokenMessage,
+            message: adminAuth.cause,
+          });
+        }
       }
+    } else {
+      return res.status(400).json({
+        refreshedTokenMessage: res.locals.refreshedTokenMessage,
+        message: "User not found",
+      });
     }
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({
+      refreshedTokenMessage: res.locals.refreshedTokenMessage,
+      error: error.message,
+    });
   }
 };
 
 /**
- * Return all transactions made by a specific user filtered by a specific category
-  - Request Body Content: None
-  - Response `data` Content: An array of objects, each one having attributes `username`, `type`, `amount`, `date` and `color`, filtered so that `type` is the same for all objects
-  - Optional behavior:
-    - empty array is returned if there are no transactions made by the user with the specified category
-    - error 401 is returned if the user or the category does not exist
- */
+     * Return all transactions made by a specific user filtered by a specific category
+      - Request Body Content: None
+      - Response `data` Content: An array of objects, each one having attributes `username`, `type`, `amount`, `date` and `color`, filtered so that `type` is the same for all objects
+      - Optional behavior:
+        - empty array is returned if there are no transactions made by the user with the specified category
+        - error 401 is returned if the user or the category does not exist
+     */
 export const getTransactionsByUserByCategory = async (req, res) => {
   try {
     const username = req.params.username;
-    const userAuth = verifyAuth(req, res, {
-      authType: "User",
-      username: username,
-    });
-    ///if userAuth return true, user can retrieve only info about himself
-    if (userAuth.authorized) {
-      transactions
-        .aggregate([
-          {
-            $match: { username: username, type: req.params.category },
-          },
-          {
-            $lookup: {
-              from: "categories",
-              localField: "type",
-              foreignField: "type",
-              as: "categories_info",
-            },
-          },
-          { $unwind: "$categories_info" },
-        ])
-        .then((result) => {
-          let data = result.map((v) =>
-            Object.assign(
-              {},
-              {
-                _id: v._id,
-                username: v.username,
-                amount: v.amount,
-                type: v.type,
-                color: v.categories_info.color,
-                date: v.date,
-              }
-            )
-          );
-          res.status(200).json({ data, message: userAuth.cause });
+    const cat = req.params.category;
+    const user = await User.findOne({ username: username });
+    const category = await categories.findOne({ type: cat });
+    if (user && category) {
+      if (req.url.includes("/users/" + username + "/transactions")) {
+        const userAuth = verifyAuth(req, res, {
+          authType: "User",
+          username: username,
         });
-      ///if userAuth fails (Username mismatch) it means that a user want to retrieve info about another user
-    } else {
-      const adminAuth = verifyAuth(req, res, { authType: "Admin" });
-      ///if the user is an Admin ok, otherwise unauthorized
-      if (adminAuth.authorized) {
-        const user = await User.findOne({ username: username }).select(
-          "username email role"
-        );
-        if (!user) return res.status(401).json({ message: "User not found" });
-        transactions
-          .aggregate([
-            {
-              $match: { username: username, type: req.params.category },
-            },
-            {
-              $lookup: {
-                from: "categories",
-                localField: "type",
-                foreignField: "type",
-                as: "categories_info",
+        if (userAuth.authorized) {
+          transactions
+            .aggregate([
+              {
+                $match: { username: username, type: cat },
               },
-            },
-            { $unwind: "$categories_info" },
-          ])
-          .then((result) => {
-            let data = result.map((v) =>
-              Object.assign(
-                {},
-                {
-                  _id: v._id,
-                  username: v.username,
-                  amount: v.amount,
-                  type: v.type,
-                  color: v.categories_info.color,
-                  date: v.date,
-                }
-              )
-            );
-            res.status(200).json({ data, message: adminAuth.cause });
+              {
+                $lookup: {
+                  from: "categories",
+                  localField: "type",
+                  foreignField: "type",
+                  as: "categories_info",
+                },
+              },
+              { $unwind: "$categories_info" },
+            ])
+            .then((result) => {
+              let data = result.map((v) =>
+                Object.assign(
+                  {},
+                  {
+                    _id: v._id,
+                    username: v.username,
+                    amount: v.amount,
+                    type: v.type,
+                    color: v.categories_info.color,
+                    date: v.date,
+                  }
+                )
+              );
+              res.status(200).json({
+                refreshedTokenMessage: res.locals.refreshedTokenMessage,
+                data,
+                message: userAuth.cause,
+              });
+            });
+          ///if userAuth fails (Username mismatch) it means that a user want to retrieve info about another user
+        } else {
+          return res.status(401).json({
+            refreshedTokenMessage: res.locals.refreshedTokenMessage,
+            message: userAuth.cause,
           });
+        }
       } else {
-        return res.status(401).json({ message: adminAuth.cause });
+        const adminAuth = verifyAuth(req, res, { authType: "Admin" });
+        ///if the user is an Admin ok, otherwise unauthorized
+        if (adminAuth.authorized) {
+          transactions
+            .aggregate([
+              {
+                $match: { username: username, type: cat },
+              },
+              {
+                $lookup: {
+                  from: "categories",
+                  localField: "type",
+                  foreignField: "type",
+                  as: "categories_info",
+                },
+              },
+              { $unwind: "$categories_info" },
+            ])
+            .then((result) => {
+              let data = result.map((v) =>
+                Object.assign(
+                  {},
+                  {
+                    _id: v._id,
+                    username: v.username,
+                    amount: v.amount,
+                    type: v.type,
+                    color: v.categories_info.color,
+                    date: v.date,
+                  }
+                )
+              );
+              res.status(200).json({
+                data,
+                refreshedTokenMessage: res.locals.refreshedTokenMessage,
+                message: adminAuth.cause,
+              });
+            });
+        } else {
+          return res.status(401).json({
+            refreshedTokenMessage: res.locals.refreshedTokenMessage,
+            message: adminAuth.cause,
+          });
+        }
       }
+    } else {
+      return res.status(400).json({
+        refreshedTokenMessage: res.locals.refreshedTokenMessage,
+        message: "User not found",
+      });
     }
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({
+      refreshedTokenMessage: res.locals.refreshedTokenMessage,
+      error: error.message,
+    });
   }
 };
 
 /**
- * Return all transactions made by members of a specific group
-  - Request Body Content: None
-  - Response `data` Content: An array of objects, each one having attributes `username`, `type`, `amount`, `date` and `color`
-  - Optional behavior:
-    - error 401 is returned if the group does not exist
-    - empty array must be returned if there are no transactions made by the group
- */
+     * Return all transactions made by members of a specific group
+      - Request Body Content: None
+      - Response `data` Content: An array of objects, each one having attributes `username`, `type`, `amount`, `date` and `color`
+      - Optional behavior:
+        - error 401 is returned if the group does not exist
+        - empty array must be returned if there are no transactions made by the group
+     */
 export const getTransactionsByGroup = async (req, res) => {
   try {
-    const name = req.params.name;
-    const group = await Group.findOne({ name });
-    if (!group) {
-      return res.status(401).json({ message: "Group does not exist" });
-    } else {
+    const groupName = req.params.name;
+    const group = await Group.findOne({ name: groupName });
+    if (group) {
       const emails = group.members.map((member) => member.email);
       let usernames = await User.find({ email: emails });
       usernames = usernames.map((user) => user.username);
-      const groupAuth = verifyAuth(req, res, {
-        authType: "Group",
-        emails: group.members.map((member) => member.email),
-      });
-      if (groupAuth.authorized) {
-        transactions
-          .aggregate([
-            {
-              $match: {
-                username: {
-                  $in: usernames,
+      if (req.url.includes("/groups/" + groupName + "/transactions")) {
+        const groupAuth = verifyAuth(req, res, {
+          authType: "Group",
+          emails: group.members.map((member) => member.email),
+        });
+        if (groupAuth.authorized) {
+          transactions
+            .aggregate([
+              {
+                $match: {
+                  username: {
+                    $in: usernames,
+                  },
                 },
               },
-            },
-            {
-              $lookup: {
-                from: "categories",
-                localField: "type",
-                foreignField: "type",
-                as: "categories_info",
+              {
+                $lookup: {
+                  from: "categories",
+                  localField: "type",
+                  foreignField: "type",
+                  as: "categories_info",
+                },
               },
-            },
-            { $unwind: "$categories_info" },
-          ])
-          .then((result) => {
-            let data = result.map((v) =>
-              Object.assign(
-                {},
-                {
-                  _id: v._id,
-                  username: v.username,
-                  amount: v.amount,
-                  type: v.type,
-                  color: v.categories_info.color,
-                  date: v.date,
-                }
-              )
-            );
-            return res.status(200).json({ data, message: groupAuth.cause });
+              { $unwind: "$categories_info" },
+            ])
+            .then((result) => {
+              let data = result.map((v) =>
+                Object.assign(
+                  {},
+                  {
+                    _id: v._id,
+                    username: v.username,
+                    amount: v.amount,
+                    type: v.type,
+                    color: v.categories_info.color,
+                    date: v.date,
+                  }
+                )
+              );
+              res.status(200).json({
+                refreshedTokenMessage: res.locals.refreshedTokenMessage,
+                data,
+                message: groupAuth.cause,
+              });
+            });
+          ///if userAuth fails (Username mismatch) it means that a user want to retrieve info about another user
+        } else {
+          return res.status(401).json({
+            refreshedTokenMessage: res.locals.refreshedTokenMessage,
+            message: groupAuth.cause,
           });
+        }
       } else {
         const adminAuth = verifyAuth(req, res, { authType: "Admin" });
+        ///if the user is an Admin ok, otherwise unauthorized
         if (adminAuth.authorized) {
           transactions
             .aggregate([
@@ -617,83 +724,107 @@ export const getTransactionsByGroup = async (req, res) => {
                   }
                 )
               );
-              return res.status(200).json({ data, message: adminAuth.cause });
+              res.status(200).json({
+                data,
+                refreshedTokenMessage: res.locals.refreshedTokenMessage,
+                message: adminAuth.cause,
+              });
             });
         } else {
-          return res.status(401).json({ message: adminAuth.cause });
+          return res.status(401).json({
+            refreshedTokenMessage: res.locals.refreshedTokenMessage,
+            message: adminAuth.cause,
+          });
         }
       }
+    } else {
+      return res.status(400).json({
+        refreshedTokenMessage: res.locals.refreshedTokenMessage,
+        message: "Group not found",
+      });
     }
   } catch (error) {
-    return res.status(500).json({ message: error.message });
+    res.status(500).json({
+      refreshedTokenMessage: res.locals.refreshedTokenMessage,
+      error: error.message,
+    });
   }
 };
 
 /**
- * Return all transactions made by members of a specific group filtered by a specific category
-  - Request Body Content: None
-  - Response `data` Content: An array of objects, each one having attributes `username`, `type`, `amount`, `date` and `color`, filtered so that `type` is the same for all objects.
-  - Optional behavior:
-    - error 401 is returned if the group or the category does not exist
-    - empty array must be returned if there are no transactions made by the group with the specified category
- */
+     * Return all transactions made by members of a specific group filtered by a specific category
+      - Request Body Content: None
+      - Response `data` Content: An array of objects, each one having attributes `username`, `type`, `amount`, `date` and `color`, filtered so that `type` is the same for all objects.
+      - Optional behavior:
+        - error 401 is returned if the group or the category does not exist
+        - empty array must be returned if there are no transactions made by the group with the specified category
+     */
 export const getTransactionsByGroupByCategory = async (req, res) => {
   try {
-    /* const cookie = req.cookies;
-    if (!cookie.accessToken) {
-      return res.status(401).json({ message: "Unauthorized" }); // unauthorized
-    } */
-    const name = req.params.name;
-    const group = await Group.findOne({ name });
-    if (!group) {
-      return res.status(400).json({ error: "Group does not exist" });
-    } else {
+    const groupName = req.params.name;
+    const categoryType = req.params.category;
+    const group = await Group.findOne({ name: groupName });
+    const category = await categories.findOne({ type: categoryType });
+    if (group && category) {
       const emails = group.members.map((member) => member.email);
       let usernames = await User.find({ email: emails });
       usernames = usernames.map((user) => user.username);
-      const groupAuth = verifyAuth(req, res, {
-        authType: "Group",
-        emails: group.members.map((member) => member.email),
-      });
-      if (groupAuth.authorized) {
-        transactions
-          .aggregate([
-            {
-              $match: {
-                username: {
-                  $in: usernames,
+      if (req.url.includes("/groups/" + groupName + "/transactions")) {
+        const groupAuth = verifyAuth(req, res, {
+          authType: "Group",
+          emails: group.members.map((member) => member.email),
+        });
+        if (groupAuth.authorized) {
+          transactions
+            .aggregate([
+              {
+                $match: {
+                  username: {
+                    $in: usernames,
+                  },
+                  type: req.params.category,
                 },
-                type: req.params.category,
               },
-            },
-            {
-              $lookup: {
-                from: "categories",
-                localField: "type",
-                foreignField: "type",
-                as: "categories_info",
+              {
+                $lookup: {
+                  from: "categories",
+                  localField: "type",
+                  foreignField: "type",
+                  as: "categories_info",
+                },
               },
-            },
-            { $unwind: "$categories_info" },
-          ])
-          .then((result) => {
-            let data = result.map((v) =>
-              Object.assign(
-                {},
-                {
-                  _id: v._id,
-                  username: v.username,
-                  amount: v.amount,
-                  type: v.type,
-                  color: v.categories_info.color,
-                  date: v.date,
-                }
-              )
-            );
-            return res.status(200).json({ data, message: groupAuth.cause });
+              { $unwind: "$categories_info" },
+            ])
+            .then((result) => {
+              let data = result.map((v) =>
+                Object.assign(
+                  {},
+                  {
+                    _id: v._id,
+                    username: v.username,
+                    amount: v.amount,
+                    type: v.type,
+                    color: v.categories_info.color,
+                    date: v.date,
+                  }
+                )
+              );
+              res.status(200).json({
+                refreshedTokenMessage: res.locals.refreshedTokenMessage,
+                data,
+                message: groupAuth.cause,
+              });
+            });
+          ///if userAuth fails (Username mismatch) it means that a user want to retrieve info about another user
+        } else {
+          return res.status(401).json({
+            refreshedTokenMessage: res.locals.refreshedTokenMessage,
+            message: groupAuth.cause,
           });
+        }
       } else {
         const adminAuth = verifyAuth(req, res, { authType: "Admin" });
+        ///if the user is an Admin ok, otherwise unauthorized
         if (adminAuth.authorized) {
           transactions
             .aggregate([
@@ -729,84 +860,144 @@ export const getTransactionsByGroupByCategory = async (req, res) => {
                   }
                 )
               );
-              return res.status(200).json({ data, message: adminAuth.cause });
+              res.status(200).json({
+                data,
+                refreshedTokenMessage: res.locals.refreshedTokenMessage,
+                message: adminAuth.cause,
+              });
             });
         } else {
-          return res.status(401).json({ message: adminAuth.cause });
+          return res.status(401).json({
+            refreshedTokenMessage: res.locals.refreshedTokenMessage,
+            message: adminAuth.cause,
+          });
+        }
+      }
+    } else {
+      return res.status(400).json({
+        refreshedTokenMessage: res.locals.refreshedTokenMessage,
+        message: "Group or category not found",
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      refreshedTokenMessage: res.locals.refreshedTokenMessage,
+      error: error.message,
+    });
+  }
+};
+
+/**
+     * Delete a transaction made by a specific user
+      - Request Body Content: The `_id` of the transaction to be deleted
+      - Response `data` Content: A string indicating successful deletion of the transaction
+      - Optional behavior:
+        - error 401 is returned if the user or the transaction does not exist
+     */
+export const deleteTransaction = async (req, res) => {
+  try {
+    const id = req.body._id;
+    if (!id || id === "") {
+      return res.status(400).json({
+        refreshedTokenMessage: res.locals.refreshedTokenMessage,
+        message: "Missing parameters",
+      }); // unauthorized
+    } else {
+      const username = req.params.username;
+      const transaction = await transactions.findOne({ _id: id });
+      const user = await User.findOne({ username: username });
+      if (user && transaction) {
+        const caller_username = req.params.username;
+        const userAuth = verifyAuth(req, res, {
+          authType: "User",
+          username: caller_username,
+        });
+        ///if userAuth return true, user can retrieve only info about himself
+        if (userAuth.authorized) {
+          const data = await transactions.deleteOne({ _id: id });
+          return res.status(200).json({
+            data: data,
+            refreshedTokenMessage: res.locals.refreshedTokenMessage,
+            message: "Transaction deleted",
+          });
+        } else {
+          const adminAuth = verifyAuth(req, res, { authType: "Admin" });
+          ///if the user is an Admin ok, otherwise unauthorized
+          if (adminAuth.authorized) {
+            const data = await transactions.deleteOne({ _id: id });
+            return res.status(200).json({
+              data: data,
+              refreshedTokenMessage: res.locals.refreshedTokenMessage,
+              message: "Transaction deleted",
+            });
+          } else {
+            return res.status(401).json({
+              refreshedTokenMessage: res.locals.refreshedTokenMessage,
+              message: "Unauthorized",
+            });
+          }
+        }
+      } else {
+        return res.status(400).json({
+          refreshedTokenMessage: res.locals.refreshedTokenMessage,
+          message: "User or transaction not found",
+        });
+      }
+    }
+  } catch (error) {
+    res.status(500).json({
+      refreshedTokenMessage: res.locals.refreshedTokenMessage,
+      error: error.message,
+    });
+  }
+};
+
+/**
+     * Delete multiple transactions identified by their ids
+      - Request Body Content: An array of strings that lists the `_ids` of the transactions to be deleted
+      - Response `data` Content: A message confirming successful deletion
+      - Optional behavior:
+        - error 401 is returned if at least one of the `_ids` does not have a corresponding transaction. Transactions that have an id are not deleted in this case
+     */
+export const deleteTransactions = async (req, res) => {
+  try {
+    const ids = req.body._ids;
+    if (!ids) {
+      return res.status(400).json({
+        refreshedTokenMessage: res.locals.refreshedTokenMessage,
+        message: "Invalid IDS",
+      });
+    } else {
+      console.log(ids);
+      for (const id of ids) {
+        const transaction = await transactions.findOne({ _id: id });
+        if (!id || id === "" || !transaction) {
+          return res.status(400).json({
+            refreshedTokenMessage: res.locals.refreshedTokenMessage,
+            message: "Invalid ID",
+          });
+        }
+        const adminAuth = verifyAuth(req, res, { authType: "Admin" });
+        ///if the user is an Admin ok, otherwise unauthorized
+        if (adminAuth.authorized) {
+          const data = await transactions.deleteMany({ _id: id });
+          return res.status(200).json({
+            data: data,
+            refreshedTokenMessage: res.locals.refreshedTokenMessage,
+            message: "Transactions deleted",
+          });
+        } else {
+          return res.status(401).json({
+            refreshedTokenMessage: res.locals.refreshedTokenMessage,
+            message: "Unauthorized",
+          });
         }
       }
     }
   } catch (error) {
-    return res.status(500).json({ message: error.message });
-  }
-};
-
-/**
- * Delete a transaction made by a specific user
-  - Request Body Content: The `_id` of the transaction to be deleted
-  - Response `data` Content: A string indicating successful deletion of the transaction
-  - Optional behavior:
-    - error 401 is returned if the user or the transaction does not exist
- */
-export const deleteTransaction = async (req, res) => {
-  try {
-    /* const cookie = req.cookies;
-    if (!cookie.accessToken) {
-      return res.status(401).json({ message: "Unauthorized" }); // unauthorized
-    } */
-    const id = req.body._id;
-    if (!id) {
-      return res.status(401).json({ message: "Missing parameters" }); // unauthorized
-    }
-    const caller_username = req.params.username;
-    const userAuth = verifyAuth(req, res, {
-      authType: "User",
-      username: caller_username,
+    res.status(500).json({
+      refreshedTokenMessage: res.locals.refreshedTokenMessage,
+      error: error.message,
     });
-    ///if userAuth return true, user can retrieve only info about himself
-    if (userAuth.authorized) {
-      const data = await transactions.deleteOne({ _id: id });
-      return res.status(200).json({ data: data, message: "deleted" });
-    } else {
-      const adminAuth = verifyAuth(req, res, { authType: "Admin" });
-      ///if the user is an Admin ok, otherwise unauthorized
-      if (adminAuth.authorized) {
-        const data = await transactions.deleteOne({ _id: id });
-        return res.status(200).json({ data: data, message: "deleted" });
-      } else {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
-    }
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-};
-
-/**
- * Delete multiple transactions identified by their ids
-  - Request Body Content: An array of strings that lists the `_ids` of the transactions to be deleted
-  - Response `data` Content: A message confirming successful deletion
-  - Optional behavior:
-    - error 401 is returned if at least one of the `_ids` does not have a corresponding transaction. Transactions that have an id are not deleted in this case
- */
-export const deleteTransactions = async (req, res) => {
-  try {
-    /* const cookie = req.cookies;
-    if (!cookie.accessToken) {
-      return res.status(401).json({ message: "Unauthorized" }); // unauthorized
-    } */
-    if (req.body._id) {
-      const adminAuth = verifyAuth(req, res, { authType: "Admin" });
-      if (adminAuth.authorized) {
-        const data = await transactions.deleteMany({ _id: req.body._id });
-        return res.status(200).json({ data: data, message: "deleted" });
-      } else {
-        return res.status(401).json({ message: adminAuth.cause });
-      }
-    } else {
-      return res.status(401).json({ message: "Missing parameters" });
-    }
-  } catch (error) {
-    return res.status(500).json({ error: error.message });
   }
 };
