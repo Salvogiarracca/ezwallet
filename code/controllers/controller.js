@@ -380,7 +380,6 @@ export const getTransactionsByUser = async (req, res) => {
     const username = req.params.username;
     const user = await User.findOne({ username: username });
     if (user) {
-      console.log(req.url);
       if (req.url.includes("/users/" + username + "/transactions")) {
         const userAuth = verifyAuth(req, res, {
           authType: "User",
@@ -602,7 +601,7 @@ export const getTransactionsByUserByCategory = async (req, res) => {
     } else {
       return res.status(400).json({
         refreshedTokenMessage: res.locals.refreshedTokenMessage,
-        message: "User not found",
+        message: "User or category not found",
       });
     }
   } catch (error) {
@@ -962,19 +961,18 @@ export const deleteTransactions = async (req, res) => {
         message: "Invalid IDS",
       });
     } else {
-      console.log(ids);
       for (const id of ids) {
         const transaction = await transactions.findOne({ _id: id });
         if (!id || id === "" || !transaction) {
           return res.status(400).json({
             refreshedTokenMessage: res.locals.refreshedTokenMessage,
-            message: "Invalid ID",
+            message: "Invalid ID:"+id,
           });
-        }
+        }}
         const adminAuth = verifyAuth(req, res, { authType: "Admin" });
         ///if the user is an Admin ok, otherwise unauthorized
         if (adminAuth.authorized) {
-          const data = await transactions.deleteMany({ _id: id });
+          const data = await transactions.deleteMany({ _id: { $in: ids} });
           return res.status(200).json({
             data: data,
             refreshedTokenMessage: res.locals.refreshedTokenMessage,
@@ -986,7 +984,6 @@ export const deleteTransactions = async (req, res) => {
             message: "Unauthorized",
           });
         }
-      }
     }
   } catch (error) {
     res.status(500).json({

@@ -120,7 +120,6 @@ describe("createTransaction", () => {
       .then((response) => {
         //After obtaining the response, we check its actual body content
         //The status must represent successful execution
-        //console.log(response)
         expect(response.status).toBe(200);
         //The "data" object must have a field named "message" that confirms that changes are successful
         //The actual value of the field could be any string, so it's not checked
@@ -178,7 +177,6 @@ describe("createTransaction", () => {
       .then((response) => {
         //After obtaining the response, we check its actual body content
         //The status must represent successful execution
-        //console.log(response)
         expect(response.status).toBe(400);
         //The "data" object must have a field named "message" that confirms that changes are successful
         //The actual value of the field could be any string, so it's not checked
@@ -468,7 +466,15 @@ describe("getAllTransactions", () => {
         //The actual value of the field could be any string, so it's not checked
         expect(response.body).toHaveProperty("message");
         //We expect the count of edited transactions returned to be equal to 2 (the two transactions we placed in the database)
-        expect(response.body.data.map((obj)=>{return {amount:obj.amount,type:obj.type,username:obj.username}})).toEqual(testTransactions);
+        expect(
+          response.body.data.map((obj) => {
+            return {
+              amount: obj.amount,
+              type: obj.type,
+              username: obj.username,
+            };
+          })
+        ).toEqual(testTransactions);
         //Must be called at the end of every test or the test will fail while waiting for it to be called
         //done();
       });
@@ -542,35 +548,41 @@ describe("getTransactionsByUser", () => {
       password: "tester",
       refreshToken: testerAccessTokenValid,
     };
-    const testUsers = [testAdmin,testUser];
-    const testUserTransactions=[{
-      username: "tester",
-      amount: 9000,
-      type: "test",
-    },
-    {
-      username: "tester",
-      amount: 3000,
-      type: "test",
-    }]
-    const testAdminTransactions=[{
-      username: "admin",
-      amount: 12000,
-      type: "test",
-    },
-    {
-      username: "admin",
-      amount: 1000,
-      type: "test",
-    }]
-    const testTransactions=[...testAdminTransactions,...testUserTransactions]
+    const testUsers = [testAdmin, testUser];
+    const testUserTransactions = [
+      {
+        username: "tester",
+        amount: 9000,
+        type: "test",
+      },
+      {
+        username: "tester",
+        amount: 3000,
+        type: "test",
+      },
+    ];
+    const testAdminTransactions = [
+      {
+        username: "admin",
+        amount: 12000,
+        type: "test",
+      },
+      {
+        username: "admin",
+        amount: 1000,
+        type: "test",
+      },
+    ];
+    const testTransactions = [
+      ...testAdminTransactions,
+      ...testUserTransactions,
+    ];
     const testCategory = {
       type: "test",
       color: "green",
     };
     await categories.create(testCategory);
     await User.insertMany(testUsers);
-    console.log(testTransactions)
     await transactions.insertMany(testTransactions);
     await request(app)
       .get("/api/users/" + testUser.username + "/transactions") //Route to call
@@ -582,7 +594,15 @@ describe("getTransactionsByUser", () => {
       .then((response) => {
         expect(response.status).toBe(200);
         expect(response.body.message).toEqual("Authorized");
-        expect(response.body.data.map((obj)=>{return {amount:obj.amount,type:obj.type,username:obj.username}})).toEqual(testUserTransactions);
+        expect(
+          response.body.data.map((obj) => {
+            return {
+              amount: obj.amount,
+              type: obj.type,
+              username: obj.username,
+            };
+          })
+        ).toEqual(testUserTransactions);
       });
   });
 
@@ -599,35 +619,41 @@ describe("getTransactionsByUser", () => {
       password: "tester",
       refreshToken: testerAccessTokenValid,
     };
-    const testUsers = [testAdmin,testUser];
-    const testUserTransactions=[{
-      username: "tester",
-      amount: 9000,
-      type: "test",
-    },
-    {
-      username: "tester",
-      amount: 3000,
-      type: "test",
-    }]
-    const testAdminTransactions=[{
-      username: "admin",
-      amount: 12000,
-      type: "test",
-    },
-    {
-      username: "admin",
-      amount: 1000,
-      type: "test",
-    }]
-    const testTransactions=[...testAdminTransactions,...testUserTransactions]
+    const testUsers = [testAdmin, testUser];
+    const testUserTransactions = [
+      {
+        username: "tester",
+        amount: 9000,
+        type: "test",
+      },
+      {
+        username: "tester",
+        amount: 3000,
+        type: "test",
+      },
+    ];
+    const testAdminTransactions = [
+      {
+        username: "admin",
+        amount: 12000,
+        type: "test",
+      },
+      {
+        username: "admin",
+        amount: 1000,
+        type: "test",
+      },
+    ];
+    const testTransactions = [
+      ...testAdminTransactions,
+      ...testUserTransactions,
+    ];
     const testCategory = {
       type: "test",
       color: "green",
     };
     await categories.create(testCategory);
     await User.insertMany(testUsers);
-    console.log(testTransactions)
     await transactions.insertMany(testTransactions);
     await request(app)
       .get("/api/users/" + testUser.username + "/transactions") //Route to call
@@ -655,35 +681,41 @@ describe("getTransactionsByUser", () => {
       password: "tester",
       refreshToken: testerAccessTokenValid,
     };
-    const testUsers = [testAdmin,testUser];
-    const testUserTransactions=[{
-      username: "tester",
-      amount: 9000,
-      type: "test",
-    },
-    {
-      username: "tester",
-      amount: 3000,
-      type: "test",
-    }]
-    const testAdminTransactions=[{
-      username: "admin",
-      amount: 12000,
-      type: "test",
-    },
-    {
-      username: "admin",
-      amount: 1000,
-      type: "test",
-    }]
-    const testTransactions=[...testAdminTransactions,...testUserTransactions]
+    const testUsers = [testAdmin, testUser];
+    const testUserTransactions = [
+      {
+        username: "tester",
+        amount: 9000,
+        type: "test",
+      },
+      {
+        username: "tester",
+        amount: 3000,
+        type: "test",
+      },
+    ];
+    const testAdminTransactions = [
+      {
+        username: "admin",
+        amount: 12000,
+        type: "test",
+      },
+      {
+        username: "admin",
+        amount: 1000,
+        type: "test",
+      },
+    ];
+    const testTransactions = [
+      ...testAdminTransactions,
+      ...testUserTransactions,
+    ];
     const testCategory = {
       type: "test",
       color: "green",
     };
     await categories.create(testCategory);
     await User.insertMany(testUsers);
-    console.log(testTransactions)
     await transactions.insertMany(testTransactions);
     await request(app)
       .get("/api/transactions/users/" + testUser.username) //Route to call
@@ -695,7 +727,15 @@ describe("getTransactionsByUser", () => {
       .then((response) => {
         expect(response.status).toBe(200);
         expect(response.body.message).toEqual("Authorized");
-        expect(response.body.data.map((obj)=>{return {amount:obj.amount,type:obj.type,username:obj.username}})).toEqual(testUserTransactions);
+        expect(
+          response.body.data.map((obj) => {
+            return {
+              amount: obj.amount,
+              type: obj.type,
+              username: obj.username,
+            };
+          })
+        ).toEqual(testUserTransactions);
       });
   });
 
@@ -712,35 +752,41 @@ describe("getTransactionsByUser", () => {
       password: "tester",
       refreshToken: testerAccessTokenValid,
     };
-    const testUsers = [testAdmin,testUser];
-    const testUserTransactions=[{
-      username: "tester",
-      amount: 9000,
-      type: "test",
-    },
-    {
-      username: "tester",
-      amount: 3000,
-      type: "test",
-    }]
-    const testAdminTransactions=[{
-      username: "admin",
-      amount: 12000,
-      type: "test",
-    },
-    {
-      username: "admin",
-      amount: 1000,
-      type: "test",
-    }]
-    const testTransactions=[...testAdminTransactions,...testUserTransactions]
+    const testUsers = [testAdmin, testUser];
+    const testUserTransactions = [
+      {
+        username: "tester",
+        amount: 9000,
+        type: "test",
+      },
+      {
+        username: "tester",
+        amount: 3000,
+        type: "test",
+      },
+    ];
+    const testAdminTransactions = [
+      {
+        username: "admin",
+        amount: 12000,
+        type: "test",
+      },
+      {
+        username: "admin",
+        amount: 1000,
+        type: "test",
+      },
+    ];
+    const testTransactions = [
+      ...testAdminTransactions,
+      ...testUserTransactions,
+    ];
     const testCategory = {
       type: "test",
       color: "green",
     };
     await categories.create(testCategory);
     await User.insertMany(testUsers);
-    console.log(testTransactions)
     await transactions.insertMany(testTransactions);
     await request(app)
       .get("/api/transactions/users/" + testUser.username) //Route to call
@@ -770,34 +816,40 @@ describe("getTransactionsByUser", () => {
       refreshToken: testerAccessTokenValid,
     };
     const testUsers = [testAdmin];
-    const testUserTransactions=[{
-      username: "tester",
-      amount: 9000,
-      type: "test",
-    },
-    {
-      username: "tester",
-      amount: 3000,
-      type: "test",
-    }]
-    const testAdminTransactions=[{
-      username: "admin",
-      amount: 12000,
-      type: "test",
-    },
-    {
-      username: "admin",
-      amount: 1000,
-      type: "test",
-    }]
-    const testTransactions=[...testAdminTransactions,...testUserTransactions]
+    const testUserTransactions = [
+      {
+        username: "tester",
+        amount: 9000,
+        type: "test",
+      },
+      {
+        username: "tester",
+        amount: 3000,
+        type: "test",
+      },
+    ];
+    const testAdminTransactions = [
+      {
+        username: "admin",
+        amount: 12000,
+        type: "test",
+      },
+      {
+        username: "admin",
+        amount: 1000,
+        type: "test",
+      },
+    ];
+    const testTransactions = [
+      ...testAdminTransactions,
+      ...testUserTransactions,
+    ];
     const testCategory = {
       type: "test",
       color: "green",
     };
     await categories.create(testCategory);
     await User.insertMany(testUsers);
-    console.log(testTransactions)
     await transactions.insertMany(testTransactions);
     await request(app)
       .get("/api/transactions/users/" + testUser.username) //Route to call
@@ -812,36 +864,1901 @@ describe("getTransactionsByUser", () => {
         expect(response.body.message).toEqual("User not found");
       });
   });
-
 });
 
-//Voy aca
 describe("getTransactionsByUserByCategory", () => {
-  test("Dummy test, change it", () => {
-    expect(true).toBe(true);
+  test("Successful user request", async () => {
+    const testAdmin = {
+      username: "admin",
+      email: "admin@test.com",
+      password: "tester",
+      refreshToken: adminAccessTokenValid,
+    };
+    const testUser = {
+      username: "tester",
+      email: "tester@test.com",
+      password: "tester",
+      refreshToken: testerAccessTokenValid,
+    };
+    const testUsers = [testAdmin, testUser];
+    const testUserTransactions = [
+      {
+        username: "tester",
+        amount: 9000,
+        type: "test",
+      },
+      {
+        username: "tester",
+        amount: 5000,
+        type: "home",
+      },
+      {
+        username: "tester",
+        amount: 3000,
+        type: "test",
+      },
+    ];
+    const testAdminTransactions = [
+      {
+        username: "admin",
+        amount: 12000,
+        type: "test",
+      },
+      {
+        username: "admin",
+        amount: 1000,
+        type: "test",
+      },
+    ];
+    const testTransactions = [
+      ...testAdminTransactions,
+      ...testUserTransactions,
+    ];
+    const testCategories = [
+      {
+        type: "test",
+        color: "green",
+      },
+      {
+        type: "home",
+        color: "green",
+      },
+    ];
+    await categories.insertMany(testCategories);
+    await User.insertMany(testUsers);
+    await transactions.insertMany(testTransactions);
+    await request(app)
+      .get(
+        "/api/users/" +
+          testUser.username +
+          "/transactions/category/" +
+          testCategories[0].type
+      ) //Route to call
+      .set(
+        "Cookie",
+        `accessToken=${testerAccessTokenValid}; refreshToken=${testerAccessTokenValid}`
+      ) //Setting cookies in the request
+      .send()
+      .then((response) => {
+        expect(response.status).toBe(200);
+        expect(response.body.message).toEqual("Authorized");
+        expect(
+          response.body.data.map((obj) => {
+            return {
+              amount: obj.amount,
+              type: obj.type,
+              username: obj.username,
+            };
+          })
+        ).toEqual(
+          testUserTransactions.filter(
+            (trans) => trans.type === testCategories[0].type
+          )
+        );
+      });
+  });
+
+  test("Unauthorized user request", async () => {
+    const testAdmin = {
+      username: "admin",
+      email: "admin@test.com",
+      password: "tester",
+      refreshToken: adminAccessTokenValid,
+    };
+    const testUser = {
+      username: "tester",
+      email: "tester@test.com",
+      password: "tester",
+      refreshToken: testerAccessTokenValid,
+    };
+    const testUsers = [testAdmin, testUser];
+    const testUserTransactions = [
+      {
+        username: "tester",
+        amount: 9000,
+        type: "test",
+      },
+      {
+        username: "tester",
+        amount: 5000,
+        type: "home",
+      },
+      {
+        username: "tester",
+        amount: 3000,
+        type: "test",
+      },
+    ];
+    const testAdminTransactions = [
+      {
+        username: "admin",
+        amount: 12000,
+        type: "test",
+      },
+      {
+        username: "admin",
+        amount: 1000,
+        type: "test",
+      },
+    ];
+    const testTransactions = [
+      ...testAdminTransactions,
+      ...testUserTransactions,
+    ];
+    const testCategories = [
+      {
+        type: "test",
+        color: "green",
+      },
+      {
+        type: "home",
+        color: "green",
+      },
+    ];
+    await categories.insertMany(testCategories);
+    await User.insertMany(testUsers);
+    await transactions.insertMany(testTransactions);
+    await request(app)
+      .get(
+        "/api/users/" +
+          testUser.username +
+          "/transactions/category/" +
+          testCategories[0].type
+      ) //Route to call
+      .set(
+        "Cookie",
+        `accessToken=${adminAccessTokenValid}; refreshToken=${adminAccessTokenValid}`
+      ) //Setting cookies in the request
+      .send()
+      .then((response) => {
+        expect(response.status).toBe(401);
+        expect(response.body.message).toEqual("Unauthorized");
+        //expect(response.body.data.map((obj)=>{return {amount:obj.amount,type:obj.type,username:obj.username}})).toEqual(testUserTransactions.filter((trans)=>trans.type===testCategories[0].type));
+      });
+  });
+
+  test("Successful admin request", async () => {
+    const testAdmin = {
+      username: "admin",
+      email: "admin@test.com",
+      password: "tester",
+      refreshToken: adminAccessTokenValid,
+    };
+    const testUser = {
+      username: "tester",
+      email: "tester@test.com",
+      password: "tester",
+      refreshToken: testerAccessTokenValid,
+    };
+    const testUsers = [testAdmin, testUser];
+    const testUserTransactions = [
+      {
+        username: "tester",
+        amount: 9000,
+        type: "test",
+      },
+      {
+        username: "tester",
+        amount: 5000,
+        type: "home",
+      },
+      {
+        username: "tester",
+        amount: 3000,
+        type: "test",
+      },
+    ];
+    const testAdminTransactions = [
+      {
+        username: "admin",
+        amount: 12000,
+        type: "test",
+      },
+      {
+        username: "admin",
+        amount: 1000,
+        type: "test",
+      },
+    ];
+    const testTransactions = [
+      ...testAdminTransactions,
+      ...testUserTransactions,
+    ];
+    const testCategories = [
+      {
+        type: "test",
+        color: "green",
+      },
+      {
+        type: "home",
+        color: "green",
+      },
+    ];
+    await categories.insertMany(testCategories);
+    await User.insertMany(testUsers);
+    await transactions.insertMany(testTransactions);
+    await request(app)
+      .get(
+        "/api/transactions/users/" +
+          testUser.username +
+          "/category/" +
+          testCategories[0].type
+      ) //Route to call
+      .set(
+        "Cookie",
+        `accessToken=${adminAccessTokenValid}; refreshToken=${adminAccessTokenValid}`
+      ) //Setting cookies in the request
+      .send()
+      .then((response) => {
+        expect(response.status).toBe(200);
+        expect(response.body.message).toEqual("Authorized");
+        expect(
+          response.body.data.map((obj) => {
+            return {
+              amount: obj.amount,
+              type: obj.type,
+              username: obj.username,
+            };
+          })
+        ).toEqual(
+          testUserTransactions.filter(
+            (trans) => trans.type === testCategories[0].type
+          )
+        );
+      });
+  });
+
+  test("Unauthorized admin request", async () => {
+    const testAdmin = {
+      username: "admin",
+      email: "admin@test.com",
+      password: "tester",
+      refreshToken: adminAccessTokenValid,
+    };
+    const testUser = {
+      username: "tester",
+      email: "tester@test.com",
+      password: "tester",
+      refreshToken: testerAccessTokenValid,
+    };
+    const testUsers = [testAdmin, testUser];
+    const testUserTransactions = [
+      {
+        username: "tester",
+        amount: 9000,
+        type: "test",
+      },
+      {
+        username: "tester",
+        amount: 5000,
+        type: "home",
+      },
+      {
+        username: "tester",
+        amount: 3000,
+        type: "test",
+      },
+    ];
+    const testAdminTransactions = [
+      {
+        username: "admin",
+        amount: 12000,
+        type: "test",
+      },
+      {
+        username: "admin",
+        amount: 1000,
+        type: "test",
+      },
+    ];
+    const testTransactions = [
+      ...testAdminTransactions,
+      ...testUserTransactions,
+    ];
+    const testCategories = [
+      {
+        type: "test",
+        color: "green",
+      },
+      {
+        type: "home",
+        color: "green",
+      },
+    ];
+    await categories.insertMany(testCategories);
+    await User.insertMany(testUsers);
+    await transactions.insertMany(testTransactions);
+    await request(app)
+      .get(
+        "/api/transactions/users/" +
+          testUser.username +
+          "/category/" +
+          testCategories[0].type
+      ) //Route to call
+      .set(
+        "Cookie",
+        `accessToken=${testerAccessTokenValid}; refreshToken=${testerAccessTokenValid}`
+      ) //Setting cookies in the request
+      .send()
+      .then((response) => {
+        expect(response.status).toBe(401);
+        expect(response.body.message).toEqual("Unauthorized");
+        //expect(response.body.data.map((obj)=>{return {amount:obj.amount,type:obj.type,username:obj.username}})).toEqual(testUserTransactions.filter((trans)=>trans.type===testCategories[0].type));
+      });
+  });
+
+  test("User not found request", async () => {
+    const testAdmin = {
+      username: "admin",
+      email: "admin@test.com",
+      password: "tester",
+      refreshToken: adminAccessTokenValid,
+    };
+    const testUser = {
+      username: "tester",
+      email: "tester@test.com",
+      password: "tester",
+      refreshToken: testerAccessTokenValid,
+    };
+    const testUsers = [testAdmin, testUser];
+    const testUserTransactions = [
+      {
+        username: "tester",
+        amount: 9000,
+        type: "test",
+      },
+      {
+        username: "tester",
+        amount: 5000,
+        type: "home",
+      },
+      {
+        username: "tester",
+        amount: 3000,
+        type: "test",
+      },
+    ];
+    const testAdminTransactions = [
+      {
+        username: "admin",
+        amount: 12000,
+        type: "test",
+      },
+      {
+        username: "admin",
+        amount: 1000,
+        type: "test",
+      },
+    ];
+    const testTransactions = [
+      ...testAdminTransactions,
+      ...testUserTransactions,
+    ];
+    const testCategories = [
+      {
+        type: "test",
+        color: "green",
+      },
+      {
+        type: "home",
+        color: "green",
+      },
+    ];
+    await categories.insertMany(testCategories);
+    //await User.insertMany(testUsers);
+    await transactions.insertMany(testTransactions);
+    await request(app)
+      .get(
+        "/api/users/" +
+          testUser.username +
+          "/transactions/category/" +
+          testCategories[0].type
+      ) //Route to call
+      .set(
+        "Cookie",
+        `accessToken=${testerAccessTokenValid}; refreshToken=${testerAccessTokenValid}`
+      ) //Setting cookies in the request
+      .send()
+      .then((response) => {
+        expect(response.status).toBe(400);
+        expect(response.body.message).toEqual("User or category not found");
+        //expect(response.body.data.map((obj)=>{return {amount:obj.amount,type:obj.type,username:obj.username}})).toEqual(testUserTransactions.filter((trans)=>trans.type===testCategories[0].type));
+      });
+  });
+
+  test("Category not found request", async () => {
+    const testAdmin = {
+      username: "admin",
+      email: "admin@test.com",
+      password: "tester",
+      refreshToken: adminAccessTokenValid,
+    };
+    const testUser = {
+      username: "tester",
+      email: "tester@test.com",
+      password: "tester",
+      refreshToken: testerAccessTokenValid,
+    };
+    const testUsers = [testAdmin, testUser];
+    const testUserTransactions = [
+      {
+        username: "tester",
+        amount: 9000,
+        type: "test",
+      },
+      {
+        username: "tester",
+        amount: 5000,
+        type: "home",
+      },
+      {
+        username: "tester",
+        amount: 3000,
+        type: "test",
+      },
+    ];
+    const testAdminTransactions = [
+      {
+        username: "admin",
+        amount: 12000,
+        type: "test",
+      },
+      {
+        username: "admin",
+        amount: 1000,
+        type: "test",
+      },
+    ];
+    const testTransactions = [
+      ...testAdminTransactions,
+      ...testUserTransactions,
+    ];
+    const testCategories = [
+      {
+        type: "test",
+        color: "green",
+      },
+      {
+        type: "home",
+        color: "green",
+      },
+    ];
+    //await categories.insertMany(testCategories);
+    await User.insertMany(testUsers);
+    await transactions.insertMany(testTransactions);
+    await request(app)
+      .get(
+        "/api/users/" +
+          testUser.username +
+          "/transactions/category/" +
+          testCategories[0].type
+      ) //Route to call
+      .set(
+        "Cookie",
+        `accessToken=${testerAccessTokenValid}; refreshToken=${testerAccessTokenValid}`
+      ) //Setting cookies in the request
+      .send()
+      .then((response) => {
+        expect(response.status).toBe(400);
+        expect(response.body.message).toEqual("User or category not found");
+        //expect(response.body.data.map((obj)=>{return {amount:obj.amount,type:obj.type,username:obj.username}})).toEqual(testUserTransactions.filter((trans)=>trans.type===testCategories[0].type));
+      });
   });
 });
 
 describe("getTransactionsByGroup", () => {
-  test("Dummy test, change it", () => {
-    expect(true).toBe(true);
+  test("Successful user request", async () => {
+    const testAdmin = {
+      username: "admin",
+      email: "admin@test.com",
+      password: "tester",
+      refreshToken: adminAccessTokenValid,
+    };
+    const testUser = {
+      username: "tester",
+      email: "tester@test.com",
+      password: "tester",
+      refreshToken: testerAccessTokenValid,
+    };
+    const testUsers = [testAdmin, testUser];
+    const testUserTransactions = [
+      {
+        username: "tester",
+        amount: 9000,
+        type: "test",
+      },
+      {
+        username: "tester",
+        amount: 3000,
+        type: "test",
+      },
+    ];
+    const testAdminTransactions = [
+      {
+        username: "admin",
+        amount: 12000,
+        type: "test",
+      },
+      {
+        username: "admin",
+        amount: 1000,
+        type: "test",
+      },
+    ];
+    const testTransactions = [
+      ...testAdminTransactions,
+      ...testUserTransactions,
+    ];
+    const testCategory = {
+      type: "test",
+      color: "green",
+    };
+    await categories.create(testCategory);
+    await User.insertMany(testUsers);
+    const testGroup = {
+      name: "testGroup",
+      members: [
+        {
+          email: testAdmin.email,
+          //user: await User.find({username:testAdmin.username}._id)
+        },
+        {
+          email: testUser.email,
+          //user: await User.find({username:testUser.username}._id)
+        },
+      ],
+    };
+    await Group.create(testGroup);
+    await transactions.insertMany(testTransactions);
+    await request(app)
+      .get("/api/groups/" + testGroup.name + "/transactions") //Route to call
+      .set(
+        "Cookie",
+        `accessToken=${testerAccessTokenValid}; refreshToken=${testerAccessTokenValid}`
+      ) //Setting cookies in the request
+      .send()
+      .then((response) => {
+        expect(response.status).toBe(200);
+        expect(response.body.message).toEqual("Authorized");
+        expect(
+          response.body.data.map((obj) => {
+            return {
+              amount: obj.amount,
+              type: obj.type,
+              username: obj.username,
+            };
+          })
+        ).toEqual(testTransactions);
+      });
+  });
+
+  test("Unauthorized user request", async () => {
+    const testAdmin = {
+      username: "admin",
+      email: "admin@test.com",
+      password: "tester",
+      refreshToken: adminAccessTokenValid,
+    };
+    const testUser = {
+      username: "tester",
+      email: "tester@test.com",
+      password: "tester",
+      refreshToken: testerAccessTokenValid,
+    };
+    const testUsers = [testAdmin, testUser];
+    const testUserTransactions = [
+      {
+        username: "tester",
+        amount: 9000,
+        type: "test",
+      },
+      {
+        username: "tester",
+        amount: 3000,
+        type: "test",
+      },
+    ];
+    const testAdminTransactions = [
+      {
+        username: "admin",
+        amount: 12000,
+        type: "test",
+      },
+      {
+        username: "admin",
+        amount: 1000,
+        type: "test",
+      },
+    ];
+    const testTransactions = [
+      ...testAdminTransactions,
+      ...testUserTransactions,
+    ];
+    const testCategory = {
+      type: "test",
+      color: "green",
+    };
+    await categories.create(testCategory);
+    await User.insertMany(testUsers);
+    const testGroup = {
+      name: "testGroup",
+      members: [
+        {
+          email: testAdmin.email,
+          //user: await User.find({username:testAdmin.username}._id)
+        },
+        {
+          email: testUser.email,
+          //user: await User.find({username:testUser.username}._id)
+        },
+      ],
+    };
+    await Group.create(testGroup);
+    await transactions.insertMany(testTransactions);
+    await request(app)
+      .get("/api/groups/" + testGroup.name + "/transactions") //Route to call
+      .set(
+        "Cookie",
+        `accessToken=${adminAccessTokenValid}; refreshToken=${adminAccessTokenValid}`
+      ) //Setting cookies in the request
+      .send()
+      .then((response) => {
+        expect(response.status).toBe(401);
+        expect(response.body.message).toEqual("Unauthorized");
+        //expect(response.body.data.map((obj)=>{return {amount:obj.amount,type:obj.type,username:obj.username}})).toEqual(testTransactions);
+      });
+  });
+
+  test("Successful admin request", async () => {
+    const testAdmin = {
+      username: "admin",
+      email: "admin@test.com",
+      password: "tester",
+      refreshToken: adminAccessTokenValid,
+    };
+    const testUser = {
+      username: "tester",
+      email: "tester@test.com",
+      password: "tester",
+      refreshToken: testerAccessTokenValid,
+    };
+    const testUsers = [testAdmin, testUser];
+    const testUserTransactions = [
+      {
+        username: "tester",
+        amount: 9000,
+        type: "test",
+      },
+      {
+        username: "tester",
+        amount: 3000,
+        type: "test",
+      },
+    ];
+    const testAdminTransactions = [
+      {
+        username: "admin",
+        amount: 12000,
+        type: "test",
+      },
+      {
+        username: "admin",
+        amount: 1000,
+        type: "test",
+      },
+    ];
+    const testTransactions = [
+      ...testAdminTransactions,
+      ...testUserTransactions,
+    ];
+    const testCategory = {
+      type: "test",
+      color: "green",
+    };
+    await categories.create(testCategory);
+    await User.insertMany(testUsers);
+    const testGroup = {
+      name: "testGroup",
+      members: [
+        {
+          email: testAdmin.email,
+          //user: await User.find({username:testAdmin.username}._id)
+        },
+        {
+          email: testUser.email,
+          //user: await User.find({username:testUser.username}._id)
+        },
+      ],
+    };
+    await Group.create(testGroup);
+    await transactions.insertMany(testTransactions);
+    await request(app)
+      .get("/api/transactions/groups/" + testGroup.name) //Route to call
+      .set(
+        "Cookie",
+        `accessToken=${adminAccessTokenValid}; refreshToken=${adminAccessTokenValid}`
+      ) //Setting cookies in the request
+      .send()
+      .then((response) => {
+        expect(response.status).toBe(200);
+        expect(response.body.message).toEqual("Authorized");
+        expect(
+          response.body.data.map((obj) => {
+            return {
+              amount: obj.amount,
+              type: obj.type,
+              username: obj.username,
+            };
+          })
+        ).toEqual(testTransactions);
+      });
+  });
+
+  test("Unauthorized user request", async () => {
+    const testAdmin = {
+      username: "admin",
+      email: "admin@test.com",
+      password: "tester",
+      refreshToken: adminAccessTokenValid,
+    };
+    const testUser = {
+      username: "tester",
+      email: "tester@test.com",
+      password: "tester",
+      refreshToken: testerAccessTokenValid,
+    };
+    const testUsers = [testAdmin, testUser];
+    const testUserTransactions = [
+      {
+        username: "tester",
+        amount: 9000,
+        type: "test",
+      },
+      {
+        username: "tester",
+        amount: 3000,
+        type: "test",
+      },
+    ];
+    const testAdminTransactions = [
+      {
+        username: "admin",
+        amount: 12000,
+        type: "test",
+      },
+      {
+        username: "admin",
+        amount: 1000,
+        type: "test",
+      },
+    ];
+    const testTransactions = [
+      ...testAdminTransactions,
+      ...testUserTransactions,
+    ];
+    const testCategory = {
+      type: "test",
+      color: "green",
+    };
+    await categories.create(testCategory);
+    await User.insertMany(testUsers);
+    const testGroup = {
+      name: "testGroup",
+      members: [
+        {
+          email: testAdmin.email,
+          //user: await User.find({username:testAdmin.username}._id)
+        },
+        {
+          email: testUser.email,
+          //user: await User.find({username:testUser.username}._id)
+        },
+      ],
+    };
+    await Group.create(testGroup);
+    await transactions.insertMany(testTransactions);
+    await request(app)
+      .get("/api/transactions/groups/" + testGroup.name) //Route to call
+      .set(
+        "Cookie",
+        `accessToken=${testerAccessTokenValid}; refreshToken=${testerAccessTokenValid}`
+      ) //Setting cookies in the request
+      .send()
+      .then((response) => {
+        expect(response.status).toBe(401);
+        expect(response.body.message).toEqual("Unauthorized");
+        //expect(response.body.data.map((obj)=>{return {amount:obj.amount,type:obj.type,username:obj.username}})).toEqual(testTransactions);
+      });
+  });
+
+  test("Group not found", async () => {
+    const testAdmin = {
+      username: "admin",
+      email: "admin@test.com",
+      password: "tester",
+      refreshToken: adminAccessTokenValid,
+    };
+    const testUser = {
+      username: "tester",
+      email: "tester@test.com",
+      password: "tester",
+      refreshToken: testerAccessTokenValid,
+    };
+    const testUsers = [testAdmin, testUser];
+    const testUserTransactions = [
+      {
+        username: "tester",
+        amount: 9000,
+        type: "test",
+      },
+      {
+        username: "tester",
+        amount: 3000,
+        type: "test",
+      },
+    ];
+    const testAdminTransactions = [
+      {
+        username: "admin",
+        amount: 12000,
+        type: "test",
+      },
+      {
+        username: "admin",
+        amount: 1000,
+        type: "test",
+      },
+    ];
+    const testTransactions = [
+      ...testAdminTransactions,
+      ...testUserTransactions,
+    ];
+    const testCategory = {
+      type: "test",
+      color: "green",
+    };
+    await categories.create(testCategory);
+    await User.insertMany(testUsers);
+    const testGroup = {
+      name: "testGroup",
+      members: [
+        {
+          email: testAdmin.email,
+          //user: await User.find({username:testAdmin.username}._id)
+        },
+        {
+          email: testUser.email,
+          //user: await User.find({username:testUser.username}._id)
+        },
+      ],
+    };
+    //await Group.create(testGroup);
+    await transactions.insertMany(testTransactions);
+    await request(app)
+      .get("/api/groups/" + testGroup.name + "/transactions") //Route to call
+      .set(
+        "Cookie",
+        `accessToken=${testerAccessTokenValid}; refreshToken=${testerAccessTokenValid}`
+      ) //Setting cookies in the request
+      .send()
+      .then((response) => {
+        expect(response.status).toBe(400);
+        expect(response.body.message).toEqual("Group not found");
+        //expect(response.body.data.map((obj)=>{return {amount:obj.amount,type:obj.type,username:obj.username}})).toEqual(testTransactions);
+      });
   });
 });
 
 describe("getTransactionsByGroupByCategory", () => {
-  test("Dummy test, change it", () => {
-    expect(true).toBe(true);
+  test("Successful user request", async () => {
+    const testAdmin = {
+      username: "admin",
+      email: "admin@test.com",
+      password: "tester",
+      refreshToken: adminAccessTokenValid,
+    };
+    const testUser = {
+      username: "tester",
+      email: "tester@test.com",
+      password: "tester",
+      refreshToken: testerAccessTokenValid,
+    };
+    const testUsers = [testAdmin, testUser];
+    const testUserTransactions = [
+      {
+        username: "tester",
+        amount: 9000,
+        type: "test",
+      },
+      {
+        username: "tester",
+        amount: 5000,
+        type: "home",
+      },
+      {
+        username: "tester",
+        amount: 3000,
+        type: "test",
+      },
+    ];
+    const testAdminTransactions = [
+      {
+        username: "admin",
+        amount: 12000,
+        type: "test",
+      },
+      {
+        username: "admin",
+        amount: 1000,
+        type: "test",
+      },
+    ];
+    const testTransactions = [
+      ...testAdminTransactions,
+      ...testUserTransactions,
+    ];
+    const testCategories = [
+      {
+        type: "test",
+        color: "green",
+      },
+      {
+        type: "home",
+        color: "green",
+      },
+    ];
+    await categories.insertMany(testCategories);
+    await User.insertMany(testUsers);
+    await transactions.insertMany(testTransactions);
+    const testGroup = {
+      name: "testGroup",
+      members: [
+        {
+          email: testAdmin.email,
+          //user: await User.find({username:testAdmin.username}._id)
+        },
+        {
+          email: testUser.email,
+          //user: await User.find({username:testUser.username}._id)
+        },
+      ],
+    };
+    await Group.create(testGroup);
+    await request(app)
+      .get(
+        "/api/groups/" +
+          testGroup.name +
+          "/transactions/category/" +
+          testCategories[0].type
+      ) //Route to call
+      .set(
+        "Cookie",
+        `accessToken=${testerAccessTokenValid}; refreshToken=${testerAccessTokenValid}`
+      ) //Setting cookies in the request
+      .send()
+      .then((response) => {
+        expect(response.status).toBe(200);
+        expect(response.body.message).toEqual("Authorized");
+        expect(
+          response.body.data.map((obj) => {
+            return {
+              amount: obj.amount,
+              type: obj.type,
+              username: obj.username,
+            };
+          })
+        ).toEqual(
+          testTransactions.filter(
+            (trans) => trans.type === testCategories[0].type
+          )
+        );
+      });
+  });
+
+  test("Unauthorized user request", async () => {
+    const testAdmin = {
+      username: "admin",
+      email: "admin@test.com",
+      password: "tester",
+      refreshToken: adminAccessTokenValid,
+    };
+    const testUser = {
+      username: "tester",
+      email: "tester@test.com",
+      password: "tester",
+      refreshToken: testerAccessTokenValid,
+    };
+    const testUsers = [testAdmin, testUser];
+    const testUserTransactions = [
+      {
+        username: "tester",
+        amount: 9000,
+        type: "test",
+      },
+      {
+        username: "tester",
+        amount: 5000,
+        type: "home",
+      },
+      {
+        username: "tester",
+        amount: 3000,
+        type: "test",
+      },
+    ];
+    const testAdminTransactions = [
+      {
+        username: "admin",
+        amount: 12000,
+        type: "test",
+      },
+      {
+        username: "admin",
+        amount: 1000,
+        type: "test",
+      },
+    ];
+    const testTransactions = [
+      ...testAdminTransactions,
+      ...testUserTransactions,
+    ];
+    const testCategories = [
+      {
+        type: "test",
+        color: "green",
+      },
+      {
+        type: "home",
+        color: "green",
+      },
+    ];
+    await categories.insertMany(testCategories);
+    await User.insertMany(testUsers);
+    await transactions.insertMany(testTransactions);
+    const testGroup = {
+      name: "testGroup",
+      members: [
+        {
+          email: testAdmin.email,
+          //user: await User.find({username:testAdmin.username}._id)
+        },
+        {
+          email: testUser.email,
+          //user: await User.find({username:testUser.username}._id)
+        },
+      ],
+    };
+    await Group.create(testGroup);
+    await request(app)
+      .get(
+        "/api/groups/" +
+          testGroup.name +
+          "/transactions/category/" +
+          testCategories[0].type
+      ) //Route to call
+      .set(
+        "Cookie",
+        `accessToken=${adminAccessTokenValid}; refreshToken=${adminAccessTokenValid}`
+      ) //Setting cookies in the request
+      .send()
+      .then((response) => {
+        expect(response.status).toBe(401);
+        expect(response.body.message).toEqual("Unauthorized");
+      });
+  });
+
+  test("Successful user request", async () => {
+    const testAdmin = {
+      username: "admin",
+      email: "admin@test.com",
+      password: "tester",
+      refreshToken: adminAccessTokenValid,
+    };
+    const testUser = {
+      username: "tester",
+      email: "tester@test.com",
+      password: "tester",
+      refreshToken: testerAccessTokenValid,
+    };
+    const testUsers = [testAdmin, testUser];
+    const testUserTransactions = [
+      {
+        username: "tester",
+        amount: 9000,
+        type: "test",
+      },
+      {
+        username: "tester",
+        amount: 5000,
+        type: "home",
+      },
+      {
+        username: "tester",
+        amount: 3000,
+        type: "test",
+      },
+    ];
+    const testAdminTransactions = [
+      {
+        username: "admin",
+        amount: 12000,
+        type: "test",
+      },
+      {
+        username: "admin",
+        amount: 1000,
+        type: "test",
+      },
+    ];
+    const testTransactions = [
+      ...testAdminTransactions,
+      ...testUserTransactions,
+    ];
+    const testCategories = [
+      {
+        type: "test",
+        color: "green",
+      },
+      {
+        type: "home",
+        color: "green",
+      },
+    ];
+    await categories.insertMany(testCategories);
+    await User.insertMany(testUsers);
+    await transactions.insertMany(testTransactions);
+    const testGroup = {
+      name: "testGroup",
+      members: [
+        {
+          email: testAdmin.email,
+          //user: await User.find({username:testAdmin.username}._id)
+        },
+        {
+          email: testUser.email,
+          //user: await User.find({username:testUser.username}._id)
+        },
+      ],
+    };
+    await Group.create(testGroup);
+    await request(app)
+      .get(
+        "/api/transactions/groups/" +
+          testGroup.name +
+          "/category/" +
+          testCategories[0].type
+      ) //Route to call
+      .set(
+        "Cookie",
+        `accessToken=${adminAccessTokenValid}; refreshToken=${adminAccessTokenValid}`
+      ) //Setting cookies in the request
+      .send()
+      .then((response) => {
+        expect(response.status).toBe(200);
+        expect(response.body.message).toEqual("Authorized");
+        expect(
+          response.body.data.map((obj) => {
+            return {
+              amount: obj.amount,
+              type: obj.type,
+              username: obj.username,
+            };
+          })
+        ).toEqual(
+          testTransactions.filter(
+            (trans) => trans.type === testCategories[0].type
+          )
+        );
+      });
+  });
+
+  test("Unauthorized user request", async () => {
+    const testAdmin = {
+      username: "admin",
+      email: "admin@test.com",
+      password: "tester",
+      refreshToken: adminAccessTokenValid,
+    };
+    const testUser = {
+      username: "tester",
+      email: "tester@test.com",
+      password: "tester",
+      refreshToken: testerAccessTokenValid,
+    };
+    const testUsers = [testAdmin, testUser];
+    const testUserTransactions = [
+      {
+        username: "tester",
+        amount: 9000,
+        type: "test",
+      },
+      {
+        username: "tester",
+        amount: 5000,
+        type: "home",
+      },
+      {
+        username: "tester",
+        amount: 3000,
+        type: "test",
+      },
+    ];
+    const testAdminTransactions = [
+      {
+        username: "admin",
+        amount: 12000,
+        type: "test",
+      },
+      {
+        username: "admin",
+        amount: 1000,
+        type: "test",
+      },
+    ];
+    const testTransactions = [
+      ...testAdminTransactions,
+      ...testUserTransactions,
+    ];
+    const testCategories = [
+      {
+        type: "test",
+        color: "green",
+      },
+      {
+        type: "home",
+        color: "green",
+      },
+    ];
+    await categories.insertMany(testCategories);
+    await User.insertMany(testUsers);
+    await transactions.insertMany(testTransactions);
+    const testGroup = {
+      name: "testGroup",
+      members: [
+        {
+          email: testAdmin.email,
+          //user: await User.find({username:testAdmin.username}._id)
+        },
+        {
+          email: testUser.email,
+          //user: await User.find({username:testUser.username}._id)
+        },
+      ],
+    };
+    await Group.create(testGroup);
+    await request(app)
+      .get(
+        "/api/transactions/groups/" +
+          testGroup.name +
+          "/category/" +
+          testCategories[0].type
+      ) //Route to call
+      .set(
+        "Cookie",
+        `accessToken=${testerAccessTokenValid}; refreshToken=${testerAccessTokenValid}`
+      ) //Setting cookies in the request
+      .send()
+      .then((response) => {
+        expect(response.status).toBe(401);
+        expect(response.body.message).toEqual("Unauthorized");
+      });
+  });
+
+  test("Group not found request", async () => {
+    const testAdmin = {
+      username: "admin",
+      email: "admin@test.com",
+      password: "tester",
+      refreshToken: adminAccessTokenValid,
+    };
+    const testUser = {
+      username: "tester",
+      email: "tester@test.com",
+      password: "tester",
+      refreshToken: testerAccessTokenValid,
+    };
+    const testUsers = [testAdmin, testUser];
+    const testUserTransactions = [
+      {
+        username: "tester",
+        amount: 9000,
+        type: "test",
+      },
+      {
+        username: "tester",
+        amount: 5000,
+        type: "home",
+      },
+      {
+        username: "tester",
+        amount: 3000,
+        type: "test",
+      },
+    ];
+    const testAdminTransactions = [
+      {
+        username: "admin",
+        amount: 12000,
+        type: "test",
+      },
+      {
+        username: "admin",
+        amount: 1000,
+        type: "test",
+      },
+    ];
+    const testTransactions = [
+      ...testAdminTransactions,
+      ...testUserTransactions,
+    ];
+    const testCategories = [
+      {
+        type: "test",
+        color: "green",
+      },
+      {
+        type: "home",
+        color: "green",
+      },
+    ];
+    await categories.insertMany(testCategories);
+    await User.insertMany(testUsers);
+    await transactions.insertMany(testTransactions);
+    const testGroup = {
+      name: "testGroup",
+      members: [
+        {
+          email: testAdmin.email,
+          //user: await User.find({username:testAdmin.username}._id)
+        },
+        {
+          email: testUser.email,
+          //user: await User.find({username:testUser.username}._id)
+        },
+      ],
+    };
+    //await Group.create(testGroup);
+    await request(app)
+      .get(
+        "/api/groups/" +
+          testGroup.name +
+          "/transactions/category/" +
+          testCategories[0].type
+      ) //Route to call
+      .set(
+        "Cookie",
+        `accessToken=${testerAccessTokenValid}; refreshToken=${testerAccessTokenValid}`
+      ) //Setting cookies in the request
+      .send()
+      .then((response) => {
+        expect(response.status).toBe(400);
+        expect(response.body.message).toEqual("Group or category not found");
+      });
+  });
+
+  test("Category not found request", async () => {
+    const testAdmin = {
+      username: "admin",
+      email: "admin@test.com",
+      password: "tester",
+      refreshToken: adminAccessTokenValid,
+    };
+    const testUser = {
+      username: "tester",
+      email: "tester@test.com",
+      password: "tester",
+      refreshToken: testerAccessTokenValid,
+    };
+    const testUsers = [testAdmin, testUser];
+    const testUserTransactions = [
+      {
+        username: "tester",
+        amount: 9000,
+        type: "test",
+      },
+      {
+        username: "tester",
+        amount: 5000,
+        type: "home",
+      },
+      {
+        username: "tester",
+        amount: 3000,
+        type: "test",
+      },
+    ];
+    const testAdminTransactions = [
+      {
+        username: "admin",
+        amount: 12000,
+        type: "test",
+      },
+      {
+        username: "admin",
+        amount: 1000,
+        type: "test",
+      },
+    ];
+    const testTransactions = [
+      ...testAdminTransactions,
+      ...testUserTransactions,
+    ];
+    const testCategories = [
+      {
+        type: "test",
+        color: "green",
+      },
+      {
+        type: "home",
+        color: "green",
+      },
+    ];
+    //await categories.insertMany(testCategories);
+    await User.insertMany(testUsers);
+    await transactions.insertMany(testTransactions);
+    const testGroup = {
+      name: "testGroup",
+      members: [
+        {
+          email: testAdmin.email,
+          //user: await User.find({username:testAdmin.username}._id)
+        },
+        {
+          email: testUser.email,
+          //user: await User.find({username:testUser.username}._id)
+        },
+      ],
+    };
+    await Group.create(testGroup);
+    await request(app)
+      .get(
+        "/api/groups/" +
+          testGroup.name +
+          "/transactions/category/" +
+          testCategories[0].type
+      ) //Route to call
+      .set(
+        "Cookie",
+        `accessToken=${testerAccessTokenValid}; refreshToken=${testerAccessTokenValid}`
+      ) //Setting cookies in the request
+      .send()
+      .then((response) => {
+        expect(response.status).toBe(400);
+        expect(response.body.message).toEqual("Group or category not found");
+      });
   });
 });
 
 describe("deleteTransaction", () => {
-  test("Dummy test, change it", () => {
-    expect(true).toBe(true);
+  test("Transaction deleted by user", async () => {
+    const testUser = {
+      username: "tester",
+      email: "tester@test.com",
+      password: "tester",
+      refreshToken: testerAccessTokenValid,
+    };
+    const testTransaction = {
+      username: testUser.username,
+      amount: 9000,
+      type: "test",
+    };
+    const testCategory = {
+      type: "test",
+      color: "green",
+    };
+    await categories.create(testCategory);
+    await User.create(testUser);
+    const createdTransaction = await transactions.create(testTransaction);
+    const createdID = createdTransaction._id.toString();
+    await request(app)
+      .delete("/api/users/" + testUser.username + "/transactions") //Route to call
+      .set(
+        "Cookie",
+        `accessToken=${testerAccessTokenValid}; refreshToken=${testerAccessTokenValid}`
+      ) //Setting cookies in the request
+      .send({ _id: createdID }) //Definition of the request body
+      .then((response) => {
+        expect(response.status).toBe(200);
+        expect(response.body.message).toEqual("Transaction deleted");
+        expect(response.body.data).toEqual({
+          acknowledged: true,
+          deletedCount: 1,
+        });
+      });
+  });
+
+  test("Transaction deleted by admin", async () => {
+    const testAdmin = {
+      username: "admin",
+      email: "admin@test.com",
+      password: "tester",
+      refreshToken: adminAccessTokenValid,
+    };
+    const testUser = {
+      username: "tester",
+      email: "tester@test.com",
+      password: "tester",
+      refreshToken: testerAccessTokenValid,
+    };
+    const testTransaction = {
+      username: testUser.username,
+      amount: 9000,
+      type: "test",
+    };
+    const testCategory = {
+      type: "test",
+      color: "green",
+    };
+    await categories.create(testCategory);
+    await User.create(testUser);
+    const createdTransaction = await transactions.create(testTransaction);
+    const createdID = createdTransaction._id.toString();
+    await request(app)
+      .delete("/api/users/" + testUser.username + "/transactions") //Route to call
+      .set(
+        "Cookie",
+        `accessToken=${adminAccessTokenValid}; refreshToken=${adminAccessTokenValid}`
+      ) //Setting cookies in the request
+      .send({ _id: createdID }) //Definition of the request body
+      .then((response) => {
+        expect(response.status).toBe(200);
+        expect(response.body.message).toEqual("Transaction deleted");
+        expect(response.body.data).toEqual({
+          acknowledged: true,
+          deletedCount: 1,
+        });
+      });
+  });
+
+  test("User not authorized", async () => {
+    const testAdmin = {
+      username: "admin",
+      email: "admin@test.com",
+      password: "tester",
+      refreshToken: adminAccessTokenValid,
+    };
+    const testUser = {
+      username: "tester",
+      email: "tester@test.com",
+      password: "tester",
+      refreshToken: testerAccessTokenValid,
+    };
+    const testTransaction = {
+      username: testUser.username,
+      amount: 9000,
+      type: "test",
+    };
+    const testCategory = {
+      type: "test",
+      color: "green",
+    };
+    await categories.create(testCategory);
+    await User.create(testUser);
+    await User.create(testAdmin);
+    const createdTransaction = await transactions.create(testTransaction);
+    const createdID = createdTransaction._id.toString();
+    await request(app)
+      .delete("/api/users/" + testAdmin.username + "/transactions") //Route to call
+      .set(
+        "Cookie",
+        `accessToken=${testerAccessTokenValid}; refreshToken=${testerAccessTokenValid}`
+      ) //Setting cookies in the request
+      .send({ _id: createdID }) //Definition of the request body
+      .then((response) => {
+        expect(response.status).toBe(401);
+        expect(response.body.message).toEqual("Unauthorized");
+      });
+  });
+
+  test("User not found", async () => {
+    const testUser = {
+      username: "tester",
+      email: "tester@test.com",
+      password: "tester",
+      refreshToken: testerAccessTokenValid,
+    };
+    const testTransaction = {
+      username: testUser.username,
+      amount: 9000,
+      type: "test",
+    };
+    const testCategory = {
+      type: "test",
+      color: "green",
+    };
+    await categories.create(testCategory);
+    //await User.create(testUser);
+    const createdTransaction = await transactions.create(testTransaction);
+    const createdID = createdTransaction._id.toString();
+    await request(app)
+      .delete("/api/users/" + testUser.username + "/transactions") //Route to call
+      .set(
+        "Cookie",
+        `accessToken=${testerAccessTokenValid}; refreshToken=${testerAccessTokenValid}`
+      ) //Setting cookies in the request
+      .send({ _id: createdID }) //Definition of the request body
+      .then((response) => {
+        expect(response.status).toBe(400);
+        expect(response.body.message).toEqual("User or transaction not found");
+      });
+  });
+
+  test("Transaction not found", async () => {
+    const testUser = {
+      username: "tester",
+      email: "tester@test.com",
+      password: "tester",
+      refreshToken: testerAccessTokenValid,
+    };
+    const testTransaction = {
+      username: testUser.username,
+      amount: 9000,
+      type: "test",
+    };
+    const testCategory = {
+      type: "test",
+      color: "green",
+    };
+    await categories.create(testCategory);
+    await User.create(testUser);
+    const createdID = "507f1f77bcf86cd799439011";
+    await request(app)
+      .delete("/api/users/" + testUser.username + "/transactions") //Route to call
+      .set(
+        "Cookie",
+        `accessToken=${testerAccessTokenValid}; refreshToken=${testerAccessTokenValid}`
+      ) //Setting cookies in the request
+      .send({ _id: createdID }) //Definition of the request body
+      .then((response) => {
+        expect(response.status).toBe(400);
+        expect(response.body.message).toEqual("User or transaction not found");
+      });
+  });
+
+  test("Missing ID", async () => {
+    const testUser = {
+      username: "tester",
+      email: "tester@test.com",
+      password: "tester",
+      refreshToken: testerAccessTokenValid,
+    };
+    const testTransaction = {
+      username: testUser.username,
+      amount: 9000,
+      type: "test",
+    };
+    const testCategory = {
+      type: "test",
+      color: "green",
+    };
+    await categories.create(testCategory);
+    await User.create(testUser);
+    const createdTransaction = await transactions.create(testTransaction);
+    const createdID = createdTransaction._id.toString();
+    await request(app)
+      .delete("/api/users/" + testUser.username + "/transactions") //Route to call
+      .set(
+        "Cookie",
+        `accessToken=${testerAccessTokenValid}; refreshToken=${testerAccessTokenValid}`
+      ) //Setting cookies in the request
+      .send() //Definition of the request body
+      .then((response) => {
+        expect(response.status).toBe(400);
+        expect(response.body.message).toEqual("Missing parameters");
+      });
   });
 });
 
 describe("deleteTransactions", () => {
-  test("Dummy test, change it", () => {
-    expect(true).toBe(true);
+  test("Transactions deleted by admin", async () => {
+    const testAdmin = {
+      username: "admin",
+      email: "admin@test.com",
+      password: "tester",
+      refreshToken: adminAccessTokenValid,
+    };
+    const testUser = {
+      username: "tester",
+      email: "tester@test.com",
+      password: "tester",
+      refreshToken: testerAccessTokenValid,
+    };
+    const testTransactions = [{
+      username: testUser.username,
+      amount: 9000,
+      type: "test",
+    },{
+      username: testUser.username,
+      amount: 3000,
+      type: "test",
+    },{
+      username: testUser.username,
+      amount: 6000,
+      type: "test",
+    }];
+    const testCategory = {
+      type: "test",
+      color: "green",
+    };
+    await categories.create(testCategory);
+    await User.create(testUser);
+    const createdTransactions = await transactions.insertMany(testTransactions);
+    const createdIDs = createdTransactions.map((t)=>t._id.toString());
+    await request(app)
+      .delete("/api/transactions") //Route to call
+      .set(
+        "Cookie",
+        `accessToken=${adminAccessTokenValid}; refreshToken=${adminAccessTokenValid}`
+      ) //Setting cookies in the request
+      .send({ _ids: createdIDs }) //Definition of the request body
+      .then((response) => {
+        expect(response.status).toBe(200);
+        expect(response.body.message).toEqual("Transactions deleted");
+        expect(response.body.data).toEqual({
+          acknowledged: true,
+          deletedCount: createdIDs.length,
+        });
+      });
+  });
+
+  test("Unauthorized admin", async () => {
+    const testAdmin = {
+      username: "admin",
+      email: "admin@test.com",
+      password: "tester",
+      refreshToken: adminAccessTokenValid,
+    };
+    const testUser = {
+      username: "tester",
+      email: "tester@test.com",
+      password: "tester",
+      refreshToken: testerAccessTokenValid,
+    };
+    const testTransactions = [{
+      username: testUser.username,
+      amount: 9000,
+      type: "test",
+    },{
+      username: testUser.username,
+      amount: 3000,
+      type: "test",
+    },{
+      username: testUser.username,
+      amount: 6000,
+      type: "test",
+    }];
+    const testCategory = {
+      type: "test",
+      color: "green",
+    };
+    await categories.create(testCategory);
+    await User.create(testUser);
+    const createdTransactions = await transactions.insertMany(testTransactions);
+    const createdIDs = createdTransactions.map((t)=>t._id.toString());
+    await request(app)
+      .delete("/api/transactions") //Route to call
+      .set(
+        "Cookie",
+        `accessToken=${testerAccessTokenValid}; refreshToken=${testerAccessTokenValid}`
+      ) //Setting cookies in the request
+      .send({ _ids: createdIDs }) //Definition of the request body
+      .then((response) => {
+        expect(response.status).toBe(401);
+        expect(response.body.message).toEqual("Unauthorized");
+      });
+  });
+
+  test("Invalid transaction", async () => {
+    const testAdmin = {
+      username: "admin",
+      email: "admin@test.com",
+      password: "tester",
+      refreshToken: adminAccessTokenValid,
+    };
+    const testUser = {
+      username: "tester",
+      email: "tester@test.com",
+      password: "tester",
+      refreshToken: testerAccessTokenValid,
+    };
+    const testTransactions = [{
+      username: testUser.username,
+      amount: 9000,
+      type: "test",
+    },{
+      username: testUser.username,
+      amount: 3000,
+      type: "test",
+    },{
+      username: testUser.username,
+      amount: 6000,
+      type: "test",
+    }];
+    const testCategory = {
+      type: "test",
+      color: "green",
+    };
+    await categories.create(testCategory);
+    await User.create(testUser);
+    const createdTransactions = await transactions.insertMany(testTransactions);
+    let createdIDs = createdTransactions.map((t)=>t._id.toString());
+    createdIDs.push("507f1f77bcf86cd799439011")
+    await request(app)
+      .delete("/api/transactions") //Route to call
+      .set(
+        "Cookie",
+        `accessToken=${adminAccessTokenValid}; refreshToken=${adminAccessTokenValid}`
+      ) //Setting cookies in the request
+      .send({ _ids: createdIDs }) //Definition of the request body
+      .then((response) => {
+        expect(response.status).toBe(400);
+        expect(response.body.message).toEqual("Invalid ID:"+"507f1f77bcf86cd799439011");
+      });
+  });
+
+  test("Invalid ids", async () => {
+    const testAdmin = {
+      username: "admin",
+      email: "admin@test.com",
+      password: "tester",
+      refreshToken: adminAccessTokenValid,
+    };
+    const testUser = {
+      username: "tester",
+      email: "tester@test.com",
+      password: "tester",
+      refreshToken: testerAccessTokenValid,
+    };
+    const testTransactions = [{
+      username: testUser.username,
+      amount: 9000,
+      type: "test",
+    },{
+      username: testUser.username,
+      amount: 3000,
+      type: "test",
+    },{
+      username: testUser.username,
+      amount: 6000,
+      type: "test",
+    }];
+    const testCategory = {
+      type: "test",
+      color: "green",
+    };
+    await categories.create(testCategory);
+    await User.create(testUser);
+    const createdTransactions = await transactions.insertMany(testTransactions);
+    await request(app)
+      .delete("/api/transactions") //Route to call
+      .set(
+        "Cookie",
+        `accessToken=${adminAccessTokenValid}; refreshToken=${adminAccessTokenValid}`
+      ) //Setting cookies in the request
+      .send() //Definition of the request body
+      .then((response) => {
+        expect(response.status).toBe(400);
+        expect(response.body.message).toEqual("Invalid IDS");
+      });
   });
 });

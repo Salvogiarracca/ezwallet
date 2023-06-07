@@ -1689,7 +1689,7 @@ describe("getTransactionsByUserByCategory", () => {
     ];
     const expectedResponse = {
       refreshedTokenMessage: "",
-      message: "User not found",
+      message: "User or category not found",
     };
     verifyAuth.mockImplementation((mockReq, mockRes, params) => {
       if (params.authType == "User") {
@@ -2989,7 +2989,7 @@ describe("deleteTransactions", () => {
     expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
   });
 
-  test("Successful Request [deleteTransactions] - Test #1", async () => {
+  test("Invalid ID [deleteTransactions] - Test #3", async () => {
     const mockReq = {
       body: { _ids: ["testID1", "testID2", "testID3"] },
       params: { username: "testuser" },
@@ -3034,7 +3034,7 @@ describe("deleteTransactions", () => {
     ];
     const expectedResponse = {
       refreshedTokenMessage: "",
-      message: "Invalid ID",
+      message: "Invalid ID:"+"testID1",
     };
     verifyAuth.mockImplementation((mockReq, mockRes, params) => {
       if (params.authType == "User") {
