@@ -221,8 +221,254 @@ describe("createCategory", () => {
 });
 
 describe("updateCategory", () => {
-  test("Dummy test, change it", () => {
-    expect(true).toBe(true);
+  test("Missing attributes (empty string) [updateCategory] - Test #1", async () => {
+    const mockReq = {
+      params: {username: "testuser", type: "test"},
+      cookies: {
+        accessToken: "adminAccessTokenValid",
+        refreshToken: "adminRefreshTokenValid",
+      },
+      body: {
+        type: "",
+        color: "",
+      }
+    };
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn()
+    };
+    const expectedResponse = {
+      error: "Missing attributes",
+    };
+    verifyAuth.mockImplementation((mockReq, mockRes, params) => {
+      if (params.authType == "Admin") {
+        return {authorized: true, cause: "authorized"};
+      } else {
+        return {authorized: false, cause: "authorized"};
+      }
+    });
+
+    await updateCategory(mockReq, mockRes);
+    expect(mockRes.status).toHaveBeenCalledWith(400);
+    expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
+  });
+
+  test("Missing attributes (no body) [updateCategory] - Test #2", async () => {
+    const mockReq = {
+      params: {username: "testuser", type: "test"},
+      cookies: {
+        accessToken: "adminAccessTokenValid",
+        refreshToken: "adminRefreshTokenValid",
+      },
+    };
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn()
+    };
+    const expectedResponse = {
+      error: "body is not defined",
+    };
+    verifyAuth.mockImplementation((mockReq, mockRes, params) => {
+      if (params.authType == "Admin") {
+        return {authorized: true, cause: "authorized"};
+      } else {
+        return {authorized: false, cause: "authorized"};
+      }
+    });
+
+    await updateCategory(mockReq, mockRes);
+    expect(mockRes.status).toHaveBeenCalledWith(400);
+    expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
+  });
+
+  test("Category does not exist [updateCategory] - Test #3", async () => {
+    const mockReq = {
+      params: {username: "testuser", type: "noexist"},
+      body: {type: 'investment',
+        color: '#ff0000'},
+      cookies: {
+        accessToken: "adminAccessTokenValid",
+        refreshToken: "adminRefreshTokenValid",
+      },
+    };
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn()
+    };
+    const expectedResponse = {
+      error: "Old category type does not exist",
+    };
+    verifyAuth.mockImplementation((mockReq, mockRes, params) => {
+      if (params.authType == "Admin") {
+        return {authorized: true, cause: "authorized"};
+      } else {
+        return {authorized: false, cause: "authorized"};
+      }
+    });
+    jest.spyOn(categories, 'findOne').mockReturnValue({})
+    await updateCategory(mockReq, mockRes);
+    expect(mockRes.status).toHaveBeenCalledWith(400);
+    expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
+  });
+
+  test("New category type already defined [updateCategory] - Test #4", async () => {
+    const mockReq = {
+      params: {username: "testuser", type: "noexist"},
+      body: {type: 'investment',
+        color: '#ff0000'},
+      cookies: {
+        accessToken: "adminAccessTokenValid",
+        refreshToken: "adminRefreshTokenValid",
+      },
+    };
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn()
+    };
+    const expectedResponse = {
+      error: "new type invalid, category already exists",
+    };
+    verifyAuth.mockImplementation((mockReq, mockRes, params) => {
+      if (params.authType == "Admin") {
+        return {authorized: true, cause: "authorized"};
+      } else {
+        return {authorized: false, cause: "authorized"};
+      }
+    });
+    jest.spyOn(categories, 'findOne').mockReturnValue({type: 'exists', color: '#ffffff'})
+    await updateCategory(mockReq, mockRes);
+    expect(mockRes.status).toHaveBeenCalledWith(400);
+    expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
+  });
+
+  test("Admin auth [updateCategory] - Test #5", async () => {
+    const mockReq = {
+      params: {username: "testuser", type: "noexist"},
+      body: {type: 'investment',
+        color: '#ff0000'},
+      cookies: {
+        accessToken: "adminAccessTokenValid",
+        refreshToken: "adminRefreshTokenValid",
+      },
+    };
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn()
+    };
+    const expectedResponse = {
+      message: "Unauthorized",
+    };
+    verifyAuth.mockImplementation((mockReq, mockRes, params) => {
+      if (params.authType == "Admin") {
+        return {authorized: false, cause: "Unauthorized"};
+      } else {
+        return {authorized: false, cause: "Unauthorized"};
+      }
+    });
+    jest.spyOn(categories, 'findOne').mockReturnValue({type: 'exists', color: '#ffffff'})
+    await updateCategory(mockReq, mockRes);
+    expect(mockRes.status).toHaveBeenCalledWith(401);
+    expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
+  });
+
+  test("Success [updateCategory] - Test #6", async() =>{
+    const mockReq = {
+      params: {username: "testuser", type: "test"},
+      body: {type: 'investment',
+        color: '#ff0000'},
+      cookies: {
+        accessToken: "adminAccessTokenValid",
+        refreshToken: "adminRefreshTokenValid",
+      },
+    };
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn()
+    };
+    const expectedResponse = {
+      message: "Update completed successfully",
+      count: 15
+    };
+    verifyAuth.mockImplementation((mockReq, mockRes, params) => {
+      if (params.authType == "Admin") {
+        return {authorized: true, cause: "authorized"};
+      } else {
+        return {authorized: false, cause: "authorized"};
+      }
+    });
+    jest.spyOn(categories, 'findOne').mockReturnValueOnce({type: 'exists', color: '#ffffff'})
+        .mockReturnValueOnce(null);
+    jest.spyOn(categories, 'findOneAndUpdate').mockReturnValue({type: 'investment', color: '#ff0000'});
+    jest.spyOn(transactions, 'updateMany').mockReturnValue({modifiedCount: 15});
+    await updateCategory(mockReq, mockRes);
+    expect(mockRes.status).toHaveBeenCalledWith(200);
+    expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
+  });
+
+  test("Wrong color format [updateCategory] - Test #7", async() =>{
+    const mockReq = {
+      params: {username: "testuser", type: "test"},
+      body: {type: 'investment',
+        color: 'abcde'},
+      cookies: {
+        accessToken: "adminAccessTokenValid",
+        refreshToken: "adminRefreshTokenValid",
+      },
+    };
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn()
+    };
+    const expectedResponse = {
+      error: "Wrong format for color",
+    };
+    verifyAuth.mockImplementation((mockReq, mockRes, params) => {
+      if (params.authType == "Admin") {
+        return {authorized: true, cause: "authorized"};
+      } else {
+        return {authorized: false, cause: "authorized"};
+      }
+    });
+    jest.spyOn(categories, 'findOne').mockReturnValueOnce({type: 'exists', color: '#ffffff'})
+        .mockReturnValueOnce(null);
+    jest.spyOn(categories, 'findOneAndUpdate').mockReturnValue({type: 'investment', color: '#ff0000'});
+    jest.spyOn(transactions, 'updateMany').mockReturnValue({modifiedCount: 15});
+    await updateCategory(mockReq, mockRes);
+    expect(mockRes.status).toHaveBeenCalledWith(400);
+    expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
+  });
+
+  test("Mismatched types [updateCategory] - Test #8", async() =>{
+    const mockReq = {
+      params: {username: "testuser", type: "test"},
+      body: {type: 10,
+        color: '#ff5455'},
+      cookies: {
+        accessToken: "adminAccessTokenValid",
+        refreshToken: "adminRefreshTokenValid",
+      },
+    };
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn()
+    };
+    const expectedResponse = {
+      error: "Mismatched types in req.body!",
+    };
+    verifyAuth.mockImplementation((mockReq, mockRes, params) => {
+      if (params.authType == "Admin") {
+        return {authorized: true, cause: "authorized"};
+      } else {
+        return {authorized: false, cause: "authorized"};
+      }
+    });
+    jest.spyOn(categories, 'findOne').mockReturnValueOnce({type: 'exists', color: '#ffffff'})
+        .mockReturnValueOnce(null);
+    jest.spyOn(categories, 'findOneAndUpdate').mockReturnValue({type: 'investment', color: '#ff0000'});
+    jest.spyOn(transactions, 'updateMany').mockReturnValue({modifiedCount: 15});
+    await updateCategory(mockReq, mockRes);
+    expect(mockRes.status).toHaveBeenCalledWith(400);
+    expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
   });
 });
 
