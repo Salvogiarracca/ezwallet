@@ -238,16 +238,10 @@ export const createTransaction = async (req, res) => {
       !amount ||
       username === "" ||
       type === "" ||
-      amount === ""
+      amount === "" || parseFloat(amount) === NaN
     ) {
       return res.status(400).json({
         message: "Invalid parameters",
-        refreshedTokenMessage: res.locals.refreshedTokenMessage,
-      });
-    }
-    if (parseFloat(amount) === NaN) {
-      return res.status(400).json({
-        message: "Unable to convert amount to float",
         refreshedTokenMessage: res.locals.refreshedTokenMessage,
       });
     }
