@@ -1821,6 +1821,9 @@ describe("removeFromGroup", () => {
   })
 })
 
-describe("deleteUser", () => { })
+describe("deleteUser", () => {
+
+
+})
 
 describe("deleteGroup", () => { })

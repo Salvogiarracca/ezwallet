@@ -218,7 +218,7 @@ export const createTransaction = async (req, res) => {
     });
     ///if userAuth return true, user can retrieve only info about himself
     if (userAuth.authorized) {
-      if (caller_username == username) {
+      if (caller_username === username) {
         const new_transactions = new transactions({ username, amount, type });
         new_transactions
           .save()
