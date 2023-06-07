@@ -112,80 +112,87 @@ export const updateCategory = async (req, res) => {
   - Optional behavior:
     - error 401 is returned if the specified category does not exist
  */
-export const deleteCategory = async (req, res) => {
-  try {
-    const cookie = req.cookies;
-    if (!cookie.accessToken) {
-      return res.status(401).json({ message: "Unauthorized" }); // unauthorized
-    }
-
-    const { types } = req.body;
-    if (types.length === 0) {
-      //empty input
-      return res.status(400).json({ message: "Missing attributes" });
-    }
-
-    const nCat = await categories.countDocuments({});
-    if (nCat === 1) {
-      //one category in db, deletion not possible
-      return res
-        .status(400)
-        .json({ message: "Only one category, deletion not possible!" });
-    }
-
-    for (const str of types) {
-      //check array in req.body
-      if (str === "") {
-        //empty "type" string
-        return res.status(400).json({ message: "Empty string in array" });
-      }
-      const exists = await categories.findOne({ type: str });
-      if (!exists) {
-        // type not found in db
-        return res
-          .status(400)
-          .json({ message: "Category does not exist, deletion not possible!" });
-      }
-    }
-    const nT = types.length;
-    const oldestCat = await categories.find().sort({ _id: 1 }).limit(1);
-    if (nCat > nT) {
-      // N > T
-      let nUpd = 0; //count of affected transactions
-      for (const str of types) {
-        const removed = await categories.findOneAndRemove({ type: str }); //category removed
-        const updated = await transactions.updateMany(
-          //update of transactions
-          { type: str },
-          { $set: { $type: oldestCat.type } }
-        );
-        nUpd += updated.modifiedCount;
-      }
-    }
-
-    if (nCat === nT) {
-      // N == T
-      let nUpd = 0;
-      for (const str of types) {
-        if (str !== oldestCat.type) {
-          // if str is === to oldestCategory, skipped (then it's the same as N > T)
-          const removed = await categories.findOneAndRemove({ type: str });
-          const updated = await transactions.updateMany(
-            { type: str },
-            { $set: { $type: oldestCat.type } }
-          );
-          nUpd += updated.modifiedCount;
+    export const deleteCategory = async (req, res) => {
+      try {
+        const cookie = req.cookies;
+        if (!cookie.accessToken) {
+          return res.status(401).json({ message: "Unauthorized" }); // unauthorized
         }
+        if(!req.body){
+          throw new Error("Missing attributes");
+        }
+        const adminAuth = verifyAuth(req, res, { authType: "Admin" });
+        ///if the user is an Admin ok, otherwise unauthorized
+        if (!adminAuth.authorized) {
+          return res.status(401).json({message: "Unauthorized"})
+        }
+        const { types } = req.body;
+        if (types.length === 0) {
+          //empty input
+          throw new Error("Missing attributes");
+        }
+    
+        const nCat = await categories.countDocuments({});
+        if (nCat === 1) {
+          //one category in db, deletion not possible
+          throw new Error("Only one category, deletion not possible!");
+        }
+    
+        for (const str of types) {
+          //check array in req.body
+          if (str === "") {
+            //empty "type" string
+            throw new Error("Empty string in array");
+          }
+          const exists = await categories.findOne({ type: str });
+          if (!exists) {
+            // type not found in db
+            throw new Error("Category does not exist, deletion not possible!");
+          }
+        }
+        const nT = types.length;
+        if (nCat > nT) {
+          // N > T
+          for (const str of types) {
+            await categories.findOneAndRemove({type: str});
+          }
+          let nUpd = 0;
+          const oldestCat = await categories.find().sort({createdAt: 1}).limit(1);
+          for(const str of types){
+            const updated = await transactions.updateMany(
+                { type: str },
+                { $set: { $type: oldestCat[0].type } }
+            );
+            nUpd += updated.modifiedCount;
+          }
+          return res.status(200).json({
+            message: "Deletion completed successfully",
+            count: nUpd,
+          });
+        }
+    
+        else if (nCat === nT) {
+          // N == T
+          const oldestCat = await categories.find().sort({createdAt: 1}).limit(1);
+          let nUpd = 0;
+          for (const str of types) {
+            if (str !== oldestCat.type) {
+              const updated = await transactions.updateMany(
+                  {type: str},
+                  {$set: {$type: oldestCat[0].type}}
+              );
+              nUpd += updated.modifiedCount;
+            }
+          }
+          return res.status(200).json({
+            message: "Deletion completed successfully",
+            count: nUpd,
+          });
+        }
+      } catch (error) {
+        res.status(400).json({ error: error.message });
       }
-    }
-    return res.status(200).json({
-      message: "Deletion completed successfully",
-      count: nUpd,
-    });
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
-};
+    };
 
 /**
  * Return all the categories

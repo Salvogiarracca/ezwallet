@@ -227,10 +227,280 @@ describe("updateCategory", () => {
 });
 
 describe("deleteCategory", () => {
-  test("Dummy test, change it", () => {
-    expect(true).toBe(true);
+  test("Missing attributes [deleteCategory] - Test #1", async () => {
+    const mockReq = {
+      params: {username: "testuser"},
+      cookies: {
+        accessToken: "adminAccessTokenValid",
+        refreshToken: "adminRefreshTokenValid",
+      },
+    };
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn()
+    };
+    const expectedResponse = {
+      error: "Missing attributes",
+    };
+    verifyAuth.mockImplementation((mockReq, mockRes, params) => {
+      if (params.authType == "Admin") {
+        return {authorized: true, cause: "authorized"};
+      } else {
+        return {authorized: false, cause: "authorized"};
+      }
+    });
+
+    await deleteCategory(mockReq, mockRes);
+    expect(mockRes.status).toHaveBeenCalledWith(400);
+    expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
+  });
+
+  test("Only one category [deleteCategory] - Test #2", async () => {
+    const mockReq = {
+      params: {username: "testuser"},
+      body: {
+        types: ["investment", "fuel"],
+      },
+      cookies: {
+        accessToken: "adminAccessTokenValid",
+        refreshToken: "adminRefreshTokenValid",
+      },
+    };
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn()
+    };
+    const expectedResponse = {
+      error: "Only one category, deletion not possible!",
+    };
+    verifyAuth.mockImplementation((mockReq, mockRes, params) => {
+      if (params.authType == "Admin") {
+        return {authorized: true, cause: "authorized"};
+      } else {
+        return {authorized: false, cause: "authorized"};
+      }
+    });
+    jest.spyOn(categories, 'countDocuments').mockImplementation(() => 1);
+    await deleteCategory(mockReq, mockRes);
+    expect(mockRes.status).toHaveBeenCalledWith(400);
+    expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
+  });
+
+  test("Empty string [deleteCategory] - Test #3", async () => {
+    const mockReq = {
+      params: {username: "testuser"},
+      body: {
+        types: ["investment", "", "fuel"],
+      },
+      cookies: {
+        accessToken: "adminAccessTokenValid",
+        refreshToken: "adminRefreshTokenValid",
+      },
+    };
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn()
+    };
+    const expectedResponse = {
+      error: "Empty string in array",
+    };
+    verifyAuth.mockImplementation((mockReq, mockRes, params) => {
+      if (params.authType == "Admin") {
+        return {authorized: true, cause: "authorized"};
+      } else {
+        return {authorized: false, cause: "authorized"};
+      }
+    });
+    jest.spyOn(categories, 'countDocuments').mockImplementation(() => 4);
+    jest.spyOn(categories, 'findOne').mockImplementation(() => ({type: 'test', color: "#ff0000"}));
+    await deleteCategory(mockReq, mockRes);
+    expect(mockRes.status).toHaveBeenCalledWith(400);
+    expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
+  });
+
+  test("Category does not exist [deleteCategory] - Test #4", async () => {
+    const mockReq = {
+      params: {username: "testuser"},
+      body: {
+        types: ["investment", "test", "fuel"],
+      },
+      cookies: {
+        accessToken: "adminAccessTokenValid",
+        refreshToken: "adminRefreshTokenValid",
+      },
+    };
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn()
+    };
+    const expectedResponse = {
+      error: "Category does not exist, deletion not possible!",
+    };
+    verifyAuth.mockImplementation((mockReq, mockRes, params) => {
+      if (params.authType == "Admin") {
+        return {authorized: true, cause: "authorized"};
+      } else {
+        return {authorized: false, cause: "authorized"};
+      }
+    });
+    jest.spyOn(categories, 'countDocuments').mockImplementation(() => 4);
+    jest.spyOn(categories, 'findOne').mockReturnValueOnce({type: 'test', color: '#ffffff'})
+        .mockReturnValueOnce(null)
+        .mockReturnValue({type: 'test', color: '#ff0000'});
+    await deleteCategory(mockReq, mockRes);
+    expect(mockRes.status).toHaveBeenCalledWith(400);
+    expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
+  });
+
+  test("Success N>T [deleteCategory] - Test #5", async () => {
+    const mockReq = {
+      params: {username: "testuser"},
+      body: {
+        types: ["fuel"],
+      },
+      cookies: {
+        accessToken: "adminAccessTokenValid",
+        refreshToken: "adminRefreshTokenValid",
+      },
+    };
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn()
+    };
+    const expectedResponse = {
+      message: "Deletion completed successfully",
+      count: 23,
+    };
+    verifyAuth.mockImplementation((mockReq, mockRes, params) => {
+      if (params.authType == "Admin") {
+        return {authorized: true, cause: "authorized"};
+      } else {
+        return {authorized: false, cause: "authorized"};
+      }
+    });
+    jest.spyOn(categories, 'countDocuments').mockImplementation(() => 5);
+    jest.spyOn(categories, 'findOne').mockReturnValue({type: 'test', color: '#ffffff'});
+    jest.spyOn(categories, 'findOneAndRemove').mockImplementation(() => ({}));
+    jest.spyOn(categories, 'find').mockImplementation(() => ({type: 'oldest', color: '#ffffff'}));
+    jest.spyOn(transactions, 'updateMany').mockImplementation(() => ({modifiedCount: 23}));
+    jest.spyOn(categories, "find").mockImplementation(() => ({
+      sort: () => ({
+        limit: () => [{
+          type: 'oldest',
+          color: '#cc1b1b'
+        }],
+      }),
+    }));
+
+    await deleteCategory(mockReq, mockRes);
+    expect(mockRes.status).toHaveBeenCalledWith(200);
+    expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
+  });
+
+  test("Success N=T [deleteCategory] - Test #6", async () => {
+    const mockReq = {
+      params: {username: "testuser"},
+      body: {
+        types: ["fuel", "investment", "supermarket", "test"],
+      },
+      cookies: {
+        accessToken: "adminAccessTokenValid",
+        refreshToken: "adminRefreshTokenValid",
+      },
+    };
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn()
+    };
+    const expectedResponse = {
+      message: "Deletion completed successfully",
+      count: 68,
+    };
+    verifyAuth.mockImplementation((mockReq, mockRes, params) => {
+      if (params.authType == "Admin") {
+        return {authorized: true, cause: "authorized"};
+      } else {
+        return {authorized: false, cause: "authorized"};
+      }
+    });
+    jest.spyOn(categories, 'countDocuments').mockImplementation(() => 4);
+    jest.spyOn(categories, 'findOne').mockReturnValue({type: 'test', color: '#ffffff'});
+    jest.spyOn(categories, 'findOneAndRemove').mockImplementation(() => ({}));
+    jest.spyOn(categories, 'find').mockImplementation(() => ({type: 'fuel', color: '#ffffff'}));
+    jest.spyOn(transactions, 'updateMany').mockImplementation(() => ({modifiedCount: 17}));
+    jest.spyOn(categories, "find").mockImplementation(() => ({
+      sort: () => ({
+        limit: () => [{
+          type: 'fuel',
+          color: '#cc1b1b'
+        }],
+      }),
+    }));
+
+    await deleteCategory(mockReq, mockRes);
+    expect(mockRes.status).toHaveBeenCalledWith(200);
+    expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
+  });
+
+  test("Unauthorized [deleteCategory] - Test #7", async () => {
+    const mockReq = {
+      params: {username: "testuser"},
+      body: {
+        types: ["fuel", "investment", "supermarket", "test"],
+      },
+      cookies: {
+        accessToken: "adminAccessTokenValid",
+        refreshToken: "adminRefreshTokenValid",
+      },
+    };
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn()
+    }
+    const expectedResponse = {
+      message: 'Unauthorized'
+    };
+    verifyAuth.mockImplementation((mockReq, mockRes, params) => {
+      if (params.authType == "Admin") {
+        return {authorized: false, cause: "Unauthorized"};
+      } else {
+        return {authorized: false, cause: "Unauthorized"};
+      }
+    });
+    await deleteCategory(mockReq, mockRes);
+    expect(mockRes.status).toHaveBeenCalledWith(401);
+    expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
+  });
+
+  test("Empty array [deleteCategory] - Test #8", async () => {
+    const mockReq = {
+      params: {username: "testuser"},
+      cookies: {
+        accessToken: "adminAccessTokenValid",
+        refreshToken: "adminRefreshTokenValid",
+      },
+      body: {types: [],}
+    };
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn()
+    };
+    const expectedResponse = {
+      error: "Missing attributes",
+    };
+    verifyAuth.mockImplementation((mockReq, mockRes, params) => {
+      if (params.authType == "Admin") {
+        return {authorized: true, cause: "authorized"};
+      } else {
+        return {authorized: false, cause: "authorized"};
+      }
+    });
+    await deleteCategory(mockReq, mockRes);
+    expect(mockRes.status).toHaveBeenCalledWith(400);
+    expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
   });
 });
+
 
 describe("getCategories", () => {
   test("Successful Request [getCategories] - Test #1", async () => {
