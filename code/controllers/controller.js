@@ -11,24 +11,39 @@ import {
   - Request Body Content: An object having attributes `type` and `color`
   - Response `data` Content: An object having attributes `type` and `color`
  */
-export const createCategory = (req, res) => {
-  try {
-    const cookie = req.cookies;
-    if (!cookie.accessToken) {
-      return res.status(401).json({ message: "Unauthorized" }); // unauthorized
-    }
-    const { type, color } = req.body;
-    const new_categories = new categories({ type, color });
-    new_categories
-      .save()
-      .then((data) => res.json(data))
-      .catch((err) => {
-        throw err;
+  export const createCategory = (req, res) => {
+    try {
+      const username = req.params.username;
+      const cookie = req.cookies;
+      if (!cookie.accessToken) {
+        return res.status(401).json({ message: "Unauthorized" }); // unauthorized
+      }
+      const adminAuth = verifyAuth(req, res, {
+        authType: "Admin",
+        username: username
       });
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
-};
+      if(!adminAuth.authorized){
+        return res.status(401).json({message: "Unauthorized"});
+      }
+      const { type, color } = req.body;
+      if(!type || !color){
+        throw new Error("Missing attributes");
+      }
+      if(categories.findOne({type: type})){
+        throw new Error("Category already exists")
+      }
+      const new_categories = new categories({ type, color });
+      new_categories
+        .save()
+        .then((data) => res.json(data))
+        .catch((err) => {
+          throw err;
+        });
+      res.status(200).json({data: {type: type, color: color}, message: "Category created!"});
+    } catch (error) {
+      res.status(400).json({ error: error.message });
+    }
+  };
 
 /**
  * Edit a category's type or color
@@ -176,23 +191,31 @@ export const deleteCategory = async (req, res) => {
   - Optional behavior:
     - empty array is returned if there are no categories
  */
-export const getCategories = async (req, res) => {
-  try {
-    const cookie = req.cookies;
-    if (!cookie.accessToken) {
-      return res.status(401).json({ message: "Unauthorized" }); // unauthorized
-    }
-    let data = await categories.find({});
-
-    let filter = data.map((v) =>
-      Object.assign({}, { type: v.type, color: v.color })
-    );
-
-    return res.json(filter);
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
-};
+    export const getCategories = async (req, res) => {
+      try {
+        const username = req.params.username;
+        const cookie = req.cookies;
+        if (!cookie.accessToken) {
+          return res.status(401).json({ message: "Unauthorized" }); // unauthorized
+        }
+        const auth = verifyAuth(req, res, {
+          authType: "Simple",
+          username: username,
+        });
+        if(!auth.authorized){
+          return res.status(401).json({message: "Unauthorized"});
+        }
+        let data = await categories.find({});
+    
+        let filter = data.map((v) =>
+          Object.assign({}, { type: v.type, color: v.color })
+        );
+    
+        return res.status(200).json({data: filter, message: "authorized"});
+      } catch (error) {
+        res.status(400).json({ error: error.message });
+      }
+    };
 
 /**
  * Create a new transaction made by a specific user
