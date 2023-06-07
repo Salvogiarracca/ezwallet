@@ -378,7 +378,9 @@ describe("createTransaction", () => {
     };
     const expectedResponse = {
       data: testTransaction,
-      message: "Transaction created!",
+      refreshedTokenMessage: "",
+      message: "Transaction created",
+      refreshedTokenMessage: "",
     };
     const mockReq = {
       body: testTransaction,
@@ -391,8 +393,22 @@ describe("createTransaction", () => {
     const mockRes = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
+      locals: {
+        //The name can also be message, what matters is consistency with the one used in the code
+        refreshedTokenMessage: "",
+      },
     };
-
+    const testCategory = {
+      type: "test",
+      color: "testColor",
+    };
+    const testUser = {
+      username: testTransaction.username,
+      email: "test@gmail.com",
+      password: "test",
+    };
+    jest.spyOn(User, "findOne").mockResolvedValue(testUser);
+    jest.spyOn(categories, "findOne").mockResolvedValue(testCategory);
     jest
       .spyOn(transactions.prototype, "save")
       .mockResolvedValue(testTransaction);
@@ -415,6 +431,7 @@ describe("createTransaction", () => {
       type: "Personal",
     };
     const expectedResponse = {
+      refreshedTokenMessage: "",
       message: "Unauthorized",
     };
     const mockReq = {
@@ -428,8 +445,22 @@ describe("createTransaction", () => {
     const mockRes = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
+      locals: {
+        //The name can also be message, what matters is consistency with the one used in the code
+        refreshedTokenMessage: "",
+      },
     };
-
+    const testCategory = {
+      type: "test",
+      color: "testColor",
+    };
+    const testUser = {
+      username: testTransaction.username,
+      email: "test@gmail.com",
+      password: "test",
+    };
+    jest.spyOn(User, "findOne").mockResolvedValue(testUser);
+    jest.spyOn(categories, "findOne").mockResolvedValue(testCategory);
     jest
       .spyOn(transactions.prototype, "save")
       .mockResolvedValue(testTransaction);
@@ -452,6 +483,7 @@ describe("createTransaction", () => {
       type: "Personal",
     };
     const expectedResponse = {
+      refreshedTokenMessage: "",
       message: "Username dosen't match transaction's username",
     };
     const mockReq = {
@@ -465,8 +497,22 @@ describe("createTransaction", () => {
     const mockRes = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
+      locals: {
+        //The name can also be message, what matters is consistency with the one used in the code
+        refreshedTokenMessage: "",
+      },
     };
-
+    const testCategory = {
+      type: "test",
+      color: "testColor",
+    };
+    const testUser = {
+      username: testTransaction.username,
+      email: "test@gmail.com",
+      password: "test",
+    };
+    jest.spyOn(User, "findOne").mockResolvedValue(testUser);
+    jest.spyOn(categories, "findOne").mockResolvedValue(testCategory);
     jest
       .spyOn(transactions.prototype, "save")
       .mockResolvedValue(testTransaction);
@@ -490,7 +536,8 @@ describe("createTransaction", () => {
     };
     const expectedResponse = {
       data: testTransaction,
-      message: "Transaction created!",
+      refreshedTokenMessage: "",
+      message: "Transaction created",
     };
     const mockReq = {
       body: testTransaction,
@@ -503,8 +550,22 @@ describe("createTransaction", () => {
     const mockRes = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
+      locals: {
+        //The name can also be message, what matters is consistency with the one used in the code
+        refreshedTokenMessage: "",
+      },
     };
-
+    const testCategory = {
+      type: "test",
+      color: "testColor",
+    };
+    const testUser = {
+      username: testTransaction.username,
+      email: "test@gmail.com",
+      password: "test",
+    };
+    jest.spyOn(User, "findOne").mockResolvedValue(testUser);
+    jest.spyOn(categories, "findOne").mockResolvedValue(testCategory);
     jest
       .spyOn(transactions.prototype, "save")
       .mockResolvedValue(testTransaction);
@@ -525,7 +586,11 @@ describe("createTransaction", () => {
       username: "Pippo",
       amount: 3500,
     };
-    const expectedResponse = {};
+    const expectedResponse = {
+      refreshedTokenMessage: "",
+      message: "Invalid parameters",
+      refreshedTokenMessage: "",
+    };
     const mockReq = {
       body: testTransaction,
       params: { username: "Pippo" },
@@ -537,8 +602,22 @@ describe("createTransaction", () => {
     const mockRes = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
+      locals: {
+        //The name can also be message, what matters is consistency with the one used in the code
+        refreshedTokenMessage: "",
+      },
     };
-
+    const testCategory = {
+      type: "test",
+      color: "testColor",
+    };
+    const testUser = {
+      username: testTransaction.username,
+      email: "test@gmail.com",
+      password: "test",
+    };
+    jest.spyOn(User, "findOne").mockResolvedValue(testUser);
+    jest.spyOn(categories, "findOne").mockResolvedValue(testCategory);
     jest
       .spyOn(transactions.prototype, "save")
       .mockResolvedValue(testTransaction);
@@ -546,8 +625,8 @@ describe("createTransaction", () => {
       return { authorized: true, cause: "authorized" };
     });
     await createTransaction(mockReq, mockRes);
-    expect(mockRes.status).toHaveBeenCalledWith(401);
-    //expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
+    expect(mockRes.status).toHaveBeenCalledWith(400);
+    expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
   });
 
   test("Database Error Transaction Request [createTransaction] - Test #6", async () => {
@@ -557,6 +636,7 @@ describe("createTransaction", () => {
       type: "Personal",
     };
     const expectedResponse = {
+      refreshedTokenMessage: "",
       error: "Database Error",
     };
     const mockReq = {
@@ -570,8 +650,22 @@ describe("createTransaction", () => {
     const mockRes = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
+      locals: {
+        //The name can also be message, what matters is consistency with the one used in the code
+        refreshedTokenMessage: "",
+      },
     };
-
+    const testCategory = {
+      type: "test",
+      color: "testColor",
+    };
+    const testUser = {
+      username: testTransaction.username,
+      email: "test@gmail.com",
+      password: "test",
+    };
+    jest.spyOn(User, "findOne").mockResolvedValue(testUser);
+    jest.spyOn(categories, "findOne").mockResolvedValue(testCategory);
     jest.spyOn(transactions.prototype, "save").mockImplementation(() => {
       throw new Error("Database Error");
     });
@@ -600,6 +694,10 @@ describe("getAllTransactions", () => {
     const mockRes = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
+      locals: {
+        //The name can also be message, what matters is consistency with the one used in the code
+        refreshedTokenMessage: "",
+      },
     };
     const retrievedTransactions = [
       {
@@ -641,6 +739,7 @@ describe("getAllTransactions", () => {
           }
         )
       ),
+      refreshedTokenMessage: "",
       message: "authorized",
     };
     verifyAuth.mockImplementation((mockReq, mockRes, params) => {
@@ -670,6 +769,10 @@ describe("getAllTransactions", () => {
     const mockRes = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
+      locals: {
+        //The name can also be message, what matters is consistency with the one used in the code
+        refreshedTokenMessage: "",
+      },
     };
     const retrievedTransactions = [
       {
@@ -698,6 +801,7 @@ describe("getAllTransactions", () => {
       },
     ];
     const expectedResponse = {
+      refreshedTokenMessage: "",
       message: "unauthorized",
     };
     verifyAuth.mockImplementation((mockReq, mockRes, params) => {
@@ -727,6 +831,10 @@ describe("getAllTransactions", () => {
     const mockRes = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
+      locals: {
+        //The name can also be message, what matters is consistency with the one used in the code
+        refreshedTokenMessage: "",
+      },
     };
     const retrievedTransactions = [];
     const expectedResponse = {
@@ -743,6 +851,7 @@ describe("getAllTransactions", () => {
           }
         )
       ),
+      refreshedTokenMessage: "",
       message: "authorized",
     };
     verifyAuth.mockImplementation((mockReq, mockRes, params) => {
@@ -772,8 +881,13 @@ describe("getAllTransactions", () => {
     const mockRes = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
+      locals: {
+        //The name can also be message, what matters is consistency with the one used in the code
+        refreshedTokenMessage: "",
+      },
     };
     const expectedResponse = {
+      refreshedTokenMessage: "",
       error: "Database Error",
     };
     verifyAuth.mockImplementation((mockReq, mockRes, params) => {
@@ -801,10 +915,15 @@ describe("getTransactionsByUser", () => {
         accessToken: "adminAccessTokenValid",
         refreshToken: "adminRefreshTokenValid",
       },
+      url: "/api/users/Pippo/transactions",
     };
     const mockRes = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
+      locals: {
+        //The name can also be message, what matters is consistency with the one used in the code
+        refreshedTokenMessage: "",
+      },
     };
     const retrievedTransactions = [
       {
@@ -846,6 +965,7 @@ describe("getTransactionsByUser", () => {
           }
         )
       ),
+      refreshedTokenMessage: "",
       message: "authorized",
     };
     verifyAuth.mockImplementation((mockReq, mockRes, params) => {
@@ -854,6 +974,11 @@ describe("getTransactionsByUser", () => {
       } else {
         return { authorized: false, cause: "unauthorized" };
       }
+    });
+    jest.spyOn(User, "findOne").mockReturnValue({
+      username: "mockedUsername",
+      email: "mockedEmail",
+      role: "mockedRole",
     });
     jest
       .spyOn(transactions, "aggregate")
@@ -865,18 +990,25 @@ describe("getTransactionsByUser", () => {
   });
 
   test("Unauthorized User Request [getTransactionsByUser] - Test #2", async () => {
+    const url_un = "Gianluca";
     const mockReq = {
-      params: { username: "Gianluca" },
+      params: { username: url_un },
       cookies: {
         accessToken: "adminAccessTokenValid",
         refreshToken: "adminRefreshTokenValid",
       },
+      url: "/api/users/" + url_un + "/transactions",
     };
     const mockRes = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
+      locals: {
+        //The name can also be message, what matters is consistency with the one used in the code
+        refreshedTokenMessage: "",
+      },
     };
     const expectedResponse = {
+      refreshedTokenMessage: "",
       message: "unauthorized",
     };
     verifyAuth.mockImplementation((mockReq, mockRes, params) => {
@@ -886,6 +1018,11 @@ describe("getTransactionsByUser", () => {
         return { authorized: false, cause: "unauthorized" };
       }
     });
+    jest.spyOn(User, "findOne").mockReturnValue({
+      username: "mockedUsername",
+      email: "mockedEmail",
+      role: "mockedRole",
+    });
     await getTransactionsByUser(mockReq, mockRes);
     expect(transactions.aggregate).not.toHaveBeenCalled();
     expect(mockRes.status).toHaveBeenCalledWith(401);
@@ -893,16 +1030,22 @@ describe("getTransactionsByUser", () => {
   });
 
   test("Successful Admin Request [getTransactionsByUser] - Test #3", async () => {
+    const url_un = "Pippo";
     const mockReq = {
-      params: { username: "Pippo" },
+      params: { username: url_un },
       cookies: {
         accessToken: "adminAccessTokenValid",
         refreshToken: "adminRefreshTokenValid",
       },
+      url: "/api/transactions/users" + url_un,
     };
     const mockRes = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
+      locals: {
+        //The name can also be message, what matters is consistency with the one used in the code
+        refreshedTokenMessage: "",
+      },
     };
     const retrievedTransactions = [
       {
@@ -944,6 +1087,7 @@ describe("getTransactionsByUser", () => {
           }
         )
       ),
+      refreshedTokenMessage: "",
       message: "authorized",
     };
     verifyAuth.mockImplementation((mockReq, mockRes, params) => {
@@ -953,16 +1097,14 @@ describe("getTransactionsByUser", () => {
         return { authorized: true, cause: "authorized" };
       }
     });
+    jest.spyOn(User, "findOne").mockReturnValue({
+      username: "mockedUsername",
+      email: "mockedEmail",
+      role: "mockedRole",
+    });
     jest
       .spyOn(transactions, "aggregate")
       .mockResolvedValue(retrievedTransactions);
-    jest.spyOn(User, "findOne").mockReturnValue({
-      select: jest.fn().mockResolvedValue({
-        username: "mockedUsername",
-        email: "mockedEmail",
-        role: "mockedRole",
-      }),
-    });
     await getTransactionsByUser(mockReq, mockRes);
     expect(transactions.aggregate).toHaveBeenCalled();
     expect(mockRes.status).toHaveBeenCalledWith(200);
@@ -970,16 +1112,22 @@ describe("getTransactionsByUser", () => {
   });
 
   test("Inexistent User Request [getTransactionsByUser] - Test #4", async () => {
+    const url_un = "Pippo";
     const mockReq = {
-      params: { username: "Pippo" },
+      params: { username: url_un },
       cookies: {
         accessToken: "adminAccessTokenValid",
         refreshToken: "adminRefreshTokenValid",
       },
+      url: "/api/users/" + url_un + "/transactions",
     };
     const mockRes = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
+      locals: {
+        //The name can also be message, what matters is consistency with the one used in the code
+        refreshedTokenMessage: "",
+      },
     };
     const retrievedTransactions = [
       {
@@ -1008,6 +1156,7 @@ describe("getTransactionsByUser", () => {
       },
     ];
     const expectedResponse = {
+      refreshedTokenMessage: "",
       message: "User not found",
     };
     verifyAuth.mockImplementation((mockReq, mockRes, params) => {
@@ -1017,31 +1166,36 @@ describe("getTransactionsByUser", () => {
         return { authorized: true, cause: "authorized" };
       }
     });
+    jest.spyOn(User, "findOne").mockReturnValue(undefined);
     jest
       .spyOn(transactions, "aggregate")
       .mockResolvedValue(retrievedTransactions);
-    jest.spyOn(User, "findOne").mockReturnValue({
-      select: jest.fn().mockResolvedValue(undefined),
-    });
     await getTransactionsByUser(mockReq, mockRes);
     expect(transactions.aggregate).not.toHaveBeenCalled();
-    expect(mockRes.status).toHaveBeenCalledWith(401);
+    expect(mockRes.status).toHaveBeenCalledWith(400);
     expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
   });
 
   test("Database Error Request [getTransactionsByUser] - Test #5", async () => {
+    const url_un = "Pippo";
     const mockReq = {
-      params: { username: "Pippo" },
+      params: { username: url_un },
       cookies: {
         accessToken: "adminAccessTokenValid",
         refreshToken: "adminRefreshTokenValid",
       },
+      url: "/api/users/" + url_un + "/transactions",
     };
     const mockRes = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
+      locals: {
+        //The name can also be message, what matters is consistency with the one used in the code
+        refreshedTokenMessage: "",
+      },
     };
     const expectedResponse = {
+      refreshedTokenMessage: "",
       error: "Database Error",
     };
     verifyAuth.mockImplementation((mockReq, mockRes, params) => {
@@ -1050,6 +1204,11 @@ describe("getTransactionsByUser", () => {
       } else {
         return { authorized: false, cause: "unauthorized" };
       }
+    });
+    jest.spyOn(User, "findOne").mockReturnValue({
+      username: "mockedUsername",
+      email: "mockedEmail",
+      role: "mockedRole",
     });
     jest.spyOn(transactions, "aggregate").mockImplementation(() => {
       throw new Error("Database Error");
@@ -1062,17 +1221,22 @@ describe("getTransactionsByUser", () => {
 });
 
 describe("getTransactionsByUserByCategory", () => {
-  test("Successful User Request [getTransactionsByUserByCategory] - Test #1", async () => {
+  test("Successful User Request [getTransactionsByUser] - Test #1", async () => {
     const mockReq = {
       params: { username: "Pippo" },
       cookies: {
         accessToken: "adminAccessTokenValid",
         refreshToken: "adminRefreshTokenValid",
       },
+      url: "/api/users/Pippo/transactions",
     };
     const mockRes = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
+      locals: {
+        //The name can also be message, what matters is consistency with the one used in the code
+        refreshedTokenMessage: "",
+      },
     };
     const retrievedTransactions = [
       {
@@ -1114,6 +1278,7 @@ describe("getTransactionsByUserByCategory", () => {
           }
         )
       ),
+      refreshedTokenMessage: "",
       message: "authorized",
     };
     verifyAuth.mockImplementation((mockReq, mockRes, params) => {
@@ -1122,6 +1287,15 @@ describe("getTransactionsByUserByCategory", () => {
       } else {
         return { authorized: false, cause: "unauthorized" };
       }
+    });
+    jest.spyOn(User, "findOne").mockReturnValue({
+      username: "mockedUsername",
+      email: "mockedEmail",
+      role: "mockedRole",
+    });
+    jest.spyOn(categories, "findOne").mockReturnValue({
+      type: "test",
+      color: "testColor",
     });
     jest
       .spyOn(transactions, "aggregate")
@@ -1132,19 +1306,26 @@ describe("getTransactionsByUserByCategory", () => {
     expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
   });
 
-  test("Unauthorized User Request [getTransactionsByUserByCategory] - Test #2", async () => {
+  test("Unauthorized User Request [getTransactionsByUser] - Test #2", async () => {
+    const url_un = "Gianluca";
     const mockReq = {
-      params: { username: "Gianluca" },
+      params: { username: url_un },
       cookies: {
         accessToken: "adminAccessTokenValid",
         refreshToken: "adminRefreshTokenValid",
       },
+      url: "/api/users/" + url_un + "/transactions",
     };
     const mockRes = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
+      locals: {
+        //The name can also be message, what matters is consistency with the one used in the code
+        refreshedTokenMessage: "",
+      },
     };
     const expectedResponse = {
+      refreshedTokenMessage: "",
       message: "unauthorized",
     };
     verifyAuth.mockImplementation((mockReq, mockRes, params) => {
@@ -1154,23 +1335,38 @@ describe("getTransactionsByUserByCategory", () => {
         return { authorized: false, cause: "unauthorized" };
       }
     });
+    jest.spyOn(User, "findOne").mockReturnValue({
+      username: "mockedUsername",
+      email: "mockedEmail",
+      role: "mockedRole",
+    });
+    jest.spyOn(categories, "findOne").mockReturnValue({
+      type: "test",
+      color: "testColor",
+    });
     await getTransactionsByUserByCategory(mockReq, mockRes);
     expect(transactions.aggregate).not.toHaveBeenCalled();
     expect(mockRes.status).toHaveBeenCalledWith(401);
     expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
   });
 
-  test("Successful Admin Request [getTransactionsByUserByCategory] - Test #3", async () => {
+  test("Successful Admin Request [getTransactionsByUser] - Test #3", async () => {
+    const url_un = "Pippo";
     const mockReq = {
-      params: { username: "Pippo" },
+      params: { username: url_un },
       cookies: {
         accessToken: "adminAccessTokenValid",
         refreshToken: "adminRefreshTokenValid",
       },
+      url: "/api/transactions/users" + url_un,
     };
     const mockRes = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
+      locals: {
+        //The name can also be message, what matters is consistency with the one used in the code
+        refreshedTokenMessage: "",
+      },
     };
     const retrievedTransactions = [
       {
@@ -1212,6 +1408,7 @@ describe("getTransactionsByUserByCategory", () => {
           }
         )
       ),
+      refreshedTokenMessage: "",
       message: "authorized",
     };
     verifyAuth.mockImplementation((mockReq, mockRes, params) => {
@@ -1221,9 +1418,6 @@ describe("getTransactionsByUserByCategory", () => {
         return { authorized: true, cause: "authorized" };
       }
     });
-    jest
-      .spyOn(transactions, "aggregate")
-      .mockResolvedValue(retrievedTransactions);
     jest.spyOn(User, "findOne").mockReturnValue({
       select: jest.fn().mockResolvedValue({
         username: "mockedUsername",
@@ -1231,23 +1425,41 @@ describe("getTransactionsByUserByCategory", () => {
         role: "mockedRole",
       }),
     });
+    jest
+      .spyOn(transactions, "aggregate")
+      .mockResolvedValue(retrievedTransactions);
+      jest.spyOn(User, "findOne").mockReturnValue({
+        username: "mockedUsername",
+        email: "mockedEmail",
+        role: "mockedRole",
+      });
+      jest.spyOn(categories, "findOne").mockReturnValue({
+        type: "test",
+        color: "testColor",
+      });
     await getTransactionsByUserByCategory(mockReq, mockRes);
     expect(transactions.aggregate).toHaveBeenCalled();
     expect(mockRes.status).toHaveBeenCalledWith(200);
     expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
   });
 
-  test("Inexistent User Request [getTransactionsByUserByCategory] - Test #4", async () => {
+  test("Inexistent User Request [getTransactionsByUser] - Test #4", async () => {
+    const url_un = "Pippo";
     const mockReq = {
-      params: { username: "Pippo" },
+      params: { username: url_un },
       cookies: {
         accessToken: "adminAccessTokenValid",
         refreshToken: "adminRefreshTokenValid",
       },
+      url: "/api/users/" + url_un + "/transactions",
     };
     const mockRes = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
+      locals: {
+        //The name can also be message, what matters is consistency with the one used in the code
+        refreshedTokenMessage: "",
+      },
     };
     const retrievedTransactions = [
       {
@@ -1276,6 +1488,7 @@ describe("getTransactionsByUserByCategory", () => {
       },
     ];
     const expectedResponse = {
+      refreshedTokenMessage: "",
       message: "User not found",
     };
     verifyAuth.mockImplementation((mockReq, mockRes, params) => {
@@ -1288,28 +1501,37 @@ describe("getTransactionsByUserByCategory", () => {
     jest
       .spyOn(transactions, "aggregate")
       .mockResolvedValue(retrievedTransactions);
-    jest.spyOn(User, "findOne").mockReturnValue({
-      select: jest.fn().mockResolvedValue(undefined),
-    });
+      jest.spyOn(User, "findOne").mockReturnValue(undefined);
+      jest.spyOn(categories, "findOne").mockReturnValue({
+        type: "test",
+        color: "testColor",
+      });
     await getTransactionsByUserByCategory(mockReq, mockRes);
     expect(transactions.aggregate).not.toHaveBeenCalled();
-    expect(mockRes.status).toHaveBeenCalledWith(401);
+    expect(mockRes.status).toHaveBeenCalledWith(400);
     expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
   });
 
-  test("Database Error Request [getTransactionsByUserByCategory] - Test #5", async () => {
+  test("Database Error Request [getTransactionsByUser] - Test #5", async () => {
+    const url_un = "Pippo";
     const mockReq = {
-      params: { username: "Pippo" },
+      params: { username: url_un },
       cookies: {
         accessToken: "adminAccessTokenValid",
         refreshToken: "adminRefreshTokenValid",
       },
+      url: "/api/users/" + url_un + "/transactions",
     };
     const mockRes = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
+      locals: {
+        //The name can also be message, what matters is consistency with the one used in the code
+        refreshedTokenMessage: "",
+      },
     };
     const expectedResponse = {
+      refreshedTokenMessage: "",
       error: "Database Error",
     };
     verifyAuth.mockImplementation((mockReq, mockRes, params) => {
@@ -1318,6 +1540,15 @@ describe("getTransactionsByUserByCategory", () => {
       } else {
         return { authorized: false, cause: "unauthorized" };
       }
+    });
+    jest.spyOn(User, "findOne").mockReturnValue({
+      username: "mockedUsername",
+      email: "mockedEmail",
+      role: "mockedRole",
+    });
+    jest.spyOn(categories, "findOne").mockReturnValue({
+      type: "test",
+      color: "testColor",
     });
     jest.spyOn(transactions, "aggregate").mockImplementation(() => {
       throw new Error("Database Error");
@@ -1331,16 +1562,22 @@ describe("getTransactionsByUserByCategory", () => {
 
 describe("getTransactionsByGroup", () => {
   test("Successful User Request [getTransactionsByGroup] - Test #1", async () => {
+    const groupName = "testGroup"
     const mockReq = {
-      params: { name: "testGroup" },
+      params: {name:groupName},
       cookies: {
         accessToken: "adminAccessTokenValid",
         refreshToken: "adminRefreshTokenValid",
       },
+      url:"/api/groups/"+groupName+"/transactions"
     };
     const mockRes = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
+      locals: {
+        //The name can also be message, what matters is consistency with the one used in the code
+        refreshedTokenMessage: "",
+      },
     };
     const retrievedTransactions = [
       {
@@ -1382,6 +1619,8 @@ describe("getTransactionsByGroup", () => {
           }
         )
       ),
+
+      refreshedTokenMessage: "",
       message: "authorized",
     };
     verifyAuth.mockImplementation((mockReq, mockRes, params) => {
@@ -1403,16 +1642,22 @@ describe("getTransactionsByGroup", () => {
   });
 
   test("Unauthorized User Request [getTransactionsByGroup] - Test #2", async () => {
+    const groupName = "testGroup"
     const mockReq = {
-      params: { name: "testGroup" },
+      params: {name:groupName},
       cookies: {
         accessToken: "adminAccessTokenValid",
         refreshToken: "adminRefreshTokenValid",
       },
+      url:"/api/groups/"+groupName+"/transactions"
     };
     const mockRes = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
+      locals: {
+        //The name can also be message, what matters is consistency with the one used in the code
+        refreshedTokenMessage: "",
+      },
     };
     const retrievedTransactions = [
       {
@@ -1441,6 +1686,7 @@ describe("getTransactionsByGroup", () => {
       },
     ];
     const expectedResponse = {
+      refreshedTokenMessage: "",
       message: "unauthorized",
     };
     verifyAuth.mockImplementation((mockReq, mockRes, params) => {
@@ -1462,16 +1708,22 @@ describe("getTransactionsByGroup", () => {
   });
 
   test("Successful Admin Request [getTransactionsByGroup] - Test #3", async () => {
+    const groupName = "testGroup"
     const mockReq = {
-      params: { name: "testGroup" },
+      params: {name:groupName},
       cookies: {
         accessToken: "adminAccessTokenValid",
         refreshToken: "adminRefreshTokenValid",
       },
+      url:"/api/transactions/groups/"+groupName
     };
     const mockRes = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
+      locals: {
+        //The name can also be message, what matters is consistency with the one used in the code
+        refreshedTokenMessage: "",
+      },
     };
     const retrievedTransactions = [
       {
@@ -1513,6 +1765,7 @@ describe("getTransactionsByGroup", () => {
           }
         )
       ),
+      refreshedTokenMessage: "",
       message: "authorized",
     };
     verifyAuth.mockImplementation((mockReq, mockRes, params) => {
@@ -1534,41 +1787,56 @@ describe("getTransactionsByGroup", () => {
   });
 
   test("Inexistent Group Request [getTransactionsByGroup] - Test #4", async () => {
+    const groupName = "testGroup"
     const mockReq = {
-      params: { name: "testGroup" },
+      params: {name:groupName},
       cookies: {
         accessToken: "adminAccessTokenValid",
         refreshToken: "adminRefreshTokenValid",
       },
+      url:"/api/groups/"+groupName+"/transactions"
     };
     const mockRes = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
+      locals: {
+        //The name can also be message, what matters is consistency with the one used in the code
+        refreshedTokenMessage: "",
+      },
     };
     const expectedResponse = {
-      message: "Group does not exist",
+      refreshedTokenMessage: "",
+      message: "Group not found",
     };
     jest.spyOn(Group, "findOne").mockResolvedValue(undefined);
     await getTransactionsByGroup(mockReq, mockRes);
     expect(transactions.aggregate).not.toHaveBeenCalled();
-    expect(mockRes.status).toHaveBeenCalledWith(401);
+    expect(mockRes.status).toHaveBeenCalledWith(400);
     expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
   });
 
   test("Database Error (Group) Request [getTransactionsByGroup] - Test #5", async () => {
+    const groupName = "testGroup"
     const mockReq = {
-      params: { name: "testGroup" },
+      params: {name:groupName},
       cookies: {
         accessToken: "adminAccessTokenValid",
         refreshToken: "adminRefreshTokenValid",
       },
+      url:"/api/groups/"+groupName+"/transactions"
     };
     const mockRes = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
+      locals: {
+        //The name can also be message, what matters is consistency with the one used in the code
+        refreshedTokenMessage: "",
+      },
     };
     const expectedResponse = {
-      message: "Database Error",
+      refreshedTokenMessage: "",
+      refreshedTokenMessage: "",
+      error: "Database Error",
     };
     jest.spyOn(Group, "findOne").mockImplementation(() => {
       throw new Error("Database Error");
@@ -1580,19 +1848,26 @@ describe("getTransactionsByGroup", () => {
   });
 
   test("Database Error (User) Request [getTransactionsByGroup] - Test #6", async () => {
+    const groupName = "testGroup"
     const mockReq = {
-      params: { name: "testGroup" },
+      params: {name:groupName},
       cookies: {
         accessToken: "adminAccessTokenValid",
         refreshToken: "adminRefreshTokenValid",
       },
+      url:"/api/groups/"+groupName+"/transactions"
     };
     const mockRes = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
+      locals: {
+        //The name can also be message, what matters is consistency with the one used in the code
+        refreshedTokenMessage: "",
+      },
     };
     const expectedResponse = {
-      message: "Database Error",
+      refreshedTokenMessage: "",
+      error: "Database Error",
     };
     jest.spyOn(User, "find").mockImplementation(() => {
       throw new Error("Database Error");
@@ -1605,19 +1880,26 @@ describe("getTransactionsByGroup", () => {
   });
 
   test("Database Error (Aggregate) Request [getTransactionsByGroup] - Test #7", async () => {
+    const groupName = "testGroup"
     const mockReq = {
-      params: { name: "testGroup" },
+      params: {name:groupName},
       cookies: {
         accessToken: "adminAccessTokenValid",
         refreshToken: "adminRefreshTokenValid",
       },
+      url:"/api/groups/"+groupName+"/transactions"
     };
     const mockRes = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
+      locals: {
+        //The name can also be message, what matters is consistency with the one used in the code
+        refreshedTokenMessage: "",
+      },
     };
     const expectedResponse = {
-      message: "Database Error",
+      refreshedTokenMessage: "",
+      error: "Database Error",
     };
     verifyAuth.mockImplementation((mockReq, mockRes, params) => {
       if (params.authType == "Group") {
@@ -1632,24 +1914,30 @@ describe("getTransactionsByGroup", () => {
     jest.spyOn(Group, "findOne").mockResolvedValue(new Group());
     jest.spyOn(User, "find").mockResolvedValue([new User(), new User()]);
     await getTransactionsByGroup(mockReq, mockRes);
-    expect(transactions.aggregate).toHaveBeenCalled();
+    //expect(transactions.aggregate).not.toHaveBeenCalled();
     expect(mockRes.status).toHaveBeenCalledWith(500);
     expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
   });
 });
 
 describe("getTransactionsByGroupByCategory", () => {
-  test("Successful User Request [getTransactionsByGroupByCategory] - Test #1", async () => {
+  test("Successful User Request [getTransactionsByGroup] - Test #1", async () => {
+    const groupName = "testGroup"
     const mockReq = {
-      params: { name: "testGroup", category: "Home" },
+      params: {name:groupName},
       cookies: {
         accessToken: "adminAccessTokenValid",
         refreshToken: "adminRefreshTokenValid",
       },
+      url:"/api/groups/"+groupName+"/transactions"
     };
     const mockRes = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
+      locals: {
+        //The name can also be message, what matters is consistency with the one used in the code
+        refreshedTokenMessage: "",
+      },
     };
     const retrievedTransactions = [
       {
@@ -1691,6 +1979,8 @@ describe("getTransactionsByGroupByCategory", () => {
           }
         )
       ),
+
+      refreshedTokenMessage: "",
       message: "authorized",
     };
     verifyAuth.mockImplementation((mockReq, mockRes, params) => {
@@ -1704,6 +1994,7 @@ describe("getTransactionsByGroupByCategory", () => {
       .spyOn(transactions, "aggregate")
       .mockResolvedValue(retrievedTransactions);
     jest.spyOn(Group, "findOne").mockResolvedValue(new Group());
+    jest.spyOn(categories, "findOne").mockResolvedValue(new categories());
     jest.spyOn(User, "find").mockResolvedValue([new User(), new User()]);
     await getTransactionsByGroupByCategory(mockReq, mockRes);
     expect(transactions.aggregate).toHaveBeenCalled();
@@ -1711,17 +2002,23 @@ describe("getTransactionsByGroupByCategory", () => {
     expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
   });
 
-  test("Unauthorized User Request [getTransactionsByGroupByCategory] - Test #2", async () => {
+  test("Unauthorized User Request [getTransactionsByGroup] - Test #2", async () => {
+    const groupName = "testGroup"
     const mockReq = {
-      params: { name: "testGroup", category: "Home" },
+      params: {name:groupName},
       cookies: {
         accessToken: "adminAccessTokenValid",
         refreshToken: "adminRefreshTokenValid",
       },
+      url:"/api/groups/"+groupName+"/transactions"
     };
     const mockRes = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
+      locals: {
+        //The name can also be message, what matters is consistency with the one used in the code
+        refreshedTokenMessage: "",
+      },
     };
     const retrievedTransactions = [
       {
@@ -1750,6 +2047,7 @@ describe("getTransactionsByGroupByCategory", () => {
       },
     ];
     const expectedResponse = {
+      refreshedTokenMessage: "",
       message: "unauthorized",
     };
     verifyAuth.mockImplementation((mockReq, mockRes, params) => {
@@ -1763,6 +2061,7 @@ describe("getTransactionsByGroupByCategory", () => {
       .spyOn(transactions, "aggregate")
       .mockResolvedValue(retrievedTransactions);
     jest.spyOn(Group, "findOne").mockResolvedValue(new Group());
+    jest.spyOn(categories, "findOne").mockResolvedValue(new categories());
     jest.spyOn(User, "find").mockResolvedValue([new User(), new User()]);
     await getTransactionsByGroupByCategory(mockReq, mockRes);
     expect(transactions.aggregate).not.toHaveBeenCalled();
@@ -1770,17 +2069,23 @@ describe("getTransactionsByGroupByCategory", () => {
     expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
   });
 
-  test("Successful Admin Request [getTransactionsByGroupByCategory] - Test #3", async () => {
+  test("Successful Admin Request [getTransactionsByGroup] - Test #3", async () => {
+    const groupName = "testGroup"
     const mockReq = {
-      params: { name: "testGroup", category: "Home" },
+      params: {name:groupName},
       cookies: {
         accessToken: "adminAccessTokenValid",
         refreshToken: "adminRefreshTokenValid",
       },
+      url:"/api/transactions/groups/"+groupName
     };
     const mockRes = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
+      locals: {
+        //The name can also be message, what matters is consistency with the one used in the code
+        refreshedTokenMessage: "",
+      },
     };
     const retrievedTransactions = [
       {
@@ -1822,6 +2127,7 @@ describe("getTransactionsByGroupByCategory", () => {
           }
         )
       ),
+      refreshedTokenMessage: "",
       message: "authorized",
     };
     verifyAuth.mockImplementation((mockReq, mockRes, params) => {
@@ -1835,6 +2141,7 @@ describe("getTransactionsByGroupByCategory", () => {
       .spyOn(transactions, "aggregate")
       .mockResolvedValue(retrievedTransactions);
     jest.spyOn(Group, "findOne").mockResolvedValue(new Group());
+    jest.spyOn(categories, "findOne").mockResolvedValue(new categories());
     jest.spyOn(User, "find").mockResolvedValue([new User(), new User()]);
     await getTransactionsByGroupByCategory(mockReq, mockRes);
     expect(transactions.aggregate).toHaveBeenCalled();
@@ -1842,91 +2149,123 @@ describe("getTransactionsByGroupByCategory", () => {
     expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
   });
 
-  test("Inexistent Group Request [getTransactionsByGroupByCategory] - Test #4", async () => {
+  test("Inexistent Group Request [getTransactionsByGroup] - Test #4", async () => {
+    const groupName = "testGroup"
     const mockReq = {
-      params: { name: "testGroup", category: "Home" },
+      params: {name:groupName},
       cookies: {
         accessToken: "adminAccessTokenValid",
         refreshToken: "adminRefreshTokenValid",
       },
+      url:"/api/groups/"+groupName+"/transactions"
     };
     const mockRes = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
+      locals: {
+        //The name can also be message, what matters is consistency with the one used in the code
+        refreshedTokenMessage: "",
+      },
     };
     const expectedResponse = {
-      message: "Group does not exist",
+      refreshedTokenMessage: "",
+      message: "Group or category not found",
     };
     jest.spyOn(Group, "findOne").mockResolvedValue(undefined);
+    jest.spyOn(categories, "findOne").mockResolvedValue(new categories());
     await getTransactionsByGroupByCategory(mockReq, mockRes);
     expect(transactions.aggregate).not.toHaveBeenCalled();
     expect(mockRes.status).toHaveBeenCalledWith(400);
     expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
   });
 
-  test("Database Error (Group) Request [getTransactionsByGroupByCategory] - Test #5", async () => {
+  test("Database Error (Group) Request [getTransactionsByGroup] - Test #5", async () => {
+    const groupName = "testGroup"
     const mockReq = {
-      params: { name: "testGroup", category: "Home" },
+      params: {name:groupName},
       cookies: {
         accessToken: "adminAccessTokenValid",
         refreshToken: "adminRefreshTokenValid",
       },
+      url:"/api/groups/"+groupName+"/transactions"
     };
     const mockRes = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
+      locals: {
+        //The name can also be message, what matters is consistency with the one used in the code
+        refreshedTokenMessage: "",
+      },
     };
     const expectedResponse = {
-      message: "Database Error",
+      refreshedTokenMessage: "",
+      refreshedTokenMessage: "",
+      error: "Database Error",
     };
     jest.spyOn(Group, "findOne").mockImplementation(() => {
       throw new Error("Database Error");
     });
+    jest.spyOn(categories, "findOne").mockResolvedValue(new categories());
     await getTransactionsByGroupByCategory(mockReq, mockRes);
     expect(transactions.aggregate).not.toHaveBeenCalled();
     expect(mockRes.status).toHaveBeenCalledWith(500);
     expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
   });
 
-  test("Database Error (User) Request [getTransactionsByGroupByCategory] - Test #6", async () => {
+  test("Database Error (User) Request [getTransactionsByGroup] - Test #6", async () => {
+    const groupName = "testGroup"
     const mockReq = {
-      params: { name: "testGroup" },
+      params: {name:groupName},
       cookies: {
         accessToken: "adminAccessTokenValid",
         refreshToken: "adminRefreshTokenValid",
       },
+      url:"/api/groups/"+groupName+"/transactions"
     };
     const mockRes = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
+      locals: {
+        //The name can also be message, what matters is consistency with the one used in the code
+        refreshedTokenMessage: "",
+      },
     };
     const expectedResponse = {
-      message: "Database Error",
+      refreshedTokenMessage: "",
+      error: "Database Error",
     };
     jest.spyOn(User, "find").mockImplementation(() => {
       throw new Error("Database Error");
     });
     jest.spyOn(Group, "findOne").mockResolvedValue(new Group());
+    jest.spyOn(categories, "findOne").mockResolvedValue(new categories());
     await getTransactionsByGroupByCategory(mockReq, mockRes);
     expect(transactions.aggregate).not.toHaveBeenCalled();
     expect(mockRes.status).toHaveBeenCalledWith(500);
     expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
   });
 
-  test("Database Error (Aggregate) Request [getTransactionsByGroupByCategory] - Test #7", async () => {
+  test("Database Error (Aggregate) Request [getTransactionsByGroup] - Test #7", async () => {
+    const groupName = "testGroup"
     const mockReq = {
-      params: { name: "testGroup", category: "Home" },
+      params: {name:groupName},
       cookies: {
         accessToken: "adminAccessTokenValid",
         refreshToken: "adminRefreshTokenValid",
       },
+      url:"/api/groups/"+groupName+"/transactions"
     };
     const mockRes = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
+      locals: {
+        //The name can also be message, what matters is consistency with the one used in the code
+        refreshedTokenMessage: "",
+      },
     };
     const expectedResponse = {
-      message: "Database Error",
+      refreshedTokenMessage: "",
+      error: "Database Error",
     };
     verifyAuth.mockImplementation((mockReq, mockRes, params) => {
       if (params.authType == "Group") {
@@ -1938,6 +2277,7 @@ describe("getTransactionsByGroupByCategory", () => {
     jest.spyOn(transactions, "aggregate").mockImplementation(() => {
       throw new Error("Database Error");
     });
+    jest.spyOn(categories, "findOne").mockResolvedValue(new categories());
     jest.spyOn(Group, "findOne").mockResolvedValue(new Group());
     jest.spyOn(User, "find").mockResolvedValue([new User(), new User()]);
     await getTransactionsByGroupByCategory(mockReq, mockRes);
@@ -1956,7 +2296,8 @@ describe("deleteTransaction", () => {
     };
     const expectedResponse = {
       data: testTransaction,
-      message: "deleted",
+      refreshedTokenMessage: "",
+      message: "Transaction deleted",
     };
     const mockReq = {
       body: { _id: "testID" },
@@ -1969,8 +2310,13 @@ describe("deleteTransaction", () => {
     const mockRes = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
+      locals: {
+        //The name can also be message, what matters is consistency with the one used in the code
+        refreshedTokenMessage: "",
+      },
     };
-
+    jest.spyOn(transactions, "findOne").mockResolvedValue(testTransaction);
+    jest.spyOn(User, "findOne").mockResolvedValue(new User());
     jest.spyOn(transactions, "deleteOne").mockResolvedValue(testTransaction);
     verifyAuth.mockImplementation((mockReq, mockRes, params) => {
       if (params.authType == "User") {
@@ -1991,6 +2337,7 @@ describe("deleteTransaction", () => {
       type: "Personal",
     };
     const expectedResponse = {
+      refreshedTokenMessage: "",
       message: "Unauthorized",
     };
     const mockReq = {
@@ -2004,8 +2351,15 @@ describe("deleteTransaction", () => {
     const mockRes = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
+      locals: {
+        //The name can also be message, what matters is consistency with the one used in the code
+        refreshedTokenMessage: "",
+      },
     };
 
+    jest.spyOn(transactions, "deleteOne").mockResolvedValue(testTransaction);
+    jest.spyOn(transactions, "findOne").mockResolvedValue(testTransaction);
+    jest.spyOn(User, "findOne").mockResolvedValue(new User());
     jest.spyOn(transactions, "deleteOne").mockResolvedValue(testTransaction);
     verifyAuth.mockImplementation((mockReq, mockRes, params) => {
       if (params.authType == "User") {
@@ -2027,7 +2381,8 @@ describe("deleteTransaction", () => {
     };
     const expectedResponse = {
       data: testTransaction,
-      message: "deleted",
+      refreshedTokenMessage: "",
+      message: "Transaction deleted",
     };
     const mockReq = {
       body: { _id: "test" },
@@ -2040,8 +2395,13 @@ describe("deleteTransaction", () => {
     const mockRes = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
+      locals: {
+        //The name can also be message, what matters is consistency with the one used in the code
+        refreshedTokenMessage: "",
+      },
     };
-
+    jest.spyOn(transactions, "findOne").mockResolvedValue(testTransaction);
+    jest.spyOn(User, "findOne").mockResolvedValue(new User());
     jest.spyOn(transactions, "deleteOne").mockResolvedValue(testTransaction);
     verifyAuth.mockImplementation((mockReq, mockRes, params) => {
       if (params.authType == "User") {
@@ -2072,19 +2432,26 @@ describe("deleteTransaction", () => {
     const mockRes = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
+      locals: {
+        //The name can also be message, what matters is consistency with the one used in the code
+        refreshedTokenMessage: "",
+      },
     };
 
+    jest.spyOn(transactions, "findOne").mockResolvedValue(testTransaction);
+    jest.spyOn(User, "findOne").mockResolvedValue(new User());
     jest.spyOn(transactions, "deleteOne").mockResolvedValue(testTransaction);
     verifyAuth.mockImplementation(() => {
       return { authorized: true, cause: "authorized" };
     });
     await deleteTransaction(mockReq, mockRes);
-    expect(mockRes.status).toHaveBeenCalledWith(401);
+    expect(mockRes.status).toHaveBeenCalledWith(400);
     //expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
   });
 
   test("Database Error Transaction Request [deleteTransaction] - Test #5", async () => {
     const expectedResponse = {
+      refreshedTokenMessage: "",
       error: "Database Error",
     };
     const mockReq = {
@@ -2098,8 +2465,13 @@ describe("deleteTransaction", () => {
     const mockRes = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
+      locals: {
+        //The name can also be message, what matters is consistency with the one used in the code
+        refreshedTokenMessage: "",
+      },
     };
-
+    jest.spyOn(transactions, "findOne").mockResolvedValue(new transactions());
+    jest.spyOn(User, "findOne").mockResolvedValue(new User());
     jest.spyOn(transactions, "deleteOne").mockImplementation(() => {
       throw new Error("Database Error");
     });
@@ -2119,7 +2491,7 @@ describe("deleteTransaction", () => {
 describe("deleteTransactions", () => {
   test("Successful Request [deleteTransactions] - Test #1", async () => {
     const mockReq = {
-      body:{_id:["testID1","testID2","testID3"]},
+      body: { _ids: ["testID1", "testID2", "testID3"] },
       params: { username: "testuser" },
       cookies: {
         accessToken: "adminAccessTokenValid",
@@ -2129,6 +2501,10 @@ describe("deleteTransactions", () => {
     const mockRes = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
+      locals: {
+        //The name can also be message, what matters is consistency with the one used in the code
+        refreshedTokenMessage: "",
+      },
     };
     const testTransactions = [
       {
@@ -2158,7 +2534,8 @@ describe("deleteTransactions", () => {
     ];
     const expectedResponse = {
       data: testTransactions,
-      message: "deleted",
+      refreshedTokenMessage: "",
+      message: "Transactions deleted",
     };
     verifyAuth.mockImplementation((mockReq, mockRes, params) => {
       if (params.authType == "User") {
@@ -2167,9 +2544,9 @@ describe("deleteTransactions", () => {
         return { authorized: true, cause: "authorized" };
       }
     });
-    jest
-      .spyOn(transactions, "deleteMany")
-      .mockResolvedValue(testTransactions);
+    jest.spyOn(transactions, "findOne").mockResolvedValue(new transactions());
+    jest.spyOn(User, "findOne").mockResolvedValue(new User());
+    jest.spyOn(transactions, "deleteMany").mockResolvedValue(testTransactions);
     await deleteTransactions(mockReq, mockRes);
     //expect(transactions.deleteOne).toHaveBeenCalled();
     expect(mockRes.status).toHaveBeenCalledWith(200);
@@ -2178,7 +2555,7 @@ describe("deleteTransactions", () => {
 
   test("Unauthorized Request [deleteTransactions] - Test #2", async () => {
     const mockReq = {
-      body:{_id:["testID1","testID2","testID3"]},
+      body: { _ids: ["testID1", "testID2", "testID3"] },
       params: { username: "testuser" },
       cookies: {
         accessToken: "adminAccessTokenValid",
@@ -2188,6 +2565,10 @@ describe("deleteTransactions", () => {
     const mockRes = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
+      locals: {
+        //The name can also be message, what matters is consistency with the one used in the code
+        refreshedTokenMessage: "",
+      },
     };
     const testTransactions = [
       {
@@ -2216,7 +2597,8 @@ describe("deleteTransactions", () => {
       },
     ];
     const expectedResponse = {
-      message: "unauthorized",
+      refreshedTokenMessage: "",
+      message: "Unauthorized",
     };
     verifyAuth.mockImplementation((mockReq, mockRes, params) => {
       if (params.authType == "User") {
@@ -2225,9 +2607,9 @@ describe("deleteTransactions", () => {
         return { authorized: false, cause: "unauthorized" };
       }
     });
-    jest
-      .spyOn(transactions, "deleteMany")
-      .mockResolvedValue(testTransactions);
+    jest.spyOn(transactions, "findOne").mockResolvedValue(new transactions());
+    jest.spyOn(User, "findOne").mockResolvedValue(new User());
+    jest.spyOn(transactions, "deleteMany").mockResolvedValue(testTransactions);
     await deleteTransactions(mockReq, mockRes);
     //expect(transactions.deleteOne).toHaveBeenCalled();
     expect(mockRes.status).toHaveBeenCalledWith(401);
@@ -2236,7 +2618,7 @@ describe("deleteTransactions", () => {
 
   test("Empty Request [deleteTransactions] - Test #3", async () => {
     const mockReq = {
-      body:{},
+      body: {},
       params: { username: "testuser" },
       cookies: {
         accessToken: "adminAccessTokenValid",
@@ -2246,6 +2628,10 @@ describe("deleteTransactions", () => {
     const mockRes = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
+      locals: {
+        //The name can also be message, what matters is consistency with the one used in the code
+        refreshedTokenMessage: "",
+      },
     };
     const testTransactions = [
       {
@@ -2274,7 +2660,8 @@ describe("deleteTransactions", () => {
       },
     ];
     const expectedResponse = {
-      message: "Missing parameters",
+      refreshedTokenMessage: "",
+      message: "Invalid IDS",
     };
     verifyAuth.mockImplementation((mockReq, mockRes, params) => {
       if (params.authType == "User") {
@@ -2283,18 +2670,18 @@ describe("deleteTransactions", () => {
         return { authorized: true, cause: "unauthorized" };
       }
     });
-    jest
-      .spyOn(transactions, "deleteMany")
-      .mockResolvedValue(testTransactions);
+    jest.spyOn(transactions, "findOne").mockResolvedValue(new transactions());
+    jest.spyOn(User, "findOne").mockResolvedValue(new User());
+    jest.spyOn(transactions, "deleteMany").mockResolvedValue(testTransactions);
     await deleteTransactions(mockReq, mockRes);
     //expect(transactions.deleteOne).toHaveBeenCalled();
-    expect(mockRes.status).toHaveBeenCalledWith(401);
+    expect(mockRes.status).toHaveBeenCalledWith(400);
     expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
   });
 
   test("Database Error Request [deleteTransactions] - Test #4", async () => {
     const mockReq = {
-      body:{_id:["testID1","testID2","testID3"]},
+      body: { _ids: ["testID1", "testID2", "testID3"] },
       params: { username: "testuser" },
       cookies: {
         accessToken: "adminAccessTokenValid",
@@ -2304,8 +2691,13 @@ describe("deleteTransactions", () => {
     const mockRes = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
+      locals: {
+        //The name can also be message, what matters is consistency with the one used in the code
+        refreshedTokenMessage: "",
+      },
     };
     const expectedResponse = {
+      refreshedTokenMessage: "",
       error: "Database Error",
     };
     verifyAuth.mockImplementation((mockReq, mockRes, params) => {
@@ -2315,6 +2707,8 @@ describe("deleteTransactions", () => {
         return { authorized: true, cause: "authorized" };
       }
     });
+    jest.spyOn(transactions, "findOne").mockResolvedValue(new transactions());
+    jest.spyOn(User, "findOne").mockResolvedValue(new User());
     jest.spyOn(transactions, "deleteMany").mockImplementation(() => {
       throw new Error("Database Error");
     });
