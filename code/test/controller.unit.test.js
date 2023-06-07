@@ -14,13 +14,15 @@ import {
   getTransactionsByUser,
   getTransactionsByUserByCategory,
 } from "../controllers/controller";
-import { verifyAuth } from "../controllers/utils";
+import { handleAmountFilterParams, handleDateFilterParams,verifyAuth } from "../controllers/utils";
 import { Group, User } from "../models/User";
 
 jest.mock("../models/model");
 jest.mock("jsonwebtoken");
 jest.mock("../controllers/utils.js", () => ({
   verifyAuth: jest.fn(),
+  handleAmountFilterParams: jest.fn(),
+  handleDateFilterParams: jest.fn()
 }));
 
 beforeEach(() => {
@@ -30,6 +32,8 @@ beforeEach(() => {
   transactions.deleteOne.mockClear();
   transactions.aggregate.mockClear();
   transactions.prototype.save.mockClear();
+  handleAmountFilterParams.mockResolvedValue({});
+  handleDateFilterParams.mockResolvedValue({});
 });
 
 describe("createCategory", () => {

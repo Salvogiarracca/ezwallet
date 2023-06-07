@@ -39,12 +39,10 @@ export const createCategory = (req, res) => {
       .catch((err) => {
         throw err;
       });
-    res
-      .status(200)
-      .json({
-        data: { type: type, color: color },
-        message: "Category created!",
-      });
+    res.status(200).json({
+      data: { type: type, color: color },
+      message: "Category created!",
+    });
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
@@ -238,7 +236,8 @@ export const createTransaction = async (req, res) => {
       !amount ||
       username === "" ||
       type === "" ||
-      amount === "" || parseFloat(amount) === NaN
+      amount === "" ||
+      parseFloat(amount) === NaN
     ) {
       return res.status(400).json({
         message: "Invalid parameters",
@@ -323,6 +322,12 @@ export const getAllTransactions = async (req, res) => {
       transactions
         .aggregate([
           {
+            $match: {
+              ...handleAmountFilterParams(req),
+              ...handleDateFilterParams(req),
+            },
+          },
+          {
             $lookup: {
               from: "categories",
               localField: "type",
@@ -390,7 +395,11 @@ export const getTransactionsByUser = async (req, res) => {
           transactions
             .aggregate([
               {
-                $match: { username: username },
+                $match: {
+                  username: username,
+                  ...handleAmountFilterParams(req),
+                  ...handleDateFilterParams(req)
+                },
               },
               {
                 $lookup: {
@@ -436,7 +445,11 @@ export const getTransactionsByUser = async (req, res) => {
           transactions
             .aggregate([
               {
-                $match: { username: username },
+                $match: {
+                  username: username,
+                  ...handleAmountFilterParams(req),
+                  ...handleDateFilterParams(req)
+                },
               },
               {
                 $lookup: {
@@ -513,7 +526,12 @@ export const getTransactionsByUserByCategory = async (req, res) => {
           transactions
             .aggregate([
               {
-                $match: { username: username, type: cat },
+                $match: {
+                  username: username,
+                  type: cat,
+                  ...handleAmountFilterParams(req),
+                  ...handleDateFilterParams(req)
+                },
               },
               {
                 $lookup: {
@@ -559,7 +577,12 @@ export const getTransactionsByUserByCategory = async (req, res) => {
           transactions
             .aggregate([
               {
-                $match: { username: username, type: cat },
+                $match: {
+                  username: username,
+                  type: cat,
+                  ...handleAmountFilterParams(req),
+                  ...handleDateFilterParams(req)
+                },
               },
               {
                 $lookup: {
@@ -641,6 +664,8 @@ export const getTransactionsByGroup = async (req, res) => {
                   username: {
                     $in: usernames,
                   },
+                  ...handleAmountFilterParams(req),
+                  ...handleDateFilterParams(req)
                 },
               },
               {
@@ -691,6 +716,8 @@ export const getTransactionsByGroup = async (req, res) => {
                   username: {
                     $in: usernames,
                   },
+                  ...handleAmountFilterParams(req),
+                  ...handleDateFilterParams(req)
                 },
               },
               {
@@ -776,6 +803,8 @@ export const getTransactionsByGroupByCategory = async (req, res) => {
                     $in: usernames,
                   },
                   type: req.params.category,
+                  ...handleAmountFilterParams(req),
+                  ...handleDateFilterParams(req),
                 },
               },
               {
@@ -827,6 +856,8 @@ export const getTransactionsByGroupByCategory = async (req, res) => {
                     $in: usernames,
                   },
                   type: req.params.category,
+                  ...handleAmountFilterParams(req),
+                  ...handleDateFilterParams(req),
                 },
               },
               {
@@ -966,24 +997,25 @@ export const deleteTransactions = async (req, res) => {
         if (!id || id === "" || !transaction) {
           return res.status(400).json({
             refreshedTokenMessage: res.locals.refreshedTokenMessage,
-            message: "Invalid ID:"+id,
-          });
-        }}
-        const adminAuth = verifyAuth(req, res, { authType: "Admin" });
-        ///if the user is an Admin ok, otherwise unauthorized
-        if (adminAuth.authorized) {
-          const data = await transactions.deleteMany({ _id: { $in: ids} });
-          return res.status(200).json({
-            data: data,
-            refreshedTokenMessage: res.locals.refreshedTokenMessage,
-            message: "Transactions deleted",
-          });
-        } else {
-          return res.status(401).json({
-            refreshedTokenMessage: res.locals.refreshedTokenMessage,
-            message: "Unauthorized",
+            message: "Invalid ID:" + id,
           });
         }
+      }
+      const adminAuth = verifyAuth(req, res, { authType: "Admin" });
+      ///if the user is an Admin ok, otherwise unauthorized
+      if (adminAuth.authorized) {
+        const data = await transactions.deleteMany({ _id: { $in: ids } });
+        return res.status(200).json({
+          data: data,
+          refreshedTokenMessage: res.locals.refreshedTokenMessage,
+          message: "Transactions deleted",
+        });
+      } else {
+        return res.status(401).json({
+          refreshedTokenMessage: res.locals.refreshedTokenMessage,
+          message: "Unauthorized",
+        });
+      }
     }
   } catch (error) {
     res.status(500).json({

@@ -42,6 +42,7 @@ export const handleDateFilterParams = (req) => {
 
     if(!date && !from && !upTo) {
         return {};
+        
     }
     if((date && upTo) || (date && from)){
         throw new Error('Invalid attribute date in query');
@@ -194,9 +195,12 @@ export const handleAmountFilterParams = (req) => {
         return { authorized: false, cause: "Unauthorized" };
     }
     const {min, max} = req.query;
-    if(!min || !max){
-        throw new Error('No parameters specified');
+    if(!min && !max){
+        return {};
     }
+    /* if(!min || !max){
+        throw new Error('No parameters specified');
+    } */
     if(min && max){
         if(isNaN(min) || isNaN(max)){
             throw new Error('One or more parameters are not a number!');
