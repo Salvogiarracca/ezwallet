@@ -308,19 +308,19 @@ export const addToGroup = async (req, res) => {
     const route = req.originalUrl;
 
 
+    if(!groupName || !newMembers || newMembers.length === 0){
+      return res.status(400).json({ error: 'Request body does not contain all the necessary attributes' });
+    }
+
     /// check if all provided emails are valid or an empty string
     if(newMembers.some(member => !isValidEmail(member))){
       return res.status(400).json({ error: 'at least one of the members emails is not in a valid email format or is an empty string' });
     }
 
-    if(!groupName || !newMembers || newMembers.length === 0){
-      return res.status(400).json({ error: 'Request body does not contain all the necessary attributes' });
-    }
-
     const group = await Group.findOne({ name: groupName });
 
     if(!group){
-      return res.status(401).json({ error: 'Group does not exist' });
+      return res.status(400).json({ error: 'Group does not exist' });
     } else {
       const groups = await Group.find({}, 'members.email' );
       const emailsInGroup = groups.flatMap(group => group.members.map(member => member.email));
