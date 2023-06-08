@@ -5,6 +5,7 @@ import jwt from "jsonwebtoken";
 import {
   getCategories,
   createCategory,
+  updateCategory,
   deleteCategory,
   createTransaction,
   deleteTransaction,
