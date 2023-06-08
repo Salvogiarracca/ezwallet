@@ -799,59 +799,531 @@ describe("removeFromGroup", () => {
     })
   })
   test("should fail if missing emails in body request", async () => {
-  //   const user1 = {
-  //     username: "testUser1",
-  //     email: "testUser1@example.com",
-  //     password: "password",
-  //     role: "Admin"
-  //   }
-  //   const user2 = {
-  //     username: "testUser2",
-  //     email: "testUser2@example.com",
-  //     password: "password",
-  //     role: "Regular",
-  //     refreshToken: newTokenAdHoc("testUser2", "Regular")
-  //   }
-  //   const user3 = {
-  //     username: "testUser3",
-  //     email: "testUser3@example.com",
-  //     password: "password",
-  //     role: "Regular"
-  //   }
-  //   const user4 = {
-  //     username: "testUser4",
-  //     email: "testUser4@example.com",
-  //     password: "password",
-  //     role: "Regular"
-  //   }
-  //   await User.create(user1, user2, user3, user4)
-  //   const group = await Group.create({
-  //     name: "group",
-  //     members: [
-  //       {email: user1.email, user: user1._id},
-  //       {email: user2.email, user: user2._id},
-  //       {email: user3.email, user: user3._id},
-  //       {email: user4.email, user: user4._id}
-  //     ]
-  //   })
-  //   const res = await request(app)
-  //       .patch(`/api/groups/${group.name}/remove`)
-  //       .set("Cookie", [
-  //         `accessToken=${newTokenAdHoc(user2.username, "Regular")}`,
-  //         `refreshToken=${user2.refreshToken}`
-  //       ])
-  //       .send({
-  //         emails: []
-  //       })
-  //   expect(res.status).toBe(400)
-  //   expect(res.body).toEqual({
-  //     error: "Request body does not contain all the necessary attributes"
-  //   })
+    const user1 = {
+      username: "testUser1",
+      email: "testUser1@example.com",
+      password: "password",
+      role: "Admin"
+    }
+    const user2 = {
+      username: "testUser2",
+      email: "testUser2@example.com",
+      password: "password",
+      role: "Regular",
+      refreshToken: newTokenAdHoc("testUser2", "Regular")
+    }
+    const user3 = {
+      username: "testUser3",
+      email: "testUser3@example.com",
+      password: "password",
+      role: "Regular"
+    }
+    const user4 = {
+      username: "testUser4",
+      email: "testUser4@example.com",
+      password: "password",
+      role: "Regular"
+    }
+    await User.create(user1, user2, user3, user4)
+    const group = await Group.create({
+      name: "group",
+      members: [
+        {email: user1.email, user: user1._id},
+        {email: user2.email, user: user2._id},
+        {email: user3.email, user: user3._id},
+        {email: user4.email, user: user4._id}
+      ]
+    })
+    const res = await request(app)
+        .patch(`/api/groups/${group.name}/remove`)
+        .set("Cookie", [
+          `accessToken=${newTokenAdHoc(user2.username, "Regular")}`,
+          `refreshToken=${user2.refreshToken}`
+        ])
+        .send({
+          emails: []
+        })
+    expect(res.status).toBe(400)
+    expect(res.body).toEqual({
+      error: "Request body does not contain all the necessary attributes"
+    })
   })
+  test("should fail if user tries to remove member of another group", async () => {
+    const user1 = {
+      username: "testUser1",
+      email: "testUser1@example.com",
+      password: "password",
+      role: "Admin"
+    }
+    const user2 = {
+      username: "testUser2",
+      email: "testUser2@example.com",
+      password: "password",
+      role: "Regular",
+      refreshToken: newTokenAdHoc("testUser2", "Regular")
+    }
+    const user3 = {
+      username: "testUser3",
+      email: "testUser3@example.com",
+      password: "password",
+      role: "Regular"
+    }
+    const user4 = {
+      username: "testUser4",
+      email: "testUser4@example.com",
+      password: "password",
+      role: "Regular"
+    }
+    await User.create(user1, user2, user3, user4)
+    const group = await Group.create({
+      name: "group",
+      members: [
+        {email: user1.email, user: user1._id},
+        {email: user3.email, user: user3._id},
+        {email: user4.email, user: user4._id}
+      ]
+    })
+    const res = await request(app)
+        .patch(`/api/groups/${group.name}/remove`)
+        .set("Cookie", [
+          `accessToken=${newTokenAdHoc(user2.username, "Regular")}`,
+          `refreshToken=${user2.refreshToken}`
+        ])
+        .send({
+          emails: [user3.email]
+        })
+    expect(res.status).toBe(401)
+    expect(res.body).toEqual({
+      error: "Unauthorized, you are not a member of requested group"
+    })
+  })
+  test("should fail if user is not an Admin (pull route)", async () => {
+    const user1 = {
+      username: "testUser1",
+      email: "testUser1@example.com",
+      password: "password",
+      role: "Admin"
+    }
+    const user2 = {
+      username: "testUser2",
+      email: "testUser2@example.com",
+      password: "password",
+      role: "Regular",
+      refreshToken: newTokenAdHoc("testUser2", "Regular")
+    }
+    const user3 = {
+      username: "testUser3",
+      email: "testUser3@example.com",
+      password: "password",
+      role: "Regular"
+    }
+    const user4 = {
+      username: "testUser4",
+      email: "testUser4@example.com",
+      password: "password",
+      role: "Regular"
+    }
+    await User.create(user1, user2, user3, user4)
+    const group = await Group.create({
+      name: "group",
+      members: [
+        {email: user1.email, user: user1._id},
+        {email: user2.email, user: user2._id},
+        {email: user3.email, user: user3._id},
+        {email: user4.email, user: user4._id}
+      ]
+    })
+    const res = await request(app)
+        .patch(`/api/groups/${group.name}/pull`)
+        .set("Cookie", [
+          `accessToken=${newTokenAdHoc(user2.username, "Regular")}`,
+          `refreshToken=${user2.refreshToken}`
+        ])
+        .send({
+          emails: [user3.email]
+        })
+    expect(res.status).toBe(401)
+    expect(res.body).toEqual({
+      error: "Unauthorized, you are not an admin"
+    })
+  })
+  test("should fail if all the members either do not exist or not in the group", async () => {
+    const user1 = {
+      username: "testUser1",
+      email: "testUser1@example.com",
+      password: "password",
+      role: "Admin",
+      refreshToken: newTokenAdHoc("testUser1", "Admin")
+    }
+    const user2 = {
+      username: "testUser2",
+      email: "testUser2@example.com",
+      password: "password",
+      role: "Regular"
 
+    }
+    const user3 = {
+      username: "testUser3",
+      email: "testUser3@example.com",
+      password: "password",
+      role: "Regular"
+    }
+    const user4 = {
+      username: "testUser4",
+      email: "testUser4@example.com",
+      password: "password",
+      role: "Regular"
+    }
+    await User.create(user1, user2, user3, user4)
+    const group = await Group.create({
+      name: "group",
+      members: [
+        {email: user1.email, user: user1._id},
+        {email: user4.email, user: user4._id}
+      ]
+    })
+    const res = await request(app)
+        .patch(`/api/groups/${group.name}/pull`)
+        .set("Cookie", [
+          `accessToken=${newTokenAdHoc(user1.username, "Admin")}`,
+          `refreshToken=${user1.refreshToken}`
+        ])
+        .send({
+          emails: [user2.email, user3.email, "notAnUser@example.com"]
+        })
+    expect(res.status).toBe(400)
+    expect(res.body).toEqual({
+      error: "all the members either do not exist or not in the group",
+      notInGroup: [user2.email, user3.email],
+      membersNotFound: ["notAnUser@example.com"]
+    })
+  })
+  test('should fail if the group has only one member before deleting someone', async () => {
+    const user1 = {
+      username: "testUser1",
+      email: "testUser1@example.com",
+      password: "password",
+      role: "Admin",
+      refreshToken: newTokenAdHoc("testUser1", "Admin")
+    }
+    const user2 = {
+      username: "testUser2",
+      email: "testUser2@example.com",
+      password: "password",
+      role: "Regular"
 
+    }
+    const user3 = {
+      username: "testUser3",
+      email: "testUser3@example.com",
+      password: "password",
+      role: "Regular"
+    }
+    const user4 = {
+      username: "testUser4",
+      email: "testUser4@example.com",
+      password: "password",
+      role: "Regular"
+    }
+    await User.create(user1, user2, user3, user4)
+    const group = await Group.create({
+      name: "group",
+      members: [
+        {email: user1.email, user: user1._id}
+      ]
+    })
+    const res = await request(app)
+        .patch(`/api/groups/${group.name}/pull`)
+        .set("Cookie", [
+          `accessToken=${newTokenAdHoc(user1.username, "Admin")}`,
+          `refreshToken=${user1.refreshToken}`
+        ])
+        .send({
+          emails: [user1.email, user2.email, user3.email, "notAnUser@example.com"]
+        })
+    expect(res.status).toBe(400)
+    expect(res.body).toEqual({
+      error: "the group contains only one member"
+    })
+  })
+  test("should delete some of requested users", async () => {
+    const user1 = {
+      username: "testUser1",
+      email: "testUser1@example.com",
+      password: "password",
+      role: "Admin",
+      refreshToken: newTokenAdHoc("testUser1", "Admin")
+    }
+    const user2 = {
+      username: "testUser2",
+      email: "testUser2@example.com",
+      password: "password",
+      role: "Regular"
+
+    }
+    const user3 = {
+      username: "testUser3",
+      email: "testUser3@example.com",
+      password: "password",
+      role: "Regular"
+    }
+    const user4 = {
+      username: "testUser4",
+      email: "testUser4@example.com",
+      password: "password",
+      role: "Regular"
+    }
+    await User.create(user1, user2, user3, user4)
+    const group = await Group.create({
+      name: "group",
+      members: [
+        {email: user1.email, user: user1._id},
+        {email: user2.email, user: user2._id},
+        {email: user3.email, user: user3._id}
+      ]
+    })
+    const res = await request(app)
+        .patch(`/api/groups/${group.name}/pull`)
+        .set("Cookie", [
+          `accessToken=${newTokenAdHoc(user1.username, "Admin")}`,
+          `refreshToken=${user1.refreshToken}`
+        ])
+        .send({
+          emails: [user2.email, user3.email, user4.email, "notAnUser@example.com"]
+        })
+    expect(res.status).toBe(200)
+    expect(res.body).toEqual(expect.objectContaining({
+      data: {
+        group: {
+          name: group.name,
+          members: [{email: user1.email}]
+        },
+        notInGroup: [user4.email],
+        membersNotFound: ["notAnUser@example.com"]
+      }
+    }))
+  })
 })
 
-describe("deleteUser", () => { })
+describe("deleteUser", () => {
+  beforeEach(async () => {
+    await User.deleteMany({});
+    await Group.deleteMany({});
+  })
+  test('should fail if user is not authenticated', async () => {
+    const res = await request(app)
+        .delete('/api/users')
+        .send({
+          email: "user@example.com"
+        })
+    expect(res.status).toBe(401)
+    expect(res.body).toEqual({
+      error: "Unauthorized"
+    })
+  })
+  test("should fail if user is not an admin", async () => {
+    const user2 = {
+      username: "testUser2",
+      email: "testUser2@example.com",
+      password: "password",
+      role: "Regular",
+      refreshToken: newTokenAdHoc("testUser2", "Regular")
+    }
+    await User.create(user2)
+    const res = await request(app)
+        .delete("/api/users")
+        .set("Cookie", [
+          `accessToken=${newTokenAdHoc(user2.username, "Regular")}`,
+          `refreshToken=${user2.refreshToken}`
+        ])
+        .send({
+          email: "testUser@example.com"
+        })
+    expect(res.status).toBe(401)
+    expect(res.body).toEqual({
+      error: "Unauthorized"
+    })
+  })
+  test('should delete the requested user that belongs to a group and should remove the group as well', async () => {
+    const user1 = {
+      username: "testUser1",
+      email: "testUser1@example.com",
+      password: "password",
+      role: "Admin",
+      refreshToken: newTokenAdHoc("testUser1", "Admin")
+    }
+    const user2 = {
+      username: "testUser2",
+      email: "testUser2@example.com",
+      password: "password",
+      role: "Regular"
+    }
+    await User.create(user1, user2)
+    const group = await Group.create({
+      name: "testGroup",
+      members: [{email: user2.email, user: user2._id}]
+    })
+    const res = await request(app)
+        .delete("/api/users")
+        .set("Cookie", [
+          `accessToken=${newTokenAdHoc(user1.username, "Admin")}`,
+          `refreshToken=${user1.refreshToken}`
+        ])
+        .send({
+          email: user2.email
+        })
+    expect(res.status).toBe(200)
+    expect(res.body).toEqual(expect.objectContaining({
+      data: {
+        deletedTransaction: 0,
+        deletedFromGroup: true
+      }
+    }))
+  })
+  test('should delete the requested user', async () => {
+    const user1 = {
+      username: "testUser1",
+      email: "testUser1@example.com",
+      password: "password",
+      role: "Admin",
+      refreshToken: newTokenAdHoc("testUser1", "Admin")
+    }
+    const user2 = {
+      username: "testUser2",
+      email: "testUser2@example.com",
+      password: "password",
+      role: "Regular"
+    }
+    await User.create(user1, user2)
+    const res = await request(app)
+        .delete("/api/users")
+        .set("Cookie", [
+          `accessToken=${newTokenAdHoc(user1.username, "Admin")}`,
+          `refreshToken=${user1.refreshToken}`
+        ])
+        .send({
+          email: user2.email
+        })
+    expect(res.status).toBe(200)
+    expect(res.body).toEqual(expect.objectContaining({
+      data: {
+        deletedTransaction: 0,
+        deletedFromGroup: false
+      }
+    }))
+  })
+})
 
-describe("deleteGroup", () => { })
+describe("deleteGroup", () => {
+  beforeEach(async () => {
+    await User.deleteMany({});
+    await Group.deleteMany({});
+  });
+  test('should fail if not authenticated', async () => {
+    const res = await request(app)
+        .delete('/api/groups')
+        .send({
+          name: "testGroup"
+        })
+    expect(res.status).toBe(401)
+    expect(res.body).toEqual({
+      error: "Unauthorized"
+    })
+  })
+  test('should fail if user is not an admin', async () => {
+    const user2 = {
+      username: "testUser2",
+      email: "testUser2@example.com",
+      password: "password",
+      role: "Regular",
+      refreshToken: newTokenAdHoc("testUser2", "Regular")
+    }
+    await User.create(user2)
+    const res = await request(app)
+        .delete("/api/groups")
+        .set("Cookie", [
+          `accessToken=${newTokenAdHoc(user2.username, "Regular")}`,
+          `refreshToken=${user2.refreshToken}`
+        ])
+        .send({
+          name: "testGroups"
+        })
+    expect(res.status).toBe(401)
+    expect(res.body).toEqual({
+      error: "Unauthorized"
+    })
+  })
+  test("should fail if the body does not contain all the necessary attributes", async () => {
+    const user1 = {
+      username: "testUser1",
+      email: "testUser1@example.com",
+      password: "password",
+      role: "Admin",
+      refreshToken: newTokenAdHoc("testUser1", "Admin")
+    }
+    await User.create(user1)
+    const res = await request(app)
+        .delete("/api/groups")
+        .set("Cookie", [
+          `accessToken=${newTokenAdHoc(user1.username, "Admin")}`,
+          `refreshToken=${user1.refreshToken}`
+        ])
+        .send({})
+    expect(res.status).toBe(400)
+    expect(res.body).toEqual({
+      error: "Request body does not contain all the necessary attributes"
+    })
+  })
+  test("should fail if group not found", async () => {
+    const user1 = {
+      username: "testUser1",
+      email: "testUser1@example.com",
+      password: "password",
+      role: "Admin",
+      refreshToken: newTokenAdHoc("testUser1", "Admin")
+    }
+    await User.create(user1)
+    const res = await request(app)
+        .delete("/api/groups")
+        .set("Cookie", [
+          `accessToken=${newTokenAdHoc(user1.username, "Admin")}`,
+          `refreshToken=${user1.refreshToken}`
+        ])
+        .send({
+          name: "notAGroup"
+        })
+    expect(res.status).toBe(400)
+    expect(res.body).toEqual({
+      error: "Group does not exist"
+    })
+  })
+  test("should delete the group", async () => {
+    const user1 = {
+      username: "testUser1",
+      email: "testUser1@example.com",
+      password: "password",
+      role: "Admin",
+      refreshToken: newTokenAdHoc("testUser1", "Admin")
+    }
+    await User.create(user1)
+    const group = await Group.create({
+      name: "testGroup",
+      members: [] // only for test purposes
+    })
+    const res = await request(app)
+        .delete("/api/groups")
+        .set("Cookie", [
+          `accessToken=${newTokenAdHoc(user1.username, "Admin")}`,
+          `refreshToken=${user1.refreshToken}`
+        ])
+        .send({
+          name: "testGroup"
+        })
+    expect(res.status).toBe(200)
+    expect(res.body).toEqual(expect.objectContaining({
+      data: {
+        message: "Group deleted successfully"
+      }
+    }))
+  })
+})

@@ -537,7 +537,7 @@ export const removeFromGroup = async (req, res) => {
 
             if(notFoundEmails.length + notInGroup.length === emails.length){
               return res.status(400).json({
-                error: 'all the members either do not exist or are already in a group',
+                error: 'all the members either do not exist or not in the group',
                 notInGroup: notInGroup,
                 membersNotFound: notFoundEmails
               });
@@ -595,7 +595,7 @@ export const deleteUser = async (req, res) => {
       ///find user to be deleted
       const user = await User.findOne({ email });
       if(!user){
-        return res.status(401).json({ error: 'User not found' });
+        return res.status(400).json({ error: 'User not found' });
       } else {
         const group = await Group.findOne({ 'members.email': email });
         if(!group){
@@ -627,7 +627,7 @@ export const deleteUser = async (req, res) => {
       }
 
     } else {
-      return res.status(401).json({ error: adminAuth.cause + ", " + "you are not an admin"});
+      return res.status(401).json({ error: adminAuth.cause });
     }
   } catch (err) {
     res.status(500).json(err.message)
@@ -661,20 +661,20 @@ export const deleteGroup = async (req, res) => {
       ///find group to be deleted
       const group = await Group.findOne({ name });
       if(!group){
-        return res.status(400).json({ error: 'Group not found' });
+        return res.status(400).json({ error: 'Group does not exist' });
       } else {
         ///delete the group
         await Group.deleteOne({ name });
         return res.status(200).json({
           data: {
-            message: 'Group deleted succesfully'
+            message: 'Group deleted successfully'
           },
           refreshedTokenMessage: res?.locals?.refreshedTokenMessage
         });
       }
 
     } else {
-      return res.status(401).json({ error: adminAuth.cause + ", " + "you are not an admin"});
+      return res.status(401).json({ error: adminAuth.cause });
     }
   } catch (err) {
     res.status(500).json(err.message)
