@@ -946,7 +946,7 @@ describe("createTransaction", () => {
       });
   });
 
-  test("Different user from url [createTransaction] - Integration Test #2", async () => {
+  test("Different url [createTransaction] - Integration Test #2", async () => {
     const testUser = {
       username: "tester",
       email: "tester@test.com",
@@ -2421,7 +2421,7 @@ describe("getTransactionsByGroup", () => {
       });
   });
 
-  test("Unauthorized user request [getTransactionsByGroup] - Integration Test #4", async () => {
+  test("Unauthorized admin request [getTransactionsByGroup] - Integration Test #4", async () => {
     const testAdmin = {
       username: "admin",
       email: "admin@test.com",
@@ -2774,7 +2774,7 @@ describe("getTransactionsByGroupByCategory", () => {
       });
   });
 
-  test("Successful user request [getTransactionsByGroupByCategory] - Integration Test #3", async () => {
+  test("Successful admin request [getTransactionsByGroupByCategory] - Integration Test #3", async () => {
     const testAdmin = {
       username: "admin",
       email: "admin@test.com",
@@ -2879,7 +2879,7 @@ describe("getTransactionsByGroupByCategory", () => {
       });
   });
 
-  test("Unauthorized user request [getTransactionsByGroupByCategory] - Integration Test #4", async () => {
+  test("Unauthorized admin request [getTransactionsByGroupByCategory] - Integration Test #4", async () => {
     const testAdmin = {
       username: "admin",
       email: "admin@test.com",
