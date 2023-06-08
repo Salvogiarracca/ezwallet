@@ -38,12 +38,7 @@ export const createCategory = async (req, res) => {
       throw new Error("Category already exists");
     }
     const new_categories = new categories({newType, newColor});
-    new_categories
-        .save()
-        .then((data) => res.json(data))
-        .catch((err) => {
-          throw err;
-        });
+    await new_categories.save();
     res.status(200).json({
       data: {type: newType, color: newColor},
       message: "Category created!",
