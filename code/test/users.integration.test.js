@@ -193,58 +193,64 @@ describe("createGroup", () => {
     expect(res.status).toBe(401)
     expect(res.body).toEqual({error: "Unauthorized"})
   })
-  //TODO: do not work
-  // test("should crete a new group", async () => {
-  //   const user11 = {
-  //     username: "testUser1",
-  //     email: "testUser1@example.com",
-  //     password: "password",
-  //     role: "Admin"
-  //   }
-  //   const user22 = {
-  //     username: "testUser2",
-  //     email: "testUser2@example.com",
-  //     password: "password",
-  //     role: "Regular"
-  //   }
-  //   const user33 = {
-  //     username: "testUser3",
-  //     email: "testUser3@example.com",
-  //     password: "password",
-  //     role: "Regular"
-  //   }
-  //   const user1 = await User.create(user11)
-  //   const user2 = await User.create(user22)
-  //   const user3 = await User.create(user33)
-  //   const existingGroup = await Group.create({
-  //     name: "existingGroup",
-  //     members:[{email: user33.email, user: user33._id}]
-  //   })
-  //   const res = await request(app)
-  //       .post('/api/groups')
-  //       .set("Accept", "application/json")
-  //       .set("Cookie", [
-  //         `accessToken=${newTokenAdHoc(user1.username, "Admin")}`,
-  //         `refreshToken=${newTokenAdHoc(user1.username, "Admin")}`
-  //       ])
-  //       .send({
-  //         name: "exampleGroup",
-  //         memberEmails: [ user22.email, user33.email, "notExistingEmail@example.com" ]
-  //       })
-  //   expect(res.status).toBe(200)
-  //   expect(res.body).toEqual(
-  //       expect.objectContaining({
-  //         data: {
-  //           group: {
-  //             name: "exampleGroup",
-  //             members: [{ email: user11.email }, { email: user22.email } ]
-  //           },
-  //           alreadyInGroup: [{ email: user33.email }],
-  //           membersNotFound: [{ email: "notExistingEmail@example.com" }]
-  //         }
-  //       })
-  //   )
-  // })
+
+  test("should crete a new group", async () => {
+    const user11 = {
+      username: "testUser1",
+      email: "testUser1@example.com",
+      password: "password",
+      role: "Admin"
+    }
+    const user22 = {
+      username: "testUser2",
+      email: "testUser2@example.com",
+      password: "password",
+      role: "Regular"
+    }
+    const user33 = {
+      username: "testUser3",
+      email: "testUser3@example.com",
+      password: "password",
+      role: "Regular"
+    }
+    const user1 = await User.create(user11)
+    // const usr1 = new User(user1)
+    // await usr1.save()
+    const user2 = await User.create(user22)
+    // const usr2 = new User(user2)
+    // await usr2.save()
+    const user3 = await User.create(user33)
+    // const usr3 = new User(user3)
+    // await usr3.save()
+
+    const existingGroup = await Group.create({
+      name: "existingGroup",
+      members:[{email: user33.email, user: user33._id}]
+    })
+    const res = await request(app)
+        .post('/api/groups')
+        .set("Cookie", [
+          `accessToken=${newTokenAdHoc(user1.username, "Admin")}`,
+          `refreshToken=${newTokenAdHoc(user1.username, "Admin")}`
+        ])
+        .send({
+          name: "exampleGroup",
+          memberEmails: [ user2.email, user3.email, "notExistingEmail@example.com" ]
+        })
+    expect(res.status).toBe(200)
+    expect(res.body).toEqual(
+        expect.objectContaining({
+          data: {
+            group: {
+              name: "exampleGroup",
+              members: [{ email: user1.email }, { email: user2.email } ]
+            },
+            alreadyInGroup: [{ email: user3.email }],
+            membersNotFound: [{ email: "notExistingEmail@example.com" }]
+          }
+        })
+    )
+  })
 
 })
 
