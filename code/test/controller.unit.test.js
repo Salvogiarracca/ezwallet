@@ -62,6 +62,9 @@ describe("createCategory", () => {
     jest
         .spyOn(categories.prototype, "save")
         .mockResolvedValue(testCategory);
+    jest
+        .spyOn(categories, 'findOne')
+        .mockReturnValue(null);
     verifyAuth.mockImplementation((mockReq, mockRes, params) => {
       if (params.authType == "Admin") {
         return { authorized: true, cause: "authorized" };
