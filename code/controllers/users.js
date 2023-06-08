@@ -601,23 +601,24 @@ export const deleteUser = async (req, res) => {
         if(!group){
           //remove user that not belong to any group
           await User.deleteOne({ email });
+          const deletedTr = await transactions.deleteMany({username: user.username});
           return res.status(200).json({
             data: {
-              deletedTransaction: "Transaction count not implemented yet", deletedFromGroup: false
+              deletedTransaction: deletedTr.deletedCount, deletedFromGroup: false
             },
             refreshedTokenMessage: res?.locals?.refreshedTokenMessage
           });
         } else {
           //user belongs to a group
-          //TODO: count of transactions performed by deleted user
           if (group.members.length === 1) {
             //remove group
             await Group.deleteOne({ name: group.name });
             //delete the user
             await User.deleteOne({ email });
+            const deletedTr = await transactions.deleteMany({username: user.username});
             return res.status(200).json({
               data: {
-                deletedTransaction: "Transaction count not implemented yet", deletedFromGroup: true
+                deletedTransaction: deletedTr.deletedCount, deletedFromGroup: true
               },
               refreshedTokenMessage: res?.locals?.refreshedTokenMessage
             });
