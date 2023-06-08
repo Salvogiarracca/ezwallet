@@ -55,7 +55,41 @@ describe("verifyAuth", () => {
 })
 
 describe("handleAmountFilterParams", () => { 
-    test('Dummy test, change it', () => {
-        expect(true).toBe(true);
+    test('Test #1, $gte', () => {
+        const mockReq = {
+            query: {min: 20},
+        };
+        const expectedResponse = "{amount: {$gte: 20} }";
+        const res = handleAmountFilterParams(mockReq);
+        expect(res).toEqual(expectedResponse);
+    });
+
+    test('Test #2, $lte', () => {
+        const mockReq = {
+            query: {max: 20},
+        };
+        const expectedResponse = "{amount: {$lte: 20} }";
+        const res = handleAmountFilterParams(mockReq);
+        expect(res).toEqual(expectedResponse);
+    });
+
+    test('Test #3, $gte and $lte', () => {
+        const mockReq = {
+            query: {min: 10,
+                max: 20},
+        };
+        const expectedResponse = "{amount: {$gte: 10, $lte: 20} }";
+        const res = handleAmountFilterParams(mockReq);
+        expect(res).toEqual(expectedResponse);
+    });
+
+    test('Test #4, NaN', () => {
+        const mockReq = {
+            query: {min: 'abcde',
+                max: 20},
+        };
+        const expectedResponse = "One or more parameters are not a number!";
+        const res = handleAmountFilterParams(mockReq);
+        expect(res).toEqual(expectedResponse);
     });
 })
