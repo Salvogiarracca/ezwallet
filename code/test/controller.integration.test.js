@@ -899,7 +899,7 @@ describe("getCategories", () => {
 });
 
 describe("createTransaction", () => {
-  test("Transaction created by user", async () => {
+  test("Transaction created by user [createTransaction] - Integration Test #1", async () => {
     const testUser = {
       username: "tester",
       email: "tester@test.com",
@@ -946,7 +946,7 @@ describe("createTransaction", () => {
       });
   });
 
-  test("Different user from url", async () => {
+  test("Different user from url [createTransaction] - Integration Test #2", async () => {
     const testUser = {
       username: "tester",
       email: "tester@test.com",
@@ -994,7 +994,7 @@ describe("createTransaction", () => {
       });
   });
 
-  test("Invalid parameters", async () => {
+  test("Invalid parameters [createTransaction] - Integration Test #3", async () => {
     const testUser = {
       username: "tester",
       email: "tester@test.com",
@@ -1035,7 +1035,7 @@ describe("createTransaction", () => {
       });
   });
 
-  test("Category dosen't exist", async () => {
+  test("Category dosen't exist [createTransaction] - Integration Test #4", async () => {
     const testUser = {
       username: "tester",
       email: "tester@test.com",
@@ -1076,7 +1076,7 @@ describe("createTransaction", () => {
       });
   });
 
-  test("Unauthorized User", async () => {
+  test("Unauthorized User [createTransaction] - Integration Test #5", async () => {
     const testUser = {
       username: "tester",
       email: "tester@test.com",
@@ -1118,7 +1118,7 @@ describe("createTransaction", () => {
       });
   });
 
-  test("Transaction created by admin", async () => {
+  test("Transaction created by admin [createTransaction] - Integration Test #6", async () => {
     const testUser = {
       username: "tester",
       email: "tester@test.com",
@@ -1166,7 +1166,7 @@ describe("createTransaction", () => {
       });
   });
 
-  test("Transaction for another user created by admin", async () => {
+  test("Transaction for another user created by admin [createTransaction] - Integration Test #7", async () => {
     const testUser = {
       username: "tester",
       email: "tester@test.com",
@@ -1223,7 +1223,7 @@ describe("createTransaction", () => {
 });
 
 describe("getAllTransactions", () => {
-  test("Retrieved all transactions", async () => {
+  test("Retrieved all transactions [getAllTransactions] - Integration Test #1", async () => {
     const testUsers = [
       {
         username: "tester1",
@@ -1287,7 +1287,7 @@ describe("getAllTransactions", () => {
       });
   });
 
-  test("Unauthorized admin", async () => {
+  test("Unauthorized admin [getAllTransactions] - Integration Test #2", async () => {
     const testUsers = [
       {
         username: "tester1",
@@ -1342,7 +1342,7 @@ describe("getAllTransactions", () => {
 });
 
 describe("getTransactionsByUser", () => {
-  test("Successful user request", async () => {
+  test("Successful user request [getTransactionsByUser] - Integration Test #1", async () => {
     const testAdmin = {
       username: "admin",
       email: "admin@test.com",
@@ -1413,7 +1413,7 @@ describe("getTransactionsByUser", () => {
       });
   });
 
-  test("Unauthorized user request", async () => {
+  test("Unauthorized user request [getTransactionsByUser] - Integration Test #2", async () => {
     const testAdmin = {
       username: "admin",
       email: "admin@test.com",
@@ -1475,7 +1475,7 @@ describe("getTransactionsByUser", () => {
       });
   });
 
-  test("Successful admin request", async () => {
+  test("Successful admin request [getTransactionsByUser] - Integration Test #3", async () => {
     const testAdmin = {
       username: "admin",
       email: "admin@test.com",
@@ -1546,7 +1546,7 @@ describe("getTransactionsByUser", () => {
       });
   });
 
-  test("Unauthorized admin request", async () => {
+  test("Unauthorized admin request [getTransactionsByUser] - Integration Test #4", async () => {
     const testAdmin = {
       username: "admin",
       email: "admin@test.com",
@@ -1609,7 +1609,7 @@ describe("getTransactionsByUser", () => {
       });
   });
 
-  test("User not found", async () => {
+  test("User not found [getTransactionsByUser] - Integration Test #5", async () => {
     const testAdmin = {
       username: "admin",
       email: "admin@test.com",
@@ -1674,7 +1674,7 @@ describe("getTransactionsByUser", () => {
 });
 
 describe("getTransactionsByUserByCategory", () => {
-  test("Successful user request", async () => {
+  test("Successful user request [getTransactionsByUserByCategory] - Integration Test #1", async () => {
     const testAdmin = {
       username: "admin",
       email: "admin@test.com",
@@ -1765,7 +1765,7 @@ describe("getTransactionsByUserByCategory", () => {
       });
   });
 
-  test("Unauthorized user request", async () => {
+  test("Unauthorized user request [getTransactionsByUserByCategory] - Integration Test #2", async () => {
     const testAdmin = {
       username: "admin",
       email: "admin@test.com",
@@ -1844,7 +1844,7 @@ describe("getTransactionsByUserByCategory", () => {
       });
   });
 
-  test("Successful admin request", async () => {
+  test("Successful admin request [getTransactionsByUserByCategory] - Integration Test #3", async () => {
     const testAdmin = {
       username: "admin",
       email: "admin@test.com",
@@ -1935,7 +1935,7 @@ describe("getTransactionsByUserByCategory", () => {
       });
   });
 
-  test("Unauthorized admin request", async () => {
+  test("Unauthorized admin request [getTransactionsByUserByCategory] - Integration Test #4", async () => {
     const testAdmin = {
       username: "admin",
       email: "admin@test.com",
@@ -2014,7 +2014,7 @@ describe("getTransactionsByUserByCategory", () => {
       });
   });
 
-  test("User not found request", async () => {
+  test("User not found request [getTransactionsByUserByCategory] - Integration Test #5", async () => {
     const testAdmin = {
       username: "admin",
       email: "admin@test.com",
@@ -2093,7 +2093,7 @@ describe("getTransactionsByUserByCategory", () => {
       });
   });
 
-  test("Category not found request", async () => {
+  test("Category not found request [getTransactionsByUserByCategory] - Integration Test #6", async () => {
     const testAdmin = {
       username: "admin",
       email: "admin@test.com",
@@ -2174,7 +2174,7 @@ describe("getTransactionsByUserByCategory", () => {
 });
 
 describe("getTransactionsByGroup", () => {
-  test("Successful user request", async () => {
+  test("Successful user request [getTransactionsByGroup] - Integration Test #1", async () => {
     const testAdmin = {
       username: "admin",
       email: "admin@test.com",
@@ -2259,7 +2259,7 @@ describe("getTransactionsByGroup", () => {
       });
   });
 
-  test("Unauthorized user request", async () => {
+  test("Unauthorized user request [getTransactionsByGroup] - Integration Test #2", async () => {
     const testAdmin = {
       username: "admin",
       email: "admin@test.com",
@@ -2336,7 +2336,7 @@ describe("getTransactionsByGroup", () => {
       });
   });
 
-  test("Successful admin request", async () => {
+  test("Successful admin request [getTransactionsByGroup] - Integration Test #3", async () => {
     const testAdmin = {
       username: "admin",
       email: "admin@test.com",
@@ -2421,7 +2421,7 @@ describe("getTransactionsByGroup", () => {
       });
   });
 
-  test("Unauthorized user request", async () => {
+  test("Unauthorized user request [getTransactionsByGroup] - Integration Test #4", async () => {
     const testAdmin = {
       username: "admin",
       email: "admin@test.com",
@@ -2498,7 +2498,7 @@ describe("getTransactionsByGroup", () => {
       });
   });
 
-  test("Group not found", async () => {
+  test("Group not found [getTransactionsByGroup] - Integration Test #5", async () => {
     const testAdmin = {
       username: "admin",
       email: "admin@test.com",
@@ -2577,7 +2577,7 @@ describe("getTransactionsByGroup", () => {
 });
 
 describe("getTransactionsByGroupByCategory", () => {
-  test("Successful user request", async () => {
+  test("Successful user request [getTransactionsByGroupByCategory] - Integration Test #1", async () => {
     const testAdmin = {
       username: "admin",
       email: "admin@test.com",
@@ -2682,7 +2682,7 @@ describe("getTransactionsByGroupByCategory", () => {
       });
   });
 
-  test("Unauthorized user request", async () => {
+  test("Unauthorized user request [getTransactionsByGroupByCategory] - Integration Test #2", async () => {
     const testAdmin = {
       username: "admin",
       email: "admin@test.com",
@@ -2774,7 +2774,7 @@ describe("getTransactionsByGroupByCategory", () => {
       });
   });
 
-  test("Successful user request", async () => {
+  test("Successful user request [getTransactionsByGroupByCategory] - Integration Test #3", async () => {
     const testAdmin = {
       username: "admin",
       email: "admin@test.com",
@@ -2879,7 +2879,7 @@ describe("getTransactionsByGroupByCategory", () => {
       });
   });
 
-  test("Unauthorized user request", async () => {
+  test("Unauthorized user request [getTransactionsByGroupByCategory] - Integration Test #4", async () => {
     const testAdmin = {
       username: "admin",
       email: "admin@test.com",
@@ -2971,7 +2971,7 @@ describe("getTransactionsByGroupByCategory", () => {
       });
   });
 
-  test("Group not found request", async () => {
+  test("Group not found request [getTransactionsByGroupByCategory] - Integration Test #5", async () => {
     const testAdmin = {
       username: "admin",
       email: "admin@test.com",
@@ -3063,7 +3063,7 @@ describe("getTransactionsByGroupByCategory", () => {
       });
   });
 
-  test("Category not found request", async () => {
+  test("Category not found request [getTransactionsByGroupByCategory] - Integration Test #6", async () => {
     const testAdmin = {
       username: "admin",
       email: "admin@test.com",
@@ -3157,7 +3157,7 @@ describe("getTransactionsByGroupByCategory", () => {
 });
 
 describe("deleteTransaction", () => {
-  test("Transaction deleted by user", async () => {
+  test("Transaction deleted by user [deleteTransaction] - Integration Test #1", async () => {
     const testUser = {
       username: "tester",
       email: "tester@test.com",
@@ -3194,7 +3194,7 @@ describe("deleteTransaction", () => {
       });
   });
 
-  test("Transaction deleted by admin", async () => {
+  test("Transaction deleted by admin [deleteTransaction] - Integration Test #2", async () => {
     const testAdmin = {
       username: "admin",
       email: "admin@test.com",
@@ -3237,7 +3237,7 @@ describe("deleteTransaction", () => {
       });
   });
 
-  test("User not authorized", async () => {
+  test("User not authorized [deleteTransaction] - Integration Test #3", async () => {
     const testAdmin = {
       username: "admin",
       email: "admin@test.com",
@@ -3277,7 +3277,7 @@ describe("deleteTransaction", () => {
       });
   });
 
-  test("User not found", async () => {
+  test("User not found [deleteTransaction] - Integration Test #4", async () => {
     const testUser = {
       username: "tester",
       email: "tester@test.com",
@@ -3310,7 +3310,7 @@ describe("deleteTransaction", () => {
       });
   });
 
-  test("Transaction not found", async () => {
+  test("Transaction not found [deleteTransaction] - Integration Test #5", async () => {
     const testUser = {
       username: "tester",
       email: "tester@test.com",
@@ -3342,7 +3342,7 @@ describe("deleteTransaction", () => {
       });
   });
 
-  test("Missing ID", async () => {
+  test("Missing ID [deleteTransaction] - Integration Test #6", async () => {
     const testUser = {
       username: "tester",
       email: "tester@test.com",
@@ -3377,7 +3377,7 @@ describe("deleteTransaction", () => {
 });
 
 describe("deleteTransactions", () => {
-  test("Transactions deleted by admin", async () => {
+  test("Transactions deleted by admin [deleteTransactions] - Integration Test #1", async () => {
     const testAdmin = {
       username: "admin",
       email: "admin@test.com",
@@ -3428,7 +3428,7 @@ describe("deleteTransactions", () => {
       });
   });
 
-  test("Unauthorized admin", async () => {
+  test("Unauthorized admin [deleteTransactions] - Integration Test #2", async () => {
     const testAdmin = {
       username: "admin",
       email: "admin@test.com",
@@ -3475,7 +3475,7 @@ describe("deleteTransactions", () => {
       });
   });
 
-  test("Invalid transaction", async () => {
+  test("Invalid transaction [deleteTransactions] - Integration Test #3", async () => {
     const testAdmin = {
       username: "admin",
       email: "admin@test.com",
@@ -3523,7 +3523,7 @@ describe("deleteTransactions", () => {
       });
   });
 
-  test("Invalid ids", async () => {
+  test("Invalid ids [deleteTransactions] - Integration Test #4", async () => {
     const testAdmin = {
       username: "admin",
       email: "admin@test.com",
