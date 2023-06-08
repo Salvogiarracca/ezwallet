@@ -808,8 +808,100 @@ describe("deleteCategory", () => {
 });
 
 describe("getCategories", () => {
-  test("Dummy test, change it", () => {
-    expect(true).toBe(true);
+  test("Retrieved all categories", async () => {
+      const testCategories = [
+          {
+              type: "test",
+              color: "#ff0000",
+          },
+          {
+              type: "fuel",
+              color: "#002aff",
+          },
+      ];
+      await categories.insertMany(testCategories);
+      await request(app)
+          .get("/api/categories") //Route to call
+          .set(
+              "Cookie",
+              `accessToken=${testerAccessTokenValid}; refreshToken=${testerAccessTokenValid}`
+          ) //Setting cookies in the request
+          .send()
+          .then((response) => {
+              //After obtaining the response, we check its actual body content
+              //The status must represent successful execution
+              //console.log(response)
+              expect(response.status).toBe(200);
+              //The "data" object must have a field named "message" that confirms that changes are successful
+              //The actual value of the field could be any string, so it's not checked
+              expect(response.body).toHaveProperty("message");
+              expect(
+                  response.body.data.map((obj) => {
+                      return {
+                          type: obj.type,
+                          color: obj.color,
+                      };
+                  })
+              ).toEqual(testCategories);
+              //Must be called at the end of every test or the test will fail while waiting for it to be called
+              //done();
+          });
+  });
+
+  test("Unauthorized user", async () => {
+      const testCategories = [
+          {
+              type: "test",
+              color: "#ff0000",
+          },
+          {
+              type: "fuel",
+              color: "#002aff",
+          },
+      ];
+      await categories.insertMany(testCategories);
+      await request(app)
+          .get("/api/categories") //Route to call
+          .set(
+              "Cookie",
+              `accessToken=${testerAccessTokenEmpty}; refreshToken=${testerAccessTokenEmpty}`
+          ) //Setting cookies in the request
+          .send()
+          .then((response) => {
+              //After obtaining the response, we check its actual body content
+              //The status must represent successful execution
+              //console.log(response)
+              expect(response.status).toBe(401);
+              //The "data" object must have a field named "message" that confirms that changes are successful
+              //The actual value of the field could be any string, so it's not checked
+              expect(response.body).toHaveProperty("message");
+              //Must be called at the end of every test or the test will fail while waiting for it to be called
+              //done();
+          });
+  });
+
+  test("Retrieved empty array", async () => {
+      await request(app)
+          .get("/api/categories") //Route to call
+          .set(
+              "Cookie",
+              `accessToken=${testerAccessTokenValid}; refreshToken=${testerAccessTokenValid}`
+          ) //Setting cookies in the request
+          .send()
+          .then((response) => {
+              //After obtaining the response, we check its actual body content
+              //The status must represent successful execution
+              //console.log(response)
+              expect(response.status).toBe(200);
+              //The "data" object must have a field named "message" that confirms that changes are successful
+              //The actual value of the field could be any string, so it's not checked
+              expect(response.body).toHaveProperty("message");
+              expect(
+                  response.body.data
+              ).toEqual([]);
+              //Must be called at the end of every test or the test will fail while waiting for it to be called
+              //done();
+          });
   });
 });
 

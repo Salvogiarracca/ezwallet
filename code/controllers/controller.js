@@ -194,14 +194,12 @@ export const updateCategory = async (req, res) => {
  */
 export const getCategories = async (req, res) => {
   try {
-    const username = req.params.username;
     const cookie = req.cookies;
     if (!cookie.accessToken) {
       return res.status(401).json({ message: "Unauthorized" }); // unauthorized
     }
     const auth = verifyAuth(req, res, {
       authType: "Simple",
-      username: username,
     });
     if (!auth.authorized) {
       return res.status(401).json({ message: "Unauthorized" });

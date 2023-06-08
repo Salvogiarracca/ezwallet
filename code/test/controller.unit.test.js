@@ -736,7 +736,7 @@ describe("deleteCategory", () => {
 describe("getCategories", () => {
   test("Successful Request [getCategories] - Test #1", async () => {
     const mockReq = {
-      params: { username: "testuser" },
+      params: {username: "testuser"},
       cookies: {
         accessToken: "adminAccessTokenValid",
         refreshToken: "adminRefreshTokenValid",
@@ -762,13 +762,13 @@ describe("getCategories", () => {
     ];
     const expectedResponse = {
       data: retrievedCategories.map((v) =>
-        Object.assign(
-          {},
-          {
-            type: v.type,
-            color: v.color,
-          }
-        )
+          Object.assign(
+              {},
+              {
+                type: v.type,
+                color: v.color,
+              }
+          )
       ),
       message: "authorized",
     };
@@ -779,7 +779,9 @@ describe("getCategories", () => {
         return { authorized: false, cause: "authorized" };
       }
     });
-    jest.spyOn(categories, "find").mockResolvedValue(retrievedCategories);
+    jest
+        .spyOn(categories, "find")
+        .mockResolvedValue(retrievedCategories);
     await getCategories(mockReq, mockRes);
     expect(categories.find).toHaveBeenCalled();
     expect(mockRes.status).toHaveBeenCalledWith(200);
@@ -822,7 +824,9 @@ describe("getCategories", () => {
         return { authorized: false, cause: "unauthorized" };
       }
     });
-    jest.spyOn(categories, "find").mockResolvedValue(retrievedCategories);
+    jest
+        .spyOn(categories, "find")
+        .mockResolvedValue(retrievedCategories);
     await getCategories(mockReq, mockRes);
     expect(categories.find).not.toHaveBeenCalled();
     expect(mockRes.status).toHaveBeenCalledWith(401);
@@ -844,29 +848,32 @@ describe("getCategories", () => {
     const retrievedCategories = [];
     const expectedResponse = {
       data: retrievedCategories.map((v) =>
-        Object.assign(
-          {},
-          {
-            type: v.type,
-            color: v.categories_info.color,
-          }
-        )
+          Object.assign(
+              {},
+              {
+                type: v.type,
+                color: v.categories_info.color,
+              }
+          )
       ),
       message: "authorized",
     };
     verifyAuth.mockImplementation((mockReq, mockRes, params) => {
       if (params.authType == "Simple") {
-        return { authorized: false, cause: "authorized" };
+        return { authorized: true, cause: "authorized" };
       } else {
         return { authorized: true, cause: "authorized" };
       }
     });
-    jest.spyOn(categories, "find").mockResolvedValue(retrievedCategories);
+    jest
+        .spyOn(categories, "find")
+        .mockResolvedValue(retrievedCategories);
     await getCategories(mockReq, mockRes);
     expect(categories.find).toHaveBeenCalled();
     expect(mockRes.status).toHaveBeenCalledWith(200);
     expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
   });
+
 });
 
 describe("createTransaction", () => {
