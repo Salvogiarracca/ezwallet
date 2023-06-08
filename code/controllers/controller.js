@@ -25,12 +25,18 @@ export const createCategory = (req, res) => {
     if (!adminAuth.authorized) {
       return res.status(401).json({ message: "Unauthorized" });
     }
-    const { type, color } = req.body;
-    if (!type || !color) {
+    const newType = req.body.type;
+    const newColor = req.body.color;
+    if (newType === undefined || newColor === undefined) {
       throw new Error("Missing attributes");
     }
-    if (categories.findOne({ type: type }) === null) {
-      throw new Error("Category already exists");
+    if(newType === '' || newColor === ''){
+      throw new Error("Missing attributes");
+    }
+    const existing = categories.findOne({type: newType});
+    if (existing !== null){
+      if(existing.type !== undefined)
+        throw new Error("Category already exists");
     }
     const new_categories = new categories({ type, color });
     new_categories
@@ -40,7 +46,7 @@ export const createCategory = (req, res) => {
         throw err;
       });
     res.status(200).json({
-      data: { type: type, color: color },
+      data: { type: newType, color: newColor },
       message: "Category created!",
     });
   } catch (error) {
