@@ -145,7 +145,7 @@ describe("verifyAuth", () => {
         }
 
         //The same reasoning applies for the response object: we must manually define the functions used and then check if they are called (and with which values)
-        const res = {} 
+        const res = { cookies : {} } 
 
         // Info object for the verifyAuth function
         const info = {
@@ -274,7 +274,7 @@ describe("verifyAuth", () => {
         expect(result).toHaveProperty("cause");
     });
 
-    test('Administrator authentication', async () => {  
+    test('Administrator authentication', async () => {
         const registeredUserSent = {
             email: "a334278@studenti.polito.it",
             password: "12345"
@@ -483,6 +483,39 @@ describe("verifyAuth", () => {
         expect(result).toHaveProperty("cause");
     });
 
+    test('Group authentication: access token expired and correct email', async () => {  
+        const registeredUserSent = {
+            email: "a334278@studenti.polito.it",
+            password: "12345"
+        };
+
+        const response = await request(app).post("/api/login").send(registeredUserSent);
+        const accessToken = newExpiringToken("Pluto", "a334278@studenti.polito.it", "Admin")
+        const refreshToken = response.body.data.refreshToken;
+
+        //Since we are calling the function directly, we need to manually define a request object with all the necessary parameters (route params, body, cookies, url)
+        const req = {
+            body: {},
+            cookies: { accessToken: accessToken, refreshToken: refreshToken }
+        }
+
+        //The same reasoning applies for the response object: we must manually define the functions used and then check if they are called (and with which values)
+        const res = {} 
+
+        // Info object for the verifyAuth function
+        const info = {
+            authType: "Group",
+            emails: ["a334278@studenti.polito.it", "s123456@studenti.polito.it", "s315678@studenti.polito.it"]
+        }
+        
+        // Call the function
+        const result = verifyAuth(req, res, info);
+        
+        // Verify the results
+        expect(result).toHaveProperty("authorized", true);
+        expect(result).toHaveProperty("cause");
+    });
+
     test('Group authentication: email not in emails group error #1', async () => {  
         const registeredUserSent = {
             email: "a334278@studenti.polito.it",
@@ -553,6 +586,39 @@ describe("verifyAuth", () => {
         const info = {
             authType: "Group",
             emails: ["a334278@studenti.polito.it", "s123456@studenti.polito.it", "s315678@studenti.polito.it"]
+        }
+        
+        // Call the function
+        const result = verifyAuth(req, res, info);
+        
+        // Verify the results
+        expect(result).toHaveProperty("authorized", false);
+        expect(result).toHaveProperty("cause");
+    });
+
+    test('Group authentication: access token expired and incorrect email', async () => {  
+        const registeredUserSent = {
+            email: "a334278@studenti.polito.it",
+            password: "12345"
+        };
+
+        const response = await request(app).post("/api/login").send(registeredUserSent);
+        const accessToken = newExpiringToken("Pluto", "a334278@studenti.polito.it", "Admin")
+        const refreshToken = response.body.data.refreshToken;
+
+        //Since we are calling the function directly, we need to manually define a request object with all the necessary parameters (route params, body, cookies, url)
+        const req = {
+            body: {},
+            cookies: { accessToken: accessToken, refreshToken: refreshToken }
+        }
+
+        //The same reasoning applies for the response object: we must manually define the functions used and then check if they are called (and with which values)
+        const res = {} 
+
+        // Info object for the verifyAuth function
+        const info = {
+            authType: "Group",
+            emails: ["a322656@studenti.polito.it", "s123456@studenti.polito.it", "s315678@studenti.polito.it"]
         }
         
         // Call the function
