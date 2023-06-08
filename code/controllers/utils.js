@@ -120,11 +120,11 @@ export const verifyAuth = (req, res, info) => {
             return { authorized: true, cause: "Authorized" }
         }
         ///1 either the accessToken or the refreshToken have a `username` different from the requested one
-        if(info.authType === "User" && (decodedAccessToken.username === info.username || decodedRefreshToken.username === info.username)){
+        if(info.authType === "User" && decodedAccessToken.username === info.username && decodedRefreshToken.username === info.username){
             return { authorized: true, cause: "Authorized" }
         }
         ///2 either the accessToken or the refreshToken have a `role` which is not Admin
-        if(info.authType === "Admin" && (decodedAccessToken.role === info.authType || decodedRefreshToken.role === info.authType)){
+        if(info.authType === "Admin" && decodedAccessToken.role === info.authType && decodedRefreshToken.role === info.authType){
             return { authorized: true, cause: "Authorized" }
         }
         ///3 either the accessToken or the refreshToken have a `email` which is not in the requested group
