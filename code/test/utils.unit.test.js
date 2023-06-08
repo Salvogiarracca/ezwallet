@@ -61,6 +61,49 @@ describe("verifyAuth", () => {
         expect(result).toHaveProperty("cause");
     });
 
+    test('Simple authentication: access token and refresh token expired', () => {
+        const accessToken = "testAccessToken";
+        const refreshToken = "testRefreshToken";
+
+        const decodedAccessToken = {
+            id: "123456",
+            username: "Topolino",
+            email: "s256789@studenti.polito.it",
+            role: "Regular"
+        }
+
+        const decodedRefreshToken = {
+            id: "123456",
+            username: "Pippo",
+            email: "s256789@studenti.polito.it",
+            role: "Regular"
+        }
+
+        //Since we are calling the function directly, we need to manually define a request object with all the necessary parameters (route params, body, cookies, url)
+        const req = {
+            body: {},
+            cookies: { accessToken: accessToken, refreshToken: refreshToken }
+        }
+
+        //The same reasoning applies for the response object: we must manually define the functions used and then check if they are called (and with which values)
+        const res = {} 
+
+        // Info object for the verifyAuth function
+        const info = {
+            authType: "User",
+            username: "Topolino"
+        }
+
+        jwt.verify = jest.fn().mockImplementation(() => {throw new Error("TokenExpiredError");});
+
+        // Call the function
+        const result = verifyAuth(req, res, info);
+        
+        // Verify the results
+        expect(result).toHaveProperty("authorized", false);
+        expect(result).toHaveProperty("cause");
+    });
+
     test('User authentication', () => {
         const accessToken = "testAccessToken";
         const refreshToken = "testRefreshToken";
