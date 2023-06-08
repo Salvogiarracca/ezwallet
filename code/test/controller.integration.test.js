@@ -420,8 +420,390 @@ describe("updateCategory", () => {
 });
 
 describe("deleteCategory", () => {
-  test("Dummy test, change it", () => {
-    expect(true).toBe(true);
+  test("Category created by unauthorized user", async () => {
+    const types = ["test", "fuel"];
+    const oldCategories = [{
+      type: "test",
+      color: "#ff1234"
+    },
+      {
+      type: "fuel",
+      color: "#ff1234"
+    },
+      {
+        type: "supermarket",
+        color: "#ff1234"
+      },
+      {
+        type: "bills",
+        color: "#ff1234"
+      },
+      {
+        type: "pharmacy",
+        color: "#ff1234"
+      }]
+    await categories.insertMany(oldCategories)
+    await request(app)
+        .delete("/api/categories") //Route to call
+        .set(
+            "Cookie",
+            `accessToken=${testerAccessTokenValid}; refreshToken=${testerAccessTokenValid}`
+        ) //Setting cookies in the request
+        .send(types) //Definition of the request body
+        .then((response) => {
+          //After obtaining the response, we check its actual body content
+          //The status must represent successful execution
+          expect(response.status).toBe(401);
+          //The "data" object must have a field named "message" that confirms that changes are successful
+          //The actual value of the field could be any string, so it's not checked
+          expect(response.body).toHaveProperty("message");
+          //Must be called at the end of every test or the test will fail while waiting for it to be called
+          //done();
+        });
+  });
+
+  test("Empty array", async () => {
+    const types = [];
+    const oldCategories = [{
+      type: "test",
+      color: "#ff1234"
+    },
+      {
+        type: "fuel",
+        color: "#ff1234"
+      },
+      {
+        type: "supermarket",
+        color: "#ff1234"
+      },
+      {
+        type: "bills",
+        color: "#ff1234"
+      },
+      {
+        type: "pharmacy",
+        color: "#ff1234"
+      }]
+    await categories.insertMany(oldCategories)
+    await request(app)
+        .delete("/api/categories") //Route to call
+        .set(
+            "Cookie",
+            `accessToken=${adminAccessTokenValid}; refreshToken=${adminAccessTokenValid}`
+        ) //Setting cookies in the request
+        .send(types) //Definition of the request body
+        .then((response) => {
+          //After obtaining the response, we check its actual body content
+          //The status must represent successful execution
+          expect(response.status).toBe(400);
+          //The "data" object must have a field named "message" that confirms that changes are successful
+          //The actual value of the field could be any string, so it's not checked
+          expect(response.body).toHaveProperty("error");
+          //Must be called at the end of every test or the test will fail while waiting for it to be called
+          //done();
+        });
+  });
+
+  test("Missing array", async () => {
+    const types = [];
+    const oldCategories = [{
+      type: "test",
+      color: "#ff1234"
+    },
+      {
+        type: "fuel",
+        color: "#ff1234"
+      },
+      {
+        type: "supermarket",
+        color: "#ff1234"
+      },
+      {
+        type: "bills",
+        color: "#ff1234"
+      },
+      {
+        type: "pharmacy",
+        color: "#ff1234"
+      }]
+    await categories.insertMany(oldCategories)
+    await request(app)
+        .delete("/api/categories") //Route to call
+        .set(
+            "Cookie",
+            `accessToken=${adminAccessTokenValid}; refreshToken=${adminAccessTokenValid}`
+        ) //Setting cookies in the request
+        .send() //Definition of the request body
+        .then((response) => {
+          //After obtaining the response, we check its actual body content
+          //The status must represent successful execution
+          expect(response.status).toBe(400);
+          //The "data" object must have a field named "message" that confirms that changes are successful
+          //The actual value of the field could be any string, so it's not checked
+          expect(response.body).toHaveProperty("error");
+          //Must be called at the end of every test or the test will fail while waiting for it to be called
+          //done();
+        });
+  });
+
+  test("Empty string in array", async () => {
+    const types = ["test", ""];
+    const oldCategories = [{
+      type: "test",
+      color: "#ff1234"
+    },
+      {
+        type: "fuel",
+        color: "#ff1234"
+      },
+      {
+        type: "supermarket",
+        color: "#ff1234"
+      },
+      {
+        type: "bills",
+        color: "#ff1234"
+      },
+      {
+        type: "pharmacy",
+        color: "#ff1234"
+      }]
+    await categories.insertMany(oldCategories)
+    await request(app)
+        .delete("/api/categories") //Route to call
+        .set(
+            "Cookie",
+            `accessToken=${adminAccessTokenValid}; refreshToken=${adminAccessTokenValid}`
+        ) //Setting cookies in the request
+        .send(types) //Definition of the request body
+        .then((response) => {
+          //After obtaining the response, we check its actual body content
+          //The status must represent successful execution
+          expect(response.status).toBe(400);
+          //The "data" object must have a field named "message" that confirms that changes are successful
+          //The actual value of the field could be any string, so it's not checked
+          expect(response.body).toHaveProperty("error");
+          //Must be called at the end of every test or the test will fail while waiting for it to be called
+          //done();
+        });
+  });
+
+  test("One category in array does not exist", async () => {
+    const types = ["test", "notExisting"];
+    const oldCategories = [{
+      type: "test",
+      color: "#ff1234"
+    },
+      {
+        type: "fuel",
+        color: "#ff1234"
+      },
+      {
+        type: "supermarket",
+        color: "#ff1234"
+      },
+      {
+        type: "bills",
+        color: "#ff1234"
+      },
+      {
+        type: "pharmacy",
+        color: "#ff1234"
+      }]
+    await categories.insertMany(oldCategories)
+    await request(app)
+        .delete("/api/categories") //Route to call
+        .set(
+            "Cookie",
+            `accessToken=${adminAccessTokenValid}; refreshToken=${adminAccessTokenValid}`
+        ) //Setting cookies in the request
+        .send(types) //Definition of the request body
+        .then((response) => {
+          //After obtaining the response, we check its actual body content
+          //The status must represent successful execution
+          expect(response.status).toBe(400);
+          //The "data" object must have a field named "message" that confirms that changes are successful
+          //The actual value of the field could be any string, so it's not checked
+          expect(response.body).toHaveProperty("error");
+          //Must be called at the end of every test or the test will fail while waiting for it to be called
+          //done();
+        });
+  });
+
+  test("One category in db", async () => {
+    const types = ["test"];
+    const oldCategories = [{
+      type: "test",
+      color: "#ff1234"
+    }]
+    await categories.insertMany(oldCategories)
+    await request(app)
+        .delete("/api/categories") //Route to call
+        .set(
+            "Cookie",
+            `accessToken=${adminAccessTokenValid}; refreshToken=${adminAccessTokenValid}`
+        ) //Setting cookies in the request
+        .send(types) //Definition of the request body
+        .then((response) => {
+          //After obtaining the response, we check its actual body content
+          //The status must represent successful execution
+          expect(response.status).toBe(400);
+          //The "data" object must have a field named "message" that confirms that changes are successful
+          //The actual value of the field could be any string, so it's not checked
+          expect(response.body).toHaveProperty("error");
+          //Must be called at the end of every test or the test will fail while waiting for it to be called
+          //done();
+        });
+  });
+
+  test("Success N>T", async () => {
+    const types = ["test", "fuel"];
+    const oldCategories = [{
+      type: "test",
+      color: "#ff1234"
+    },
+      {
+        type: "fuel",
+        color: "#ff1234"
+      },
+      {
+        type: "supermarket",
+        color: "#ff1234"
+      },
+      {
+        type: "bills",
+        color: "#ff1234"
+      },
+      {
+        type: "pharmacy",
+        color: "#ff1234"
+      }];
+    const transactionsToAdd = [
+      {
+        username: "mock",
+        amount: 9000,
+        type: "test",
+      },
+      {
+        username: "mock",
+        amount: 9000,
+        type: "fuel",
+      },
+      {
+        username: "mock",
+        amount: 9000,
+        type: "fuel",
+      },
+      {
+        username: "mock",
+        amount: 9000,
+        type: "supermarket",
+      },
+      {
+        username: "mock",
+        amount: 9000,
+        type: "test",
+      },
+      {
+        username: "mock",
+        amount: 9000,
+        type: "bills",
+      },
+      {
+        username: "mock",
+        amount: 9000,
+        type: "pharmacy",
+      }
+    ];
+    await transactions.insertMany(transactionsToAdd);
+    await categories.insertMany(oldCategories);
+    await request(app)
+        .delete("/api/categories") //Route to call
+        .set(
+            "Cookie",
+            `accessToken=${adminAccessTokenValid}; refreshToken=${adminAccessTokenValid}`
+        ) //Setting cookies in the request
+        .send(types) //Definition of the request body
+        .then((response) => {
+          //After obtaining the response, we check its actual body content
+          //The status must represent successful execution
+          expect(response.status).toBe(200);
+          //The "data" object must have a field named "message" that confirms that changes are successful
+          //The actual value of the field could be any string, so it's not checked
+          expect(response.body).toHaveProperty("message");
+          expect(response.body).toHaveProperty("count", 4)
+          //Must be called at the end of every test or the test will fail while waiting for it to be called
+          //done();
+        });
+  });
+
+  test("Success N==T", async () => {
+    const types = ["test", "fuel"];
+    const oldCategories = [{
+      type: "test",
+      color: "#ff1234"
+    },
+      {
+        type: "fuel",
+        color: "#ff1234"
+      },];
+    const transactionsToAdd = [
+      {
+        username: "mock",
+        amount: 9000,
+        type: "test",
+      },
+      {
+        username: "mock",
+        amount: 9000,
+        type: "fuel",
+      },
+      {
+        username: "mock",
+        amount: 9000,
+        type: "fuel",
+      },
+      {
+        username: "mock",
+        amount: 9000,
+        type: "fuel",
+      },
+      {
+        username: "mock",
+        amount: 9000,
+        type: "test",
+      },
+      {
+        username: "mock",
+        amount: 9000,
+        type: "test",
+      },
+      {
+        username: "mock",
+        amount: 9000,
+        type: "fuel",
+      }
+    ];
+    await transactions.insertMany(transactionsToAdd);
+    await categories.insertMany(oldCategories);
+    await request(app)
+        .delete("/api/categories") //Route to call
+        .set(
+            "Cookie",
+            `accessToken=${adminAccessTokenValid}; refreshToken=${adminAccessTokenValid}`
+        ) //Setting cookies in the request
+        .send(types) //Definition of the request body
+        .then((response) => {
+          //After obtaining the response, we check its actual body content
+          //The status must represent successful execution
+          expect(response.status).toBe(200);
+          //The "data" object must have a field named "message" that confirms that changes are successful
+          //The actual value of the field could be any string, so it's not checked
+          expect(response.body).toHaveProperty("message");
+          expect(response.body).toHaveProperty("count", 4)
+          //Must be called at the end of every test or the test will fail while waiting for it to be called
+          //done();
+        });
   });
 });
 
