@@ -421,7 +421,7 @@ describe("updateCategory", () => {
 
 describe("deleteCategory", () => {
   test("Category created by unauthorized user", async () => {
-    const types = ["test", "fuel"];
+    const mockReq = { types: ['test', "fuel"] };
     const oldCategories = [{
       type: "test",
       color: "#ff1234"
@@ -449,7 +449,7 @@ describe("deleteCategory", () => {
             "Cookie",
             `accessToken=${testerAccessTokenValid}; refreshToken=${testerAccessTokenValid}`
         ) //Setting cookies in the request
-        .send(types) //Definition of the request body
+        .send(mockReq) //Definition of the request body
         .then((response) => {
           //After obtaining the response, we check its actual body content
           //The status must represent successful execution
@@ -463,7 +463,7 @@ describe("deleteCategory", () => {
   });
 
   test("Empty array", async () => {
-    const types = [];
+    const mockReq = { types: [] };
     const oldCategories = [{
       type: "test",
       color: "#ff1234"
@@ -491,7 +491,7 @@ describe("deleteCategory", () => {
             "Cookie",
             `accessToken=${adminAccessTokenValid}; refreshToken=${adminAccessTokenValid}`
         ) //Setting cookies in the request
-        .send(types) //Definition of the request body
+        .send(mockReq) //Definition of the request body
         .then((response) => {
           //After obtaining the response, we check its actual body content
           //The status must represent successful execution
@@ -505,7 +505,7 @@ describe("deleteCategory", () => {
   });
 
   test("Missing array", async () => {
-    const types = [];
+    const mockReq = { };
     const oldCategories = [{
       type: "test",
       color: "#ff1234"
@@ -533,7 +533,7 @@ describe("deleteCategory", () => {
             "Cookie",
             `accessToken=${adminAccessTokenValid}; refreshToken=${adminAccessTokenValid}`
         ) //Setting cookies in the request
-        .send() //Definition of the request body
+        .send(mockReq) //Definition of the request body
         .then((response) => {
           //After obtaining the response, we check its actual body content
           //The status must represent successful execution
@@ -547,7 +547,7 @@ describe("deleteCategory", () => {
   });
 
   test("Empty string in array", async () => {
-    const types = ["test", ""];
+    const mockReq = { types: ['test', ""] };
     const oldCategories = [{
       type: "test",
       color: "#ff1234"
@@ -575,7 +575,7 @@ describe("deleteCategory", () => {
             "Cookie",
             `accessToken=${adminAccessTokenValid}; refreshToken=${adminAccessTokenValid}`
         ) //Setting cookies in the request
-        .send(types) //Definition of the request body
+        .send(mockReq) //Definition of the request body
         .then((response) => {
           //After obtaining the response, we check its actual body content
           //The status must represent successful execution
@@ -589,7 +589,7 @@ describe("deleteCategory", () => {
   });
 
   test("One category in array does not exist", async () => {
-    const types = ["test", "notExisting"];
+    const mockReq = {types: ["test", "notExisting"]};
     const oldCategories = [{
       type: "test",
       color: "#ff1234"
@@ -617,7 +617,7 @@ describe("deleteCategory", () => {
             "Cookie",
             `accessToken=${adminAccessTokenValid}; refreshToken=${adminAccessTokenValid}`
         ) //Setting cookies in the request
-        .send(types) //Definition of the request body
+        .send(mockReq) //Definition of the request body
         .then((response) => {
           //After obtaining the response, we check its actual body content
           //The status must represent successful execution
@@ -631,7 +631,7 @@ describe("deleteCategory", () => {
   });
 
   test("One category in db", async () => {
-    const types = ["test"];
+    const mockReq = { types: ['test',] };
     const oldCategories = [{
       type: "test",
       color: "#ff1234"
@@ -643,7 +643,7 @@ describe("deleteCategory", () => {
             "Cookie",
             `accessToken=${adminAccessTokenValid}; refreshToken=${adminAccessTokenValid}`
         ) //Setting cookies in the request
-        .send(types) //Definition of the request body
+        .send(mockReq) //Definition of the request body
         .then((response) => {
           //After obtaining the response, we check its actual body content
           //The status must represent successful execution
@@ -657,7 +657,7 @@ describe("deleteCategory", () => {
   });
 
   test("Success N>T", async () => {
-    const types = ["test", "fuel"];
+    const mockReq = { types: ['test', "fuel"] };
     const oldCategories = [{
       type: "test",
       color: "#ff1234"
@@ -723,7 +723,7 @@ describe("deleteCategory", () => {
             "Cookie",
             `accessToken=${adminAccessTokenValid}; refreshToken=${adminAccessTokenValid}`
         ) //Setting cookies in the request
-        .send(types) //Definition of the request body
+        .send(mockReq) //Definition of the request body
         .then((response) => {
           //After obtaining the response, we check its actual body content
           //The status must represent successful execution
@@ -738,7 +738,7 @@ describe("deleteCategory", () => {
   });
 
   test("Success N==T", async () => {
-    const types = ["test", "fuel"];
+    const mockReq = { types: ['test', "fuel"] };
     const oldCategories = [{
       type: "test",
       color: "#ff1234"
@@ -792,7 +792,7 @@ describe("deleteCategory", () => {
             "Cookie",
             `accessToken=${adminAccessTokenValid}; refreshToken=${adminAccessTokenValid}`
         ) //Setting cookies in the request
-        .send(types) //Definition of the request body
+        .send(mockReq) //Definition of the request body
         .then((response) => {
           //After obtaining the response, we check its actual body content
           //The status must represent successful execution

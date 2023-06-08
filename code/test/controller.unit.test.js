@@ -471,6 +471,7 @@ describe("deleteCategory", () => {
   test("Missing attributes [deleteCategory] - Test #1", async () => {
     const mockReq = {
       params: {username: "testuser"},
+      body: {},
       cookies: {
         accessToken: "adminAccessTokenValid",
         refreshToken: "adminRefreshTokenValid",
@@ -499,7 +500,7 @@ describe("deleteCategory", () => {
   test("Only one category [deleteCategory] - Test #2", async () => {
     const mockReq = {
       params: {username: "testuser"},
-      body: ["investment", "fuel"],
+      body: {types: ["investment", "fuel"]},
       cookies: {
         accessToken: "adminAccessTokenValid",
         refreshToken: "adminRefreshTokenValid",
@@ -528,8 +529,7 @@ describe("deleteCategory", () => {
   test("Empty string [deleteCategory] - Test #3", async () => {
     const mockReq = {
       params: {username: "testuser"},
-      body: ["investment", "", "fuel"]
-      ,
+      body: {types: ["investment", "", "fuel"]},
       cookies: {
         accessToken: "adminAccessTokenValid",
         refreshToken: "adminRefreshTokenValid",
@@ -559,7 +559,7 @@ describe("deleteCategory", () => {
   test("Category does not exist [deleteCategory] - Test #4", async () => {
     const mockReq = {
       params: {username: "testuser"},
-      body: ["investment", "test", "fuel"],
+      body: {types: ["investment", "test", "fuel"]},
       cookies: {
         accessToken: "adminAccessTokenValid",
         refreshToken: "adminRefreshTokenValid",
@@ -591,7 +591,7 @@ describe("deleteCategory", () => {
   test("Success N>T [deleteCategory] - Test #5", async () => {
     const mockReq = {
       params: {username: "testuser"},
-      body: ["fuel"],
+      body: {types: ["fuel"]},
       cookies: {
         accessToken: "adminAccessTokenValid",
         refreshToken: "adminRefreshTokenValid",
@@ -634,7 +634,7 @@ describe("deleteCategory", () => {
   test("Success N=T [deleteCategory] - Test #6", async () => {
     const mockReq = {
       params: {username: "testuser"},
-      body: ["fuel", "investment", "supermarket", "test"],
+      body: {types: ["fuel", "investment", "supermarket", "test"]},
       cookies: {
         accessToken: "adminAccessTokenValid",
         refreshToken: "adminRefreshTokenValid",
