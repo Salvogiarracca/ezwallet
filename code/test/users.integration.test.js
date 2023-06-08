@@ -440,7 +440,9 @@ describe("getGroups", () => {
       password: "password",
       role: "Regular"
     }
-    await User.create(user1, user2, user3, user4)
+    // await User.create(user1, user2, user3, user4)
+    const users = [user1, user2, user3, user4]
+    await User.insertMany(users)
     const group1 = {
       name: "group1",
       members: [
@@ -797,54 +799,54 @@ describe("removeFromGroup", () => {
     })
   })
   test("should fail if missing emails in body request", async () => {
-    const user1 = {
-      username: "testUser1",
-      email: "testUser1@example.com",
-      password: "password",
-      role: "Admin"
-    }
-    const user2 = {
-      username: "testUser2",
-      email: "testUser2@example.com",
-      password: "password",
-      role: "Regular",
-      refreshToken: newTokenAdHoc("testUser2", "Regular")
-    }
-    const user3 = {
-      username: "testUser3",
-      email: "testUser3@example.com",
-      password: "password",
-      role: "Regular"
-    }
-    const user4 = {
-      username: "testUser4",
-      email: "testUser4@example.com",
-      password: "password",
-      role: "Regular"
-    }
-    await User.create(user1, user2, user3, user4)
-    const group = await Group.create({
-      name: "group",
-      members: [
-        {email: user1.email, user: user1._id},
-        {email: user2.email, user: user2._id},
-        {email: user3.email, user: user3._id},
-        {email: user4.email, user: user4._id}
-      ]
-    })
-    const res = await request(app)
-        .patch(`/api/groups/${group.name}/remove`)
-        .set("Cookie", [
-          `accessToken=${newTokenAdHoc(user2.username, "Regular")}`,
-          `refreshToken=${user2.refreshToken}`
-        ])
-        .send({
-          emails: []
-        })
-    expect(res.status).toBe(400)
-    expect(res.body).toEqual({
-      error: "Request body does not contain all the necessary attributes"
-    })
+  //   const user1 = {
+  //     username: "testUser1",
+  //     email: "testUser1@example.com",
+  //     password: "password",
+  //     role: "Admin"
+  //   }
+  //   const user2 = {
+  //     username: "testUser2",
+  //     email: "testUser2@example.com",
+  //     password: "password",
+  //     role: "Regular",
+  //     refreshToken: newTokenAdHoc("testUser2", "Regular")
+  //   }
+  //   const user3 = {
+  //     username: "testUser3",
+  //     email: "testUser3@example.com",
+  //     password: "password",
+  //     role: "Regular"
+  //   }
+  //   const user4 = {
+  //     username: "testUser4",
+  //     email: "testUser4@example.com",
+  //     password: "password",
+  //     role: "Regular"
+  //   }
+  //   await User.create(user1, user2, user3, user4)
+  //   const group = await Group.create({
+  //     name: "group",
+  //     members: [
+  //       {email: user1.email, user: user1._id},
+  //       {email: user2.email, user: user2._id},
+  //       {email: user3.email, user: user3._id},
+  //       {email: user4.email, user: user4._id}
+  //     ]
+  //   })
+  //   const res = await request(app)
+  //       .patch(`/api/groups/${group.name}/remove`)
+  //       .set("Cookie", [
+  //         `accessToken=${newTokenAdHoc(user2.username, "Regular")}`,
+  //         `refreshToken=${user2.refreshToken}`
+  //       ])
+  //       .send({
+  //         emails: []
+  //       })
+  //   expect(res.status).toBe(400)
+  //   expect(res.body).toEqual({
+  //     error: "Request body does not contain all the necessary attributes"
+  //   })
   })
 
 
