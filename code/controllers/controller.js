@@ -101,12 +101,10 @@ export const updateCategory = async (req, res) => {
       { $set: { type: newType } }
     );
 
-    return res
-      .status(200)
-      .json({
-        message: "Update completed successfully",
-        count: updTransactions.modifiedCount,
-      });
+    return res.status(200).json({
+      message: "Update completed successfully",
+      count: updTransactions.modifiedCount,
+    });
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
@@ -257,14 +255,17 @@ export const createTransaction = async (req, res) => {
       });
     }
     const caller_username = req.params.username;
-    const category_exists = await categories.find({ type: type });
+    let category_exists = await categories.find({ type: type });
+    if (!category_exists){
+      category_exists=[];
+    }
     const user_body = await User.findOne({ username: username });
     const user_params = await User.findOne({ username: caller_username });
     const userAuth = verifyAuth(req, res, {
       authType: "User",
       username: caller_username,
     });
-    if (category_exists && user_body && user_params) {
+    if (category_exists.length > 0 && user_body && user_params) {
       if (userAuth.authorized) {
         if (caller_username == username) {
           const new_transactions = new transactions({ username, amount, type });
@@ -527,8 +528,11 @@ export const getTransactionsByUserByCategory = async (req, res) => {
     const username = req.params.username;
     const cat = req.params.category;
     const user = await User.findOne({ username: username });
-    const category = await categories.find({ type: cat });
-    if (user && category) {
+    let category = await categories.find({ type: cat });
+    if (!category){
+      category=[];
+    }
+    if (user && category.length > 0) {
       if (req.url.includes("/users/" + username + "/transactions")) {
         const userAuth = verifyAuth(req, res, {
           authType: "User",
@@ -796,8 +800,11 @@ export const getTransactionsByGroupByCategory = async (req, res) => {
     const groupName = req.params.name;
     const categoryType = req.params.category;
     const group = await Group.findOne({ name: groupName });
-    const category = await categories.find({ type: categoryType });
-    if (group && category) {
+    let category = await categories.find({ type: categoryType });
+    if (!category){
+      category=[];
+    }
+    if (group && category.length > 0) {
       const emails = group.members.map((member) => member.email);
       let usernames = await User.find({ email: emails });
       usernames = usernames.map((user) => user.username);
@@ -940,9 +947,12 @@ export const deleteTransaction = async (req, res) => {
       }); // unauthorized
     } else {
       const username = req.params.username;
-      const transaction = await transactions.find({ _id: id });
+      let transaction = await transactions.find({ _id: id });
       const user = await User.findOne({ username: username });
-      if (user && transaction) {
+      if (!transaction){
+        transaction=[];
+      }
+      if (user && transaction.length > 0) {
         const caller_username = req.params.username;
         const userAuth = verifyAuth(req, res, {
           authType: "User",
@@ -1006,11 +1016,13 @@ export const deleteTransactions = async (req, res) => {
     } else {
       for (const id of ids) {
         const transaction = await transactions.find({ _id: id });
-        if (!id || id === "" || !transaction) {
-          return res.status(400).json({
-            refreshedTokenMessage: res.locals.refreshedTokenMessage,
-            message: "Invalid ID:" + id,
-          });
+        if (transaction) {
+          if (!id || id === "" || !transaction.length > 0) {
+            return res.status(400).json({
+              refreshedTokenMessage: res.locals.refreshedTokenMessage,
+              message: "Invalid ID:" + id,
+            });
+          }
         }
       }
       const adminAuth = verifyAuth(req, res, { authType: "Admin" });
