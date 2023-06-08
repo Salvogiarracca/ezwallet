@@ -1175,7 +1175,7 @@ describe("deleteUser", () => {
     expect(res.status).toBe(200)
     expect(res.body).toEqual(expect.objectContaining({
       data: {
-        deletedTransaction: 0,
+        deletedTransactions: 0,
         deletedFromGroup: true
       }
     }))
@@ -1207,7 +1207,7 @@ describe("deleteUser", () => {
     expect(res.status).toBe(200)
     expect(res.body).toEqual(expect.objectContaining({
       data: {
-        deletedTransaction: 0,
+        deletedTransactions: 0,
         deletedFromGroup: false
       }
     }))

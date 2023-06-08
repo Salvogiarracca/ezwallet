@@ -3,7 +3,7 @@ import { app } from '../app';
 import {Group, User} from '../models/User.js';
 import {
   addToGroup,
-  createGroup,
+  createGroup, deleteGroup, deleteUser,
   getGroup,
   getGroups,
   getUser,
@@ -14,6 +14,7 @@ import * as utils from "../controllers/utils.js"
 import { newToken } from "../controllers/genericFunctions.js"
 
 import {verifyAuth} from "../controllers/utils.js";
+import {transactions} from "../models/model.js";
 
 /**
  * In order to correctly mock the calls to external modules it is necessary to mock them using the following line.
@@ -950,6 +951,87 @@ describe("addToGroup", () => {
       refreshedTokenMessage: mockRes?.locals?.refreshedTokenMessage
     }))
   })
+  test("should not add users to a group and suggests to change api (Admin)", async () => {
+    const user1 = {
+      _id: "11111",
+      username: "testUser1",
+      email: "testUser1@example.com",
+      role: "Admin"
+    }
+    const user2 = {
+      _id: "22222",
+      username: "testUser2",
+      email: "testUser2@example.com",
+      role: "Regular"
+    }
+    const user3 = {
+      _id: "33333",
+      username: "testUser3",
+      email: "testUser3@example.com",
+      role: "Regular"
+    }
+    const user4 = {
+      _id: "44444",
+      username: "testUser4",
+      email: "testUser4@example.com",
+      role: "Regular"
+    }
+
+    const group1 = {
+      name: "testGroup1",
+      members: [
+        {email: "testUser1@example.com", user: "11111"}
+      ]
+    }
+    const group2 = {
+      name: "testGroup2",
+      members: [
+        {email: "testUser2@example.com", user: "22222"},
+        {email: "testUser5@example.com", user: "55555"}
+      ]
+    }
+    jest.spyOn(utils, "verifyAuth")
+        .mockReturnValueOnce({authorized: false, cause: "Unauthorized"})
+        .mockReturnValueOnce({authorized: true, cause: "Authorized"})
+    const mockReq = {
+      originalUrl: `/api/groups/${group2.name}/add`,
+      cookies: {
+        accessToken: newToken("Admin"),
+        refreshToken: newToken("Admin")
+      },
+      body: {
+        emails: [
+          user1.email,
+          user2.email,
+          user3.email,
+          user4.email
+        ]
+      },
+      params: { name: group2.name }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      locals: jest.fn().mockReturnThis(),
+      refreshedTokenMessage: jest.fn()
+    }
+    jest.spyOn(Group, "findOne").mockResolvedValueOnce(group2)
+    jest.spyOn(Group, "find").mockResolvedValueOnce([
+      {
+        name:"testg1",
+        members: [{email: "testman1@example.com", user: "12345"}]
+      },
+      {
+        name:"testg2",
+        members: [{email: "testman2@example.com", user: "54321"}]
+      }
+    ])
+    await addToGroup(mockReq, mockRes)
+    expect(mockRes.status).toHaveBeenCalledWith(400)
+    expect(mockRes.json).toHaveBeenCalledWith({
+      message: `You must use a different url (api/groups/${group2.name}/insert)`
+    })
+  })
 
   test("should fail if user is not part of the group", async () => {
     const user1 = {
@@ -1532,6 +1614,68 @@ describe("removeFromGroup", () => {
     }))
   })
 
+  test("should not add users to a group and suggests to change api (Admin)", async () => {
+    const user1 = {
+      _id: "11111",
+      username: "testUser1",
+      email: "testUser1@example.com",
+      role: "Admin"
+    }
+    const user2 = {
+      _id: "22222",
+      username: "testUser2",
+      email: "testUser2@example.com",
+      role: "Regular"
+    }
+    const user3 = {
+      _id: "33333",
+      username: "testUser3",
+      email: "testUser3@example.com",
+      role: "Regular"
+    }
+    const user4 = {
+      _id: "44444",
+      username: "testUser4",
+      email: "testUser4@example.com",
+      role: "Regular"
+    }
+
+    const group2 = {
+      name: "testGroup2",
+      members: [
+        {email: "testUser2@example.com", user: "22222"},
+        {email: "testUser5@example.com", user: "55555"}
+      ]
+    }
+    jest.spyOn(utils, "verifyAuth")
+        .mockReturnValueOnce({authorized: false, cause: "Unauthorized"})
+        .mockReturnValueOnce({authorized: true, cause: "Authorized"})
+    const mockReq = {
+      originalUrl: `/api/groups/${group2.name}/remove`,
+      cookies: {
+        accessToken: newToken("Admin"),
+        refreshToken: newToken("Admin")
+      },
+      body: {
+        emails: [
+          user2.email
+        ]
+      },
+      params: { name: group2.name }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      locals: jest.fn().mockReturnThis(),
+      refreshedTokenMessage: jest.fn()
+    }
+    jest.spyOn(Group, "findOne").mockResolvedValueOnce(group2)
+    await removeFromGroup(mockReq, mockRes)
+    expect(mockRes.status).toHaveBeenCalledWith(400)
+    expect(mockRes.json).toHaveBeenCalledWith({
+      message: `You must use a different url (api/groups/${group2.name}/pull)`
+    })
+  })
   test("should fail if the user is not part of the group (Group)", async () => {
     const user1 = {
       _id: "11111",
@@ -1821,6 +1965,320 @@ describe("removeFromGroup", () => {
   })
 })
 
-describe("deleteUser", () => { })
+describe("deleteUser", () => {
+  test("should fail if the user is not an admin", async () => {
+    jest.spyOn(utils, "verifyAuth").mockReturnValue({authorized: false, cause: "Unauthorized" })
+    const mockReq = {
+      cookies: {
+        accessToken: newToken("Regular"),
+        refreshToken: newToken("Regular")
+      },
+      body: {
+        email:"example2@example.com",
+      }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn()
+    }
+    await deleteUser(mockReq, mockRes)
+    expect(mockRes.status).toHaveBeenCalledWith(401)
+    expect(mockRes.json).toHaveBeenCalledWith({
+      error: "Unauthorized"
+    })
+  })
+  test("shoud delete user succesfully and delete the group because last one", async () => {
+    const user1 = {
+      _id: "11111",
+      username: "testUser1",
+      email: "testUser1@example.com",
+      role: "Admin"
+    }
+    const user2 = {
+      _id: "22222",
+      username: "testUser2",
+      email: "testUser2@example.com",
+      role: "Regular"
+    }
+    const group1 = {
+      name: "testGroup1",
+      members: [
+        {email: "testUser2@example.com", user: "22222"}
+      ]
+    }
+    jest.spyOn(utils, "verifyAuth").mockReturnValue({authorized: true, cause: "Authorized" })
+    const mockReq = {
+      cookies: {
+        accessToken: newToken("Admin"),
+        refreshToken: newToken("Admin")
+      },
+      body: {
+        email: "example2@example.com"
+      }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn()
+    }
+    jest.spyOn(User, "findOne").mockResolvedValueOnce(user2)
+    jest.spyOn(Group, "findOne").mockResolvedValueOnce(group1)
+    //jest.spyOn(User, "deleteOne").mockResolvedValueOnce({deletedCount: 1})
+    jest.spyOn(Group, "deleteOne").mockResolvedValueOnce({deletedCount: 1})
+    jest.spyOn(User, "deleteOne").mockResolvedValueOnce({deletedCount: 1})
+    jest.spyOn(transactions, "deleteMany").mockResolvedValueOnce({deletedCount: 8})
+    await deleteUser(mockReq, mockRes)
+    expect(mockRes.status).toHaveBeenCalledWith(200)
+    expect(mockRes.json).toHaveBeenCalledWith(expect.objectContaining({
+      data: {
+        deletedTransactions: 8,
+        deletedFromGroup: true
+      },
+      refreshedTokenMessage: mockRes?.locals?.refreshedTokenMessage
+    }))
+  })
+  test("should fail if missing attributes in the body", async () => {
+    jest.spyOn(utils, "verifyAuth").mockReturnValue({authorized: true, cause: "Authorized"})
+    const mockReq = {
+      cookies: {
+        accessToken: newToken("Admin"),
+        refreshToken: newToken("Admin")
+      },
+      body: {
+        username: "user"
+      }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn()
+    }
+    await deleteUser(mockReq, mockRes)
+    expect(mockRes.status).toHaveBeenCalledWith(400)
+    expect(mockRes.json).toHaveBeenCalledWith({
+      error: "Request body does not contain all the necessary attributes"
+    })
+  })
+  test("should fail if email is not valid or is an empty string", async () => {
+    jest.spyOn(utils, "verifyAuth").mockReturnValue({authorized: true, cause: "Authorized"})
+    const mockReq = {
+      cookies: {
+        accessToken: newToken("Admin"),
+        refreshToken: newToken("Admin")
+      },
+      body: {
+        email: "notAnEmail.com"
+      }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn()
+    }
+    await deleteUser(mockReq, mockRes)
+    expect(mockRes.status).toHaveBeenCalledWith(400)
+    expect(mockRes.json).toHaveBeenCalledWith({
+      error: "Email is not valid or is an empty string"
+    })
+  })
+  test("should fail if email do not belongs to any user in the database", async () => {
+    jest.spyOn(utils, "verifyAuth").mockReturnValue({authorized: true, cause: "Authorized"})
+    const mockReq = {
+      body: {
+        email: "test@example.com"
+      }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn()
+    }
+    jest.spyOn(User, "findOne").mockResolvedValueOnce(null)
+    await deleteUser(mockReq, mockRes)
+    expect(mockRes.status).toHaveBeenCalledWith(400)
+    expect(mockRes.json).toHaveBeenCalledWith({
+      error: "User not found"
+    })
+  })
+  test("should delete the user and update the database if is not the last one", async () => {
+    const user1 = {
+      _id: "11111",
+      username: "testUser1",
+      email: "testUser1@example.com",
+      role: "Admin"
+    }
+    const user2 = {
+      _id: "22222",
+      username: "testUser2",
+      email: "testUser2@example.com",
+      role: "Regular"
+    }
+    const group1 = {
+      name: "testGroup1",
+      members: [
+        {email: "testUser2@example.com", user: "22222"},
+        {email: "testUser3@example.com", user: "33333"}
+      ]
+    }
+    jest.spyOn(utils, "verifyAuth").mockReturnValue({authorized: true, cause: "Authorized" })
+    const mockReq = {
+      cookies: {
+        accessToken: newToken("Admin"),
+        refreshToken: newToken("Admin")
+      },
+      body: {
+        email: "example2@example.com"
+      }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn()
+    }
+    jest.spyOn(User, "findOne").mockResolvedValueOnce(user2)
+    jest.spyOn(Group, "findOne").mockResolvedValueOnce(group1)
+    jest.spyOn(Group, "updateOne").mockResolvedValueOnce(group1)
+    jest.spyOn(User, "deleteOne").mockResolvedValueOnce({deletedCount: 1})
+    jest.spyOn(transactions, "deleteMany").mockResolvedValueOnce({deletedCount: 8})
+    await deleteUser(mockReq, mockRes)
+    expect(mockRes.status).toHaveBeenCalledWith(200)
+    expect(mockRes.json).toHaveBeenCalledWith(expect.objectContaining({
+      data: {
+        deletedTransactions: 8,
+        deletedFromGroup: true
+      },
+      refreshedTokenMessage: mockRes?.locals?.refreshedTokenMessage
+    }))
+  })
+  test("should delete the user that not belongs to any group", async () => {
+    const user1 = {
+      _id: "11111",
+      username: "testUser1",
+      email: "testUser1@example.com",
+      role: "Admin"
+    }
+    const user2 = {
+      _id: "22222",
+      username: "testUser2",
+      email: "testUser2@example.com",
+      role: "Regular"
+    }
+    jest.spyOn(utils, "verifyAuth").mockReturnValue({authorized: true, cause: "Authorized" })
+    const mockReq = {
+      cookies: {
+        accessToken: newToken("Admin"),
+        refreshToken: newToken("Admin")
+      },
+      body: {
+        email: "example2@example.com"
+      }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn()
+    }
+    jest.spyOn(User, "findOne").mockResolvedValueOnce(user2)
+    jest.spyOn(Group, "findOne").mockResolvedValueOnce(null)
+    jest.spyOn(User, "deleteOne").mockResolvedValueOnce({deletedCount: 1})
+    jest.spyOn(transactions, "deleteMany").mockResolvedValueOnce({deletedCount: 8})
+    await deleteUser(mockReq, mockRes)
+    expect(mockRes.status).toHaveBeenCalledWith(200)
+    expect(mockRes.json).toHaveBeenCalledWith(expect.objectContaining({
+      data: {
+        deletedTransactions: 8,
+        deletedFromGroup: false
+      },
+      refreshedTokenMessage: mockRes?.locals?.refreshedTokenMessage
+    }))
+  })
+})
 
-describe("deleteGroup", () => { })
+describe("deleteGroup", () => {
+  test("should fail if user is not an admin", async () => {
+    jest.spyOn(utils, "verifyAuth").mockReturnValue({authorized: false, cause: "Unauthorized" })
+    const mockReq = {
+      cookies: {
+        accessToken: newToken("Regular"),
+        refreshToken: newToken("Regular")
+      },
+      body: {
+        name: "testGroup",
+      }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn()
+    }
+    await deleteGroup(mockReq, mockRes)
+    expect(mockRes.status).toHaveBeenCalledWith(401)
+    expect(mockRes.json).toHaveBeenCalledWith({
+      error: "Unauthorized"
+    })
+  })
+  test("should fail if missing name or is an empty string", async () => {
+    const mockReq = {
+      body: {
+        name: "",
+      }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn()
+    }
+    await deleteGroup(mockReq, mockRes)
+    expect(mockRes.status).toHaveBeenCalledWith(400)
+    expect(mockRes.json).toHaveBeenCalledWith({
+      error: "Request body does not contain all the necessary attributes"
+    })
+  })
+  test("should fail if group does not exist", async () => {
+    jest.spyOn(utils, "verifyAuth").mockReturnValue({authorized: true, cause: "Authorized" })
+    const mockReq = {
+      cookies: {
+        accessToken: newToken("Admin"),
+        refreshToken: newToken("Admin")
+      },
+      body: {
+        name: "testGroup",
+      }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn()
+    }
+    jest.spyOn(Group, "findOne").mockResolvedValueOnce(null)
+    await deleteGroup(mockReq, mockRes)
+    expect(mockRes.status).toHaveBeenCalledWith(400)
+    expect(mockRes.json).toHaveBeenCalledWith({
+      error: "Group does not exist"
+    })
+  })
+  test("should delete the group", async () => {
+    jest.spyOn(utils, "verifyAuth").mockReturnValue({authorized: true, cause: "Authorized" })
+    const mockReq = {
+      cookies: {
+        accessToken: newToken("Admin"),
+        refreshToken: newToken("Admin")
+      },
+      body: {
+        name: "testGroup",
+      }
+    }
+    const group = {
+      name: "testGroup",
+      members: [
+        {email: "testUser1@example.com", user: "11111"},
+        {email: "testUser2@example.com", user: "22222"}
+      ]
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn()
+    }
+    jest.spyOn(Group, "findOne").mockResolvedValueOnce(group)
+    jest.spyOn(Group, "deleteOne").mockResolvedValueOnce({deletedCount: 1})
+    await deleteGroup(mockReq, mockRes)
+    expect(mockRes.status).toHaveBeenCalledWith(200)
+    expect(mockRes.json).toHaveBeenCalledWith(expect.objectContaining({
+      data: {
+        message: "Group deleted successfully"
+      },
+      refreshedTokenMessage: mockRes?.locals?.refreshedTokenMessage
+    }))
+  })
+})

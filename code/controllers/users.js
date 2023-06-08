@@ -322,7 +322,7 @@ export const addToGroup = async (req, res) => {
     if(!group){
       return res.status(400).json({ error: 'Group does not exist' });
     } else {
-      const groups = await Group.find({}, 'members.email' );
+      const groups = await Group.find();
       const emailsInGroup = groups.flatMap(group => group.members.map(member => member.email));
       const alreadyInGroup = [];
       const notFoundEmails = [];
@@ -590,6 +590,12 @@ export const removeFromGroup = async (req, res) => {
 export const deleteUser = async (req, res) => {
   try {
     const { email } = req.body;
+    if(!email) {
+      return res.status(400).json({ error: "Request body does not contain all the necessary attributes" })
+    }
+    if(!isValidEmail(email)) {
+      return res.status(400).json({ error: "Email is not valid or is an empty string" })
+    }
     const adminAuth = verifyAuth(req, res, { authType: "Admin" });
     if (adminAuth.authorized) {
       ///find user to be deleted
@@ -604,7 +610,7 @@ export const deleteUser = async (req, res) => {
           const deletedTr = await transactions.deleteMany({username: user.username});
           return res.status(200).json({
             data: {
-              deletedTransaction: deletedTr.deletedCount, deletedFromGroup: false
+              deletedTransactions: deletedTr.deletedCount, deletedFromGroup: false
             },
             refreshedTokenMessage: res?.locals?.refreshedTokenMessage
           });
@@ -614,16 +620,22 @@ export const deleteUser = async (req, res) => {
             //remove group
             await Group.deleteOne({ name: group.name });
             //delete the user
+            await User.deleteOne({ email })
+          }
+          else {
+            const index = group.members.findIndex(member => member.email === email);
+            group.members.splice(index, 1);
+            await Group.updateOne(group);
             await User.deleteOne({ email });
-            const deletedTr = await transactions.deleteMany({username: user.username});
-            return res.status(200).json({
-              data: {
-                deletedTransaction: deletedTr.deletedCount, deletedFromGroup: true
-              },
-              refreshedTokenMessage: res?.locals?.refreshedTokenMessage
-            });
           }
         }
+        const deletedTr = await transactions.deleteMany({username: user.username});
+        return res.status(200).json({
+          data: {
+            deletedTransactions: deletedTr.deletedCount, deletedFromGroup: true
+          },
+          refreshedTokenMessage: res?.locals?.refreshedTokenMessage
+        });
       }
 
     } else {
@@ -672,7 +684,6 @@ export const deleteGroup = async (req, res) => {
           refreshedTokenMessage: res?.locals?.refreshedTokenMessage
         });
       }
-
     } else {
       return res.status(401).json({ error: adminAuth.cause });
     }
