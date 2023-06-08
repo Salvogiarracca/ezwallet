@@ -581,9 +581,8 @@ describe("deleteCategory", () => {
       }
     });
     jest.spyOn(categories, 'countDocuments').mockImplementation(() => 4);
-    jest.spyOn(categories, 'findOne').mockReturnValueOnce({type: 'test', color: '#ffffff'})
-        .mockReturnValueOnce(null)
-        .mockReturnValue({type: 'test', color: '#ff0000'});
+    jest.spyOn(categories, 'find').mockReturnValueOnce([{type: 'test', color: '#ffffff'},
+      {type: 'test', color: '#ffffff'}]);
     await deleteCategory(mockReq, mockRes);
     expect(mockRes.status).toHaveBeenCalledWith(400);
     expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
@@ -614,9 +613,8 @@ describe("deleteCategory", () => {
       }
     });
     jest.spyOn(categories, 'countDocuments').mockImplementation(() => 5);
-    jest.spyOn(categories, 'findOne').mockReturnValue({type: 'test', color: '#ffffff'});
+    jest.spyOn(categories, 'find').mockReturnValueOnce([{type: 'test', color: '#ffffff'}]);
     jest.spyOn(categories, 'findOneAndRemove').mockImplementation(() => ({}));
-    jest.spyOn(categories, 'find').mockImplementation(() => ({type: 'oldest', color: '#ffffff'}));
     jest.spyOn(transactions, 'updateMany').mockImplementation(() => ({modifiedCount: 23}));
     jest.spyOn(categories, "find").mockImplementation(() => ({
       sort: () => ({
@@ -657,7 +655,8 @@ describe("deleteCategory", () => {
       }
     });
     jest.spyOn(categories, 'countDocuments').mockImplementation(() => 4);
-    jest.spyOn(categories, 'findOne').mockReturnValue({type: 'test', color: '#ffffff'});
+    jest.spyOn(categories, 'find').mockReturnValueOnce([{type: 'test', color: '#ffffff'},
+      {type: 'test', color: '#ffffff'}, {type: 'test', color: '#ffffff'}, {type: 'test', color: '#ffffff'},]);
     jest.spyOn(categories, 'findOneAndRemove').mockImplementation(() => ({}));
     jest.spyOn(categories, 'find').mockImplementation(() => ({type: 'fuel', color: '#ffffff'}));
     jest.spyOn(transactions, 'updateMany').mockImplementation(() => ({modifiedCount: 17}));
