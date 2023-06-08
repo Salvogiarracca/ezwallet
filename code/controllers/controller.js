@@ -13,14 +13,12 @@ import {
  */
 export const createCategory = async (req, res) => {
   try {
-    const username = req.params.username;
     const cookie = req.cookies;
     if (!cookie.accessToken) {
       return res.status(401).json({message: "Unauthorized"}); // unauthorized
     }
     const adminAuth = verifyAuth(req, res, {
-      authType: "Admin",
-      username: username,
+      authType: "Admin"
     });
     if (!adminAuth.authorized) {
       return res.status(401).json({message: "Unauthorized"});
