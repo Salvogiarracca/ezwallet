@@ -29,7 +29,7 @@ export const createCategory = (req, res) => {
     if (!type || !color) {
       throw new Error("Missing attributes");
     }
-    if (categories.findOne({ type: type })) {
+    if (categories.findOne({ type: type }) === null) {
       throw new Error("Category already exists");
     }
     const new_categories = new categories({ type, color });
