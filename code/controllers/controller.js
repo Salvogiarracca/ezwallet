@@ -15,34 +15,34 @@ export const createCategory = async (req, res) => {
   try {
     const cookie = req.cookies;
     if (!cookie.accessToken) {
-      return res.status(401).json({message: "Unauthorized"}); // unauthorized
+      return res.status(401).json({ message: "Unauthorized" }); // unauthorized
     }
     const adminAuth = verifyAuth(req, res, {
-      authType: "Admin"
+      authType: "Admin",
     });
     if (!adminAuth.authorized) {
-      return res.status(401).json({message: "Unauthorized"});
+      return res.status(401).json({ message: "Unauthorized" });
     }
     const newType = req.body.type;
     const newColor = req.body.color;
     if (newType === undefined || newColor === undefined) {
       throw new Error("Missing attributes");
     }
-    if (newType === '' || newColor === '') {
+    if (newType === "" || newColor === "") {
       throw new Error("Missing attributes");
     }
-    const existing = await categories.findOne({type: newType});
-    if (existing !== null){
+    const existing = await categories.findOne({ type: newType });
+    if (existing !== null) {
       throw new Error("Category already exists");
     }
-    const new_categories = new categories({newType, newColor});
+    const new_categories = new categories({ newType, newColor });
     await new_categories.save();
     res.status(200).json({
-      data: {type: newType, color: newColor},
+      data: { type: newType, color: newColor },
       message: "Category created!",
     });
   } catch (error) {
-    res.status(400).json({error: error.message});
+    res.status(400).json({ error: error.message });
   }
 };
 
@@ -54,60 +54,63 @@ export const createCategory = async (req, res) => {
     - error 401 returned if the specified category does not exist
     - error 401 is returned if new parameters have invalid values
  */
-    export const updateCategory = async (req, res) => {
-      try {
-        const cookie = req.cookies;
-        if (!cookie.accessToken) {
-          return res.status(401).json({ message: "Unauthorized" }); // unauthorized
-        }
-    
-        const adminAuth = verifyAuth(req, res, { authType: "Admin" });
-        ///if the user is an Admin ok, otherwise unauthorized
-        if (!adminAuth.authorized) {
-          return res.status(401).json({message: "Unauthorized"})
-        }
-    
-        if(!req.body){
-          throw new Error("body is not defined");
-        }
-        const { type: newType, color: newColor } = req.body;
-        const oldType = req.params.type;
-        if (!newType || !newColor) {
-          throw new Error("Missing attributes");
-        }
-        if (typeof newType !== "string" || typeof newColor !== "string") {
-          //check input
-          throw new Error("Mismatched types in req.body!");
-        }
-        const oldCat = await categories.findOne({type: oldType});
-        if(oldCat === null){
-          throw new Error ("Old category type does not exist");
-        }
-        if (newColor.length !== 7 || newColor[0] !== "#") {
-          throw new Error("Wrong format for color");
-        }
-    
-        const alreadyExists = await categories.findOne({ type: newType }); //if new type value refers to an existing category, fails
-        if (alreadyExists !== null) {
-          throw new Error("new type invalid, category already exists");
-        }
-    
-        await categories.findOneAndUpdate(
-          { type: oldType },
-          { type: newType, color: newColor }
-        ); //update category
-        const updTransactions = await transactions.updateMany(
-          { type: oldType },
-          { $set: { type: newType } }
-        );
-    
-        return res
-          .status(200)
-          .json({ message: "Update completed successfully", count: updTransactions.modifiedCount });
-      } catch (error) {
-        res.status(400).json({ error: error.message });
-      }
-    };
+export const updateCategory = async (req, res) => {
+  try {
+    const cookie = req.cookies;
+    if (!cookie.accessToken) {
+      return res.status(401).json({ message: "Unauthorized" }); // unauthorized
+    }
+
+    const adminAuth = verifyAuth(req, res, { authType: "Admin" });
+    ///if the user is an Admin ok, otherwise unauthorized
+    if (!adminAuth.authorized) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    if (!req.body) {
+      throw new Error("body is not defined");
+    }
+    const { type: newType, color: newColor } = req.body;
+    const oldType = req.params.type;
+    if (!newType || !newColor) {
+      throw new Error("Missing attributes");
+    }
+    if (typeof newType !== "string" || typeof newColor !== "string") {
+      //check input
+      throw new Error("Mismatched types in req.body!");
+    }
+    const oldCat = await categories.findOne({ type: oldType });
+    if (oldCat === null) {
+      throw new Error("Old category type does not exist");
+    }
+    if (newColor.length !== 7 || newColor[0] !== "#") {
+      throw new Error("Wrong format for color");
+    }
+
+    const alreadyExists = await categories.findOne({ type: newType }); //if new type value refers to an existing category, fails
+    if (alreadyExists !== null) {
+      throw new Error("new type invalid, category already exists");
+    }
+
+    await categories.findOneAndUpdate(
+      { type: oldType },
+      { type: newType, color: newColor }
+    ); //update category
+    const updTransactions = await transactions.updateMany(
+      { type: oldType },
+      { $set: { type: newType } }
+    );
+
+    return res
+      .status(200)
+      .json({
+        message: "Update completed successfully",
+        count: updTransactions.modifiedCount,
+      });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
 
 /**
  * Delete a category
@@ -116,87 +119,85 @@ export const createCategory = async (req, res) => {
   - Optional behavior:
     - error 401 is returned if the specified category does not exist
  */
-    export const deleteCategory = async (req, res) => {
-      try {
-        const cookie = req.cookies;
-        if (!cookie.accessToken) {
-          return res.status(401).json({ message: "Unauthorized" }); // unauthorized
-        }
-        if(!req.body){
-          throw new Error("Missing attributes");
-        }
-        const adminAuth = verifyAuth(req, res, { authType: "Admin" });
-        ///if the user is an Admin ok, otherwise unauthorized
-        if (!adminAuth.authorized) {
-          return res.status(401).json({message: "Unauthorized"})
-        }
-        const types = req.body;
-        if (types.length === 0 || !types.isIterableIterator) {
-          //empty input
-          throw new Error("Missing attributes");
-        }
-    
-        const nCat = await categories.countDocuments({});
-        if (nCat === 1) {
-          //one category in db, deletion not possible
-          throw new Error("Only one category, deletion not possible!");
-        }
-    
-        for (const str of types) {
-          //check array in req.body
-          if (str === "") {
-            //empty "type" string
-            throw new Error("Empty string in array");
-          }
-          const exists = await categories.findOne({ type: str });
-          if (!exists) {
-            // type not found in db
-            throw new Error("Category does not exist, deletion not possible!");
-          }
-        }
-        const nT = types.length;
-        if (nCat > nT) {
-          // N > T
-          for (const str of types) {
-            await categories.findOneAndRemove({type: str});
-          }
-          let nUpd = 0;
-          const oldestCat = await categories.find().sort({createdAt: 1}).limit(1);
-          for(const str of types){
-            const updated = await transactions.updateMany(
-                { type: str },
-                { $set: { $type: oldestCat[0].type } }
-            );
-            nUpd += updated.modifiedCount;
-          }
-          return res.status(200).json({
-            message: "Deletion completed successfully",
-            count: nUpd,
-          });
-        }
-    
-        else if (nCat === nT) {
-          // N == T
-          const oldestCat = await categories.find().sort({createdAt: 1}).limit(1);
-          let nUpd = 0;
-          for (const str of types) {
-            if (str !== oldestCat.type) {
-              const updated = await transactions.updateMany(
-                  {type: str},
-                  {$set: {$type: oldestCat[0].type}}
-              );
-              nUpd += updated.modifiedCount;
-            }
-          }
-          return res.status(200).json({
-            message: "Deletion completed successfully",
-            count: nUpd,
-          });
-        }
-      } catch (error) {
-        res.status(400).json({ error: error.message });
+export const deleteCategory = async (req, res) => {
+  try {
+    const cookie = req.cookies;
+    if (!cookie.accessToken) {
+      return res.status(401).json({ message: "Unauthorized" }); // unauthorized
+    }
+    if (!req.body) {
+      throw new Error("Missing attributes");
+    }
+    const adminAuth = verifyAuth(req, res, { authType: "Admin" });
+    ///if the user is an Admin ok, otherwise unauthorized
+    if (!adminAuth.authorized) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+    const types = req.body;
+    if (types.length === 0 || !types.isIterableIterator) {
+      //empty input
+      throw new Error("Missing attributes");
+    }
+
+    const nCat = await categories.countDocuments({});
+    if (nCat === 1) {
+      //one category in db, deletion not possible
+      throw new Error("Only one category, deletion not possible!");
+    }
+
+    for (const str of types) {
+      //check array in req.body
+      if (str === "") {
+        //empty "type" string
+        throw new Error("Empty string in array");
       }
-    };
+      const exists = await categories.findOne({ type: str });
+      if (!exists) {
+        // type not found in db
+        throw new Error("Category does not exist, deletion not possible!");
+      }
+    }
+    const nT = types.length;
+    if (nCat > nT) {
+      // N > T
+      for (const str of types) {
+        await categories.findOneAndRemove({ type: str });
+      }
+      let nUpd = 0;
+      const oldestCat = await categories.find().sort({ createdAt: 1 }).limit(1);
+      for (const str of types) {
+        const updated = await transactions.updateMany(
+          { type: str },
+          { $set: { $type: oldestCat[0].type } }
+        );
+        nUpd += updated.modifiedCount;
+      }
+      return res.status(200).json({
+        message: "Deletion completed successfully",
+        count: nUpd,
+      });
+    } else if (nCat === nT) {
+      // N == T
+      const oldestCat = await categories.find().sort({ createdAt: 1 }).limit(1);
+      let nUpd = 0;
+      for (const str of types) {
+        if (str !== oldestCat.type) {
+          const updated = await transactions.updateMany(
+            { type: str },
+            { $set: { $type: oldestCat[0].type } }
+          );
+          nUpd += updated.modifiedCount;
+        }
+      }
+      return res.status(200).json({
+        message: "Deletion completed successfully",
+        count: nUpd,
+      });
+    }
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
 
 /**
  * Return all the categories
@@ -256,14 +257,14 @@ export const createTransaction = async (req, res) => {
       });
     }
     const caller_username = req.params.username;
+    const category_exists = await categories.find({ type: type });
+    const user_body = await User.findOne({ username: username });
+    const user_params = await User.findOne({ username: caller_username });
     const userAuth = verifyAuth(req, res, {
       authType: "User",
       username: caller_username,
     });
-    const category = await categories.findOne({ type: type });
-    const user_body = await User.findOne({ username: username });
-    const user_params = await User.findOne({ username: caller_username });
-    if (category && user_body && user_params) {
+    if (category_exists && user_body && user_params) {
       if (userAuth.authorized) {
         if (caller_username == username) {
           const new_transactions = new transactions({ username, amount, type });
@@ -314,12 +315,12 @@ export const createTransaction = async (req, res) => {
 };
 
 /**
-     * Return all transactions made by all users
-      - Request Body Content: None
-      - Response `data` Content: An array of objects, each one having attributes `username`, `type`, `amount`, `date` and `color`
-      - Optional behavior:
-        - empty array must be returned if there are no transactions
-     */
+         * Return all transactions made by all users
+          - Request Body Content: None
+          - Response `data` Content: An array of objects, each one having attributes `username`, `type`, `amount`, `date` and `color`
+          - Optional behavior:
+            - empty array must be returned if there are no transactions
+         */
 export const getAllTransactions = async (req, res) => {
   try {
     const username = req.params.username;
@@ -383,14 +384,14 @@ export const getAllTransactions = async (req, res) => {
 };
 
 /**
-     * Return all transactions made by a specific user
-      - Request Body Content: None
-      - Response `data` Content: An array of objects, each one having attributes `username`, `type`, `amount`, `date` and `color`
-      - Optional behavior:
-        - error 401 is returned if the user does not exist
-        - empty array is returned if there are no transactions made by the user
-        - if there are query parameters and the function has been called by a Regular user then the returned transactions must be filtered according to the query parameters
-     */
+         * Return all transactions made by a specific user
+          - Request Body Content: None
+          - Response `data` Content: An array of objects, each one having attributes `username`, `type`, `amount`, `date` and `color`
+          - Optional behavior:
+            - error 401 is returned if the user does not exist
+            - empty array is returned if there are no transactions made by the user
+            - if there are query parameters and the function has been called by a Regular user then the returned transactions must be filtered according to the query parameters
+         */
 export const getTransactionsByUser = async (req, res) => {
   try {
     const username = req.params.username;
@@ -409,7 +410,7 @@ export const getTransactionsByUser = async (req, res) => {
                 $match: {
                   username: username,
                   ...handleAmountFilterParams(req),
-                  ...handleDateFilterParams(req)
+                  ...handleDateFilterParams(req),
                 },
               },
               {
@@ -459,7 +460,7 @@ export const getTransactionsByUser = async (req, res) => {
                 $match: {
                   username: username,
                   ...handleAmountFilterParams(req),
-                  ...handleDateFilterParams(req)
+                  ...handleDateFilterParams(req),
                 },
               },
               {
@@ -514,19 +515,19 @@ export const getTransactionsByUser = async (req, res) => {
 };
 
 /**
-     * Return all transactions made by a specific user filtered by a specific category
-      - Request Body Content: None
-      - Response `data` Content: An array of objects, each one having attributes `username`, `type`, `amount`, `date` and `color`, filtered so that `type` is the same for all objects
-      - Optional behavior:
-        - empty array is returned if there are no transactions made by the user with the specified category
-        - error 401 is returned if the user or the category does not exist
-     */
+         * Return all transactions made by a specific user filtered by a specific category
+          - Request Body Content: None
+          - Response `data` Content: An array of objects, each one having attributes `username`, `type`, `amount`, `date` and `color`, filtered so that `type` is the same for all objects
+          - Optional behavior:
+            - empty array is returned if there are no transactions made by the user with the specified category
+            - error 401 is returned if the user or the category does not exist
+         */
 export const getTransactionsByUserByCategory = async (req, res) => {
   try {
     const username = req.params.username;
     const cat = req.params.category;
     const user = await User.findOne({ username: username });
-    const category = await categories.findOne({ type: cat });
+    const category = await categories.find({ type: cat });
     if (user && category) {
       if (req.url.includes("/users/" + username + "/transactions")) {
         const userAuth = verifyAuth(req, res, {
@@ -541,7 +542,7 @@ export const getTransactionsByUserByCategory = async (req, res) => {
                   username: username,
                   type: cat,
                   ...handleAmountFilterParams(req),
-                  ...handleDateFilterParams(req)
+                  ...handleDateFilterParams(req),
                 },
               },
               {
@@ -592,7 +593,7 @@ export const getTransactionsByUserByCategory = async (req, res) => {
                   username: username,
                   type: cat,
                   ...handleAmountFilterParams(req),
-                  ...handleDateFilterParams(req)
+                  ...handleDateFilterParams(req),
                 },
               },
               {
@@ -647,13 +648,13 @@ export const getTransactionsByUserByCategory = async (req, res) => {
 };
 
 /**
-     * Return all transactions made by members of a specific group
-      - Request Body Content: None
-      - Response `data` Content: An array of objects, each one having attributes `username`, `type`, `amount`, `date` and `color`
-      - Optional behavior:
-        - error 401 is returned if the group does not exist
-        - empty array must be returned if there are no transactions made by the group
-     */
+         * Return all transactions made by members of a specific group
+          - Request Body Content: None
+          - Response `data` Content: An array of objects, each one having attributes `username`, `type`, `amount`, `date` and `color`
+          - Optional behavior:
+            - error 401 is returned if the group does not exist
+            - empty array must be returned if there are no transactions made by the group
+         */
 export const getTransactionsByGroup = async (req, res) => {
   try {
     const groupName = req.params.name;
@@ -676,7 +677,7 @@ export const getTransactionsByGroup = async (req, res) => {
                     $in: usernames,
                   },
                   ...handleAmountFilterParams(req),
-                  ...handleDateFilterParams(req)
+                  ...handleDateFilterParams(req),
                 },
               },
               {
@@ -728,7 +729,7 @@ export const getTransactionsByGroup = async (req, res) => {
                     $in: usernames,
                   },
                   ...handleAmountFilterParams(req),
-                  ...handleDateFilterParams(req)
+                  ...handleDateFilterParams(req),
                 },
               },
               {
@@ -783,19 +784,19 @@ export const getTransactionsByGroup = async (req, res) => {
 };
 
 /**
-     * Return all transactions made by members of a specific group filtered by a specific category
-      - Request Body Content: None
-      - Response `data` Content: An array of objects, each one having attributes `username`, `type`, `amount`, `date` and `color`, filtered so that `type` is the same for all objects.
-      - Optional behavior:
-        - error 401 is returned if the group or the category does not exist
-        - empty array must be returned if there are no transactions made by the group with the specified category
-     */
+         * Return all transactions made by members of a specific group filtered by a specific category
+          - Request Body Content: None
+          - Response `data` Content: An array of objects, each one having attributes `username`, `type`, `amount`, `date` and `color`, filtered so that `type` is the same for all objects.
+          - Optional behavior:
+            - error 401 is returned if the group or the category does not exist
+            - empty array must be returned if there are no transactions made by the group with the specified category
+         */
 export const getTransactionsByGroupByCategory = async (req, res) => {
   try {
     const groupName = req.params.name;
     const categoryType = req.params.category;
     const group = await Group.findOne({ name: groupName });
-    const category = await categories.findOne({ type: categoryType });
+    const category = await categories.find({ type: categoryType });
     if (group && category) {
       const emails = group.members.map((member) => member.email);
       let usernames = await User.find({ email: emails });
@@ -923,12 +924,12 @@ export const getTransactionsByGroupByCategory = async (req, res) => {
 };
 
 /**
-     * Delete a transaction made by a specific user
-      - Request Body Content: The `_id` of the transaction to be deleted
-      - Response `data` Content: A string indicating successful deletion of the transaction
-      - Optional behavior:
-        - error 401 is returned if the user or the transaction does not exist
-     */
+         * Delete a transaction made by a specific user
+          - Request Body Content: The `_id` of the transaction to be deleted
+          - Response `data` Content: A string indicating successful deletion of the transaction
+          - Optional behavior:
+            - error 401 is returned if the user or the transaction does not exist
+         */
 export const deleteTransaction = async (req, res) => {
   try {
     const id = req.body._id;
@@ -939,7 +940,7 @@ export const deleteTransaction = async (req, res) => {
       }); // unauthorized
     } else {
       const username = req.params.username;
-      const transaction = await transactions.findOne({ _id: id });
+      const transaction = await transactions.find({ _id: id });
       const user = await User.findOne({ username: username });
       if (user && transaction) {
         const caller_username = req.params.username;
@@ -988,12 +989,12 @@ export const deleteTransaction = async (req, res) => {
 };
 
 /**
-     * Delete multiple transactions identified by their ids
-      - Request Body Content: An array of strings that lists the `_ids` of the transactions to be deleted
-      - Response `data` Content: A message confirming successful deletion
-      - Optional behavior:
-        - error 401 is returned if at least one of the `_ids` does not have a corresponding transaction. Transactions that have an id are not deleted in this case
-     */
+         * Delete multiple transactions identified by their ids
+          - Request Body Content: An array of strings that lists the `_ids` of the transactions to be deleted
+          - Response `data` Content: A message confirming successful deletion
+          - Optional behavior:
+            - error 401 is returned if at least one of the `_ids` does not have a corresponding transaction. Transactions that have an id are not deleted in this case
+         */
 export const deleteTransactions = async (req, res) => {
   try {
     const ids = req.body._ids;
@@ -1004,7 +1005,7 @@ export const deleteTransactions = async (req, res) => {
       });
     } else {
       for (const id of ids) {
-        const transaction = await transactions.findOne({ _id: id });
+        const transaction = await transactions.find({ _id: id });
         if (!id || id === "" || !transaction) {
           return res.status(400).json({
             refreshedTokenMessage: res.locals.refreshedTokenMessage,
