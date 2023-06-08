@@ -33,37 +33,41 @@ function newToken(res, refreshToken){
  * - Throws an error if `date` is present in the query parameter together with at least one of `from` or `upTo`
  * - Throws an error if the value of any of the three query parameters is not a string that represents a date in the format **YYYY-MM-DD**
  */
-export const handleDateFilterParams = (req) => {
-    const cookie = req.cookies;
-    if (!cookie.accessToken || !cookie.refreshToken) {
-        return { authorized: false, cause: "Unauthorized" };
-    }
-    const {from, upTo, date} = req.query;
-
-    if(!date && !from && !upTo) {
-        return {};
-        
-    }
-    if((date && upTo) || (date && from)){
-        throw new Error('Invalid attribute date in query');
-    }
-    if(upTo){
-        checkDateValue(upTo);
-        return `{date: {$lte: ${upTo}T23:59:59.000Z}}`
-    }
-    if(from){
-        checkDateValue(from);
-        return `{date: {$lte: ${from}T00:00:00.000Z}}`
-
-    } 
-    if(upTo && from){
-        checkDateValue(from);
-        checkDateValue(upTo);
-        if(checkTimeDates(from, upTo))
-         return `{date: {$gte: ${from}T00:00:00.000Z}, $lte: ${upTo}T23:59:59.000Z}`;
+    export const handleDateFilterParams = (req) => {
+        const {from, upTo, date} = req.query;
+        try {
+            if (!date && !from && !upTo) {
+                return {};
     
+            }
+            if ((date && upTo) || (date && from)) {
+                throw new Error('Invalid attribute date in query');
+            }
+            if (upTo && from) {
+                if(!checkDateValue(from) || !checkDateValue(upTo))
+                    throw new Error("Invalid date");
+                if (!checkTimeDates(from, upTo)){
+                    throw new Error("Invalid dates");
+                }
+                return `{date: {$gte: ${from}T00:00:00.000Z, $lte: ${upTo}T23:59:59.999Z}`;
+            }
+            if (upTo) {
+                if(!checkDateValue(upTo)){
+                    throw new Error("Invalid date");
+                }
+                return `{date: {$lte: ${upTo}T23:59:59.999Z}}`
+            }
+            if (from) {
+                if(!checkDateValue(from)){
+                    throw new Error("Invalid date");
+                }
+                return `{date: {$gte: ${from}T00:00:00.000Z}}`
+    
+            }
+        }catch(error){
+            return error.message;
+        }
     }
-}
 
 /**
  * Handle possible authentication modes depending on `authType`
@@ -190,63 +194,61 @@ export const verifyAuth = (req, res, info) => {
  * - Throws an error if the value of any of the two query parameters is not a numerical value
  */
 export const handleAmountFilterParams = (req) => {
-    const cookie = req.cookies
-    if (!cookie.accessToken || !cookie.refreshToken) {
-        return { authorized: false, cause: "Unauthorized" };
-    }
     const {min, max} = req.query;
     if(!min && !max){
         return {};
     }
-    /* if(!min || !max){
-        throw new Error('No parameters specified');
-    } */
-    if(min && max){
-        if(isNaN(min) || isNaN(max)){
-            throw new Error('One or more parameters are not a number!');
+    try {
+        if (min && max) {
+            if (isNaN(min) || isNaN(max)) {
+                throw new Error('One or more parameters are not a number!');
+            }
+            if (min > max) {
+                throw new Error("min can't be bigger than max!");
+            }
+            return `{amount: {$gte: ${min}, $lte: ${max}} }`;
+        } else if (min) {
+            if (isNaN(min)) {
+                throw new Error("min is not a number!");
+            }
+            return `{amount: {$gte: ${min}} }`;
+        } else if (max) {
+            if (isNaN(max)) {
+                throw new Error("min is not a number!");
+            }
+            return `{amount: {$lte: ${max}} }`;
         }
-        if(min > max){
-            throw new Error("min can't be bigger than max!");
-        }
-        return `{amount: {$gte: ${min}, $lte: ${max}} }`;
-    }
-    else if(min){
-        if(isNaN(min)){
-            throw new Error("min is not a number!");
-        }
-        return `{amount: {$gte: ${min}} }`;
-    }
-    else if(max){
-        if(isNaN(max)){
-            throw new Error("min is not a number!");
-        }
-        return `{amount: {$lte: ${max}} }`;
+    }catch(error){
+        return error.message;
     }
 }
 
 //this function checks if date matches a regexp and if all the values are correct
 function checkDateValue(value) {
     const regExp = /^\d{4}-\d{2}-\d{2}$/;
-    if(!regExp.test(value)){
-        throw new Error(`Invalid date format: ${value}. Expected format: YYYY-MM-DD`);
+    if (!regExp.test(value)) {
+            return false
     }
-    const {yyyy, mm, dd} = value.match(regExp);
-    if(isNaN(yyyy) || isNaN(dd) || isNaN(mm)){
-        throw new Error('One or more query params are not a number!');
+    const ary = value.split('-');
+    const yyyy = ary[0];
+    const mm = ary[1];
+    const dd = ary[2];
+    if (isNaN(yyyy) || isNaN(dd) || isNaN(mm)) {
+            return false
     }
-    if(dd > 31){
-        throw new Error('Invalid date');
+    if (dd > 31) {
+        return false
     }
-    if(mm > 12){
-        throw new Error('Invalid date');
+    if (mm > 12) {
+        return false
     }
-    if(mm === 2 && dd > 28){
-        if(!((yyyy%4 === 0) && dd === 29)){
-            throw new Error('Invalid date');
+    if (mm === 2 && dd > 28) {
+        if (!((yyyy % 4 === 0) && dd === 29)) {
+            return false;
         }
     }
-    if((mm === 4 || mm === 6 || mm === 9 || mm === 11) && (dd > 30)){
-        throw new Error('Invalid date');
+    if ((mm === 4 || mm === 6 || mm === 9 || mm === 11) && (dd > 30)) {
+        return false
     }
     return true;
 }
@@ -254,18 +256,21 @@ function checkDateValue(value) {
 //function that checks if date upTo is gte from, throws Error if conditions are not satisfied, returns true if all the checks are fine
 function checkTimeDates(from, upTo){
     const regExp = /^\d{4}-\d{2}-\d{2}$/;
-    const {y1, m1, d1} = from.match(regExp);
-    const {y2, m2, d2} = upTo.match(regExp);
-    if(y1 > y2){
-        throw new Error("date from is after date upTo");
-    }else if(y1 === y2){
-        if(m1 > m2){
-            throw new Error("date from is after date upTo");
-        }else if (m1 === m2){
-            if(d1 > d2){
-                throw new Error("date from is after date upTo");
+    const ary1 = from.split('-');
+    const ary2 = upTo.split('-');
+    const y1 = ary1[0]; const m1 = ary1[1]; const d1 = ary1[2];
+    const y2 = ary2[0]; const m2 = ary2[1]; const d2 = ary2[2];
+    if (y1 > y2) {
+           return false
+    } else if (y1 === y2) {
+        if(m1 > m2) {
+            return false
+        } else if (m1 === m2) {
+            if (d1 > d2) {
+                return false
             }
         }
     }
     return true;
+
 }

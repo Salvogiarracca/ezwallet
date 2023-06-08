@@ -35,7 +35,7 @@ export const createCategory = async (req, res) => {
     if (existing !== null) {
       throw new Error("Category already exists");
     }
-    const new_categories = new categories({ newType, newColor });
+    const new_categories = new categories({ type:newType, color:newColor });
     await new_categories.save();
     res.status(200).json({
       data: { type: newType, color: newColor },
@@ -295,7 +295,6 @@ export const createTransaction = async (req, res) => {
     }
   } catch (error) {
     res.status(500).json({
-      refreshedTokenMessage: res.locals.refreshedTokenMessage,
       error: error.message,
     });
   }
@@ -364,7 +363,6 @@ export const getAllTransactions = async (req, res) => {
     }
   } catch (error) {
     res.status(500).json({
-      refreshedTokenMessage: res.locals.refreshedTokenMessage,
       error: error.message,
     });
   }
@@ -495,7 +493,6 @@ export const getTransactionsByUser = async (req, res) => {
     }
   } catch (error) {
     res.status(500).json({
-      refreshedTokenMessage: res.locals.refreshedTokenMessage,
       error: error.message,
     });
   }
@@ -631,7 +628,6 @@ export const getTransactionsByUserByCategory = async (req, res) => {
     }
   } catch (error) {
     res.status(500).json({
-      refreshedTokenMessage: res.locals.refreshedTokenMessage,
       error: error.message,
     });
   }
@@ -767,7 +763,6 @@ export const getTransactionsByGroup = async (req, res) => {
     }
   } catch (error) {
     res.status(500).json({
-      refreshedTokenMessage: res.locals.refreshedTokenMessage,
       error: error.message,
     });
   }
@@ -910,7 +905,6 @@ export const getTransactionsByGroupByCategory = async (req, res) => {
     }
   } catch (error) {
     res.status(500).json({
-      refreshedTokenMessage: res.locals.refreshedTokenMessage,
       error: error.message,
     });
   }
@@ -978,7 +972,6 @@ export const deleteTransaction = async (req, res) => {
     }
   } catch (error) {
     res.status(500).json({
-      refreshedTokenMessage: res.locals.refreshedTokenMessage,
       error: error.message,
     });
   }
@@ -1030,7 +1023,6 @@ export const deleteTransactions = async (req, res) => {
     }
   } catch (error) {
     res.status(500).json({
-      refreshedTokenMessage: res.locals.refreshedTokenMessage,
       error: error.message,
     });
   }

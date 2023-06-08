@@ -5,7 +5,7 @@ import jwt from "jsonwebtoken";
 import {
   getCategories,
   createCategory,
-  deleteCategory
+  deleteCategory,
   createTransaction,
   deleteTransaction,
   deleteTransactions,
@@ -967,7 +967,6 @@ describe("createTransaction", () => {
       email: "test@gmail.com",
       password: "test",
     };
-    console.log("test");
     jest.spyOn(User, "findOne").mockResolvedValue(testUser);
     jest.spyOn(categories, "find").mockResolvedValue([testCategory]);
     jest
@@ -1145,7 +1144,6 @@ describe("createTransaction", () => {
       type: "Personal",
     };
     const expectedResponse = {
-      refreshedTokenMessage: "",
       error: "Database Error",
     };
     const mockReq = {
@@ -1444,7 +1442,6 @@ describe("getAllTransactions", () => {
       },
     };
     const expectedResponse = {
-      refreshedTokenMessage: "",
       error: "Database Error",
     };
     verifyAuth.mockImplementation((mockReq, mockRes, params) => {
@@ -1821,7 +1818,6 @@ describe("getTransactionsByUser", () => {
       },
     };
     const expectedResponse = {
-      refreshedTokenMessage: "",
       error: "Database Error",
     };
     verifyAuth.mockImplementation((mockReq, mockRes, params) => {
@@ -2247,7 +2243,6 @@ describe("getTransactionsByUserByCategory", () => {
       },
     };
     const expectedResponse = {
-      refreshedTokenMessage: "",
       error: "Database Error",
     };
     verifyAuth.mockImplementation((mockReq, mockRes, params) => {
@@ -2695,8 +2690,6 @@ describe("getTransactionsByGroup", () => {
       },
     };
     const expectedResponse = {
-      refreshedTokenMessage: "",
-      refreshedTokenMessage: "",
       error: "Database Error",
     };
     jest.spyOn(Group, "findOne").mockImplementation(() => {
@@ -2727,7 +2720,6 @@ describe("getTransactionsByGroup", () => {
       },
     };
     const expectedResponse = {
-      refreshedTokenMessage: "",
       error: "Database Error",
     };
     const testGroup = {
@@ -2767,7 +2759,6 @@ describe("getTransactionsByGroup", () => {
       },
     };
     const expectedResponse = {
-      refreshedTokenMessage: "",
       error: "Database Error",
     };
     const testGroup = {
@@ -3239,8 +3230,6 @@ describe("getTransactionsByGroupByCategory", () => {
       },
     };
     const expectedResponse = {
-      refreshedTokenMessage: "",
-      refreshedTokenMessage: "",
       error: "Database Error",
     };
     jest.spyOn(Group, "findOne").mockImplementation(() => {
@@ -3274,7 +3263,6 @@ describe("getTransactionsByGroupByCategory", () => {
       },
     };
     const expectedResponse = {
-      refreshedTokenMessage: "",
       error: "Database Error",
     };
     const testGroup = {
@@ -3317,7 +3305,6 @@ describe("getTransactionsByGroupByCategory", () => {
       },
     };
     const expectedResponse = {
-      refreshedTokenMessage: "",
       error: "Database Error",
     };
     const testGroup = {
@@ -3584,7 +3571,6 @@ describe("deleteTransaction", () => {
 
   test("Database Error Transaction Request [deleteTransaction] - Test #5", async () => {
     const expectedResponse = {
-      refreshedTokenMessage: "",
       error: "Database Error",
     };
     const mockReq = {
@@ -3936,7 +3922,6 @@ describe("deleteTransactions", () => {
       },
     };
     const expectedResponse = {
-      refreshedTokenMessage: "",
       error: "Database Error",
     };
     verifyAuth.mockImplementation((mockReq, mockRes, params) => {
