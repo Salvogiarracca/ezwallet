@@ -11,46 +11,45 @@ import {
   - Request Body Content: An object having attributes `type` and `color`
   - Response `data` Content: An object having attributes `type` and `color`
  */
-export const createCategory = (req, res) => {
+export const createCategory = async (req, res) => {
   try {
     const username = req.params.username;
     const cookie = req.cookies;
     if (!cookie.accessToken) {
-      return res.status(401).json({ message: "Unauthorized" }); // unauthorized
+      return res.status(401).json({message: "Unauthorized"}); // unauthorized
     }
     const adminAuth = verifyAuth(req, res, {
       authType: "Admin",
       username: username,
     });
     if (!adminAuth.authorized) {
-      return res.status(401).json({ message: "Unauthorized" });
+      return res.status(401).json({message: "Unauthorized"});
     }
     const newType = req.body.type;
     const newColor = req.body.color;
     if (newType === undefined || newColor === undefined) {
       throw new Error("Missing attributes");
     }
-    if(newType === '' || newColor === ''){
+    if (newType === '' || newColor === '') {
       throw new Error("Missing attributes");
     }
-    const existing = categories.findOne({type: newType});
+    const existing = await categories.findOne({type: newType});
     if (existing !== null){
-      if(existing.type !== undefined)
-        throw new Error("Category already exists");
+      throw new Error("Category already exists");
     }
-    const new_categories = new categories({ type, color });
+    const new_categories = new categories({newType, newColor});
     new_categories
-      .save()
-      .then((data) => res.json(data))
-      .catch((err) => {
-        throw err;
-      });
+        .save()
+        .then((data) => res.json(data))
+        .catch((err) => {
+          throw err;
+        });
     res.status(200).json({
-      data: { type: newType, color: newColor },
+      data: {type: newType, color: newColor},
       message: "Category created!",
     });
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    res.status(400).json({error: error.message});
   }
 };
 
