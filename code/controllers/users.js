@@ -95,14 +95,15 @@ export const getUser = async (req, res) => {
       - Example: `res.status(200).json({data: {group: {name: "Family", members: [{email: "mario.red@email.com"}, {email: "luigi.red@email.com"}]}, membersNotFound: [], alreadyInGroup: []} refreshedTokenMessage: res.locals.refreshedTokenMessage})`
       - If the user who calls the API does not have their email in the list of emails then their email is added to the list of members
     - Optional behavior:
-      - Returns a 400 error if the request body does not contain all the necessary attributes
-      - Returns a 400 error if the group name passed in the request body is an empty string
-      - Returns a 400 error if the group name passed in the request body represents an already existing group in the database
-      - Returns a 400 error if all the provided emails represent users that are already in a group or do not exist in the database
-      - Returns a 400 error if the user who calls the API is already in a group
-      - Returns a 400 error if at least one of the member emails is not in a valid email format
-      - Returns a 400 error if at least one of the member emails is an empty string
-      - Returns a 401 error if called by a user who is not authenticated (authType = Simple)
+       - If the user who calls the API does not have their email in the list of emails then their email is added to the list of members
+       - Returns a 400 error if the request body does not contain all the necessary attributes
+       - Returns a 400 error if the group name passed in the request body is an empty string
+       - Returns a 400 error if the group name passed in the request body represents an already existing group in the database
+       - Returns a 400 error if all the provided emails (the ones in the array, the email of the user calling the function does not have to be considered in this case) represent users that are already in a group or do not exist in the database
+       - Returns a 400 error if the user who calls the API is already in a group
+       - Returns a 400 error if at least one of the member emails is not in a valid email format
+       - Returns a 400 error if at least one of the member emails is an empty string
+       - Returns a 401 error if called by a user who is not authenticated (authType = Simple)
  */
 export const createGroup = async (req, res) => {
   try {

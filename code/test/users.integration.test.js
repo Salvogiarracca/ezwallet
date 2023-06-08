@@ -195,39 +195,38 @@ describe("createGroup", () => {
   })
 
   test("should crete a new group", async () => {
-    const user11 = {
+    const user1 = {
       username: "testUser1",
       email: "testUser1@example.com",
       password: "password",
       role: "Admin",
       refreshToken: newTokenAdHoc("testUser1", "Admin")
     }
-    const user22 = {
+    const user2 = {
       username: "testUser2",
       email: "testUser2@example.com",
       password: "password",
       role: "Regular"
     }
-    const user33 = {
+    const user3 = {
       username: "testUser3",
       email: "testUser3@example.com",
       password: "password",
       role: "Regular"
     }
-    const user1 = await User.create(user11)
-    const user2 = await User.create(user22)
-    const user3 = await User.create(user33)
+    await User.create(user1, user2, user3)
 
     const existingGroup = await Group.create({
       name: "existingGroup",
-      members:[{email: user33.email, user: user33._id}]
+      members:[{email: user3.email, user: user3._id}]
     })
 
     const res = await request(app)
         .post('/api/groups')
+        .set("Accept", "application/json")
         .set("Cookie", [
           `accessToken=${newTokenAdHoc(user1.username, "Admin")}`,
-          `refreshToken=${user11.refreshToken}`
+          `refreshToken=${user1.refreshToken}`
         ])
         .send({
           name: "exampleGroup",
@@ -248,6 +247,120 @@ describe("createGroup", () => {
     )
   })
 
+  test("should fail if only the caller is a valid user to add and all the members either do not exist or are already in a group", async () => {
+    const user1 = {
+      username: "testUser1",
+      email: "testUser1@example.com",
+      password: "password",
+      role: "Admin",
+      refreshToken: newTokenAdHoc("testUser1", "Admin")
+    }
+    const user2 = {
+      username: "testUser2",
+      email: "testUser2@example.com",
+      password: "password",
+      role: "Regular"
+    }
+    const user3 = {
+      username: "testUser3",
+      email: "testUser3@example.com",
+      password: "password",
+      role: "Regular"
+    }
+    await User.create(user1, user2, user3)
+
+    const existingGroup = await Group.create({
+      name: "existingGroup",
+      members:[{email: user3.email, user: user3._id}, {email: user2.email, user: user2._id}]
+    })
+
+    const res = await request(app)
+        .post('/api/groups')
+        .set("Accept", "application/json")
+        .set("Cookie", [
+          `accessToken=${newTokenAdHoc(user1.username, "Admin")}`,
+          `refreshToken=${user1.refreshToken}`
+        ])
+        .send({
+          name: "exampleGroup",
+          memberEmails: [ user2.email, user3.email, "notExistingEmail@example.com" ]
+        })
+    expect(res.status).toBe(400)
+    expect(res.body).toEqual({
+      error: "all the members either do not exist or are already in a group",
+      alreadyInGroup: [{email: user2.email}, {email: user3.email}],
+      membersNotFound: [{email: "notExistingEmail@example.com"}]
+    })
+  })
+
+  test("should fail if at leas one email is not valid or an empty string", async () => {
+    const user1 = {
+      username: "testUser1",
+      email: "testUser1@example.com",
+      password: "password",
+      role: "Admin",
+      refreshToken: newTokenAdHoc("testUser1", "Admin")
+    }
+    const res = await request(app)
+        .post('/api/groups')
+        .set("Accept", "application/json")
+        .set("Cookie", [
+          `accessToken=${newTokenAdHoc(user1.username, "Admin")}`,
+          `refreshToken=${user1.refreshToken}`
+        ])
+        .send({
+          name: "exampleGroup",
+          memberEmails: [ "", "notAnEmail.it", "notExistingEmail@example.com" ]
+        })
+    expect(res.status).toBe(400)
+    expect(res.body).toEqual({
+      error: "at least one of the members emails is not in a valid email format or is an empty string"
+    })
+  })
+
+  test("should fail if the group already exists", async () => {
+    const user1 = {
+      username: "testUser1",
+      email: "testUser1@example.com",
+      password: "password",
+      role: "Admin",
+      refreshToken: newTokenAdHoc("testUser1", "Admin")
+    }
+    const user2 = {
+      username: "testUser2",
+      email: "testUser2@example.com",
+      password: "password",
+      role: "Regular"
+    }
+    const user3 = {
+      username: "testUser3",
+      email: "testUser3@example.com",
+      password: "password",
+      role: "Regular"
+    }
+    await User.create(user1, user2, user3)
+
+    const existingGroup = await Group.create({
+      name: "existingGroup",
+      members:[{email: user3.email, user: user3._id}]
+    })
+
+    const res = await request(app)
+        .post('/api/groups')
+        .set("Accept", "application/json")
+        .set("Cookie", [
+          `accessToken=${newTokenAdHoc(user1.username, "Admin")}`,
+          `refreshToken=${user1.refreshToken}`
+        ])
+        .send({
+          name: "existingGroup",
+          memberEmails: [ user2.email, user3.email, "notExistingEmail@example.com" ]
+        })
+    expect(res.status).toBe(400)
+    expect(res.body).toEqual({
+      error: "Group already exists"
+    })
+  })
 })
 
 describe("getGroups", () => { })
