@@ -230,8 +230,192 @@ describe("createCategory", () => {
 });
 
 describe("updateCategory", () => {
-  test("Dummy test, change it", () => {
-    expect(true).toBe(true);
+  test("Category created by unauthorized user", async () => {
+    const testCategory = {
+      type: 'test',
+      color: '#ff0000',
+    };
+    const newValues = {
+      type: 'newType',
+      color: '#ff0000',
+    };
+    await categories.create(testCategory)
+    await request(app)
+        .patch("/api/categories/" + testCategory.type) //Route to call
+        .set(
+            "Cookie",
+            `accessToken=${testerAccessTokenValid}; refreshToken=${testerAccessTokenValid}`
+        ) //Setting cookies in the request
+        .send(newValues) //Definition of the request body
+        .then((response) => {
+          //After obtaining the response, we check its actual body content
+          //The status must represent successful execution
+          expect(response.status).toBe(401);
+          //The "data" object must have a field named "message" that confirms that changes are successful
+          //The actual value of the field could be any string, so it's not checked
+          expect(response.body).toHaveProperty("message");
+          //Must be called at the end of every test or the test will fail while waiting for it to be called
+          //done();
+        });
+  });
+
+  test("Missing attributes #1 [empty string]", async () => {
+    const testCategory = {
+      type: 'test',
+      color: '#ff0000',
+    };
+    const newValues = {
+      type: '',
+      color: '#ff0000',
+    };
+    await categories.create(testCategory)
+    await request(app)
+        .patch("/api/categories/" + testCategory.type) //Route to call
+        .set(
+            "Cookie",
+            `accessToken=${adminAccessTokenValid}; refreshToken=${adminAccessTokenValid}`
+        ) //Setting cookies in the request
+        .send(newValues) //Definition of the request body
+        .then((response) => {
+          //After obtaining the response, we check its actual body content
+          //The status must represent successful execution
+          expect(response.status).toBe(400);
+          //The "data" object must have a field named "message" that confirms that changes are successful
+          //The actual value of the field could be any string, so it's not checked
+          expect(response.body).toHaveProperty("error");
+          //Must be called at the end of every test or the test will fail while waiting for it to be called
+          //done();
+        });
+  });
+
+  test("Missing attributes #2 [missing argument]", async () => {
+    const testCategory = {
+      type: 'test',
+      color: '#ff0000',
+    };
+    const newValues = {
+      color: '#ff0000',
+    };
+    await categories.create(testCategory);
+    await request(app)
+        .patch("/api/categories/" + testCategory.type) //Route to call
+        .set(
+            "Cookie",
+            `accessToken=${adminAccessTokenValid}; refreshToken=${adminAccessTokenValid}`
+        ) //Setting cookies in the request
+        .send(newValues) //Definition of the request body
+        .then((response) => {
+          //After obtaining the response, we check its actual body content
+          //The status must represent successful execution
+          expect(response.status).toBe(400);
+          //The "data" object must have a field named "message" that confirms that changes are successful
+          //The actual value of the field could be any string, so it's not checked
+          expect(response.body).toHaveProperty("error");
+          //Must be called at the end of every test or the test will fail while waiting for it to be called
+          //done();
+        });
+  });
+
+  test("New type refers to existing category", async () => {
+    const testCategory = {
+      type: 'test',
+      color: '#ff0000',
+    };
+    const newValues = {
+      type: 'exists',
+      color: '#ff0000',
+    };
+    await categories.create(testCategory);
+    await categories.create(newValues);
+    await request(app)
+        .patch("/api/categories/" + testCategory.type) //Route to call
+        .set(
+            "Cookie",
+            `accessToken=${adminAccessTokenValid}; refreshToken=${adminAccessTokenValid}`
+        ) //Setting cookies in the request
+        .send(newValues) //Definition of the request body
+        .then((response) => {
+          //After obtaining the response, we check its actual body content
+          //The status must represent successful execution
+          expect(response.status).toBe(400);
+          //The "data" object must have a field named "message" that confirms that changes are successful
+          //The actual value of the field could be any string, so it's not checked
+          expect(response.body).toHaveProperty("error");
+          //Must be called at the end of every test or the test will fail while waiting for it to be called
+          //done();
+        });
+  });
+
+  test("Route exists, category doesn't", async () => {
+    const testCategory = {
+      type: 'test',
+      color: '#ff0000',
+    };
+    const newValues = {
+      type: 'exists',
+      color: '#ff0000',
+    };
+    await request(app)
+        .patch("/api/categories/" + testCategory.type) //Route to call
+        .set(
+            "Cookie",
+            `accessToken=${adminAccessTokenValid}; refreshToken=${adminAccessTokenValid}`
+        ) //Setting cookies in the request
+        .send(newValues) //Definition of the request body
+        .then((response) => {
+          //After obtaining the response, we check its actual body content
+          //The status must represent successful execution
+          expect(response.status).toBe(400);
+          //The "data" object must have a field named "message" that confirms that changes are successful
+          //The actual value of the field could be any string, so it's not checked
+          expect(response.body).toHaveProperty("error");
+          //Must be called at the end of every test or the test will fail while waiting for it to be called
+          //done();
+        });
+  });
+
+  test("Success", async () => {
+    const testCategory = {
+      type: 'test',
+      color: '#ff0000',
+    };
+    const newValues = {
+      type: 'exists',
+      color: '#ff0000',
+    };
+    const testTransactions = [{
+      username: "mock",
+      amount: 9000,
+      type: "test",
+    }, {
+      username: "mock",
+      amount: 9000,
+      type: "test",
+    }, {
+      username: "mock",
+      amount: 9000,
+      type: "test",
+    }];
+    await categories.create(testCategory);
+    await transactions.insertMany(testTransactions);
+    await request(app)
+        .patch("/api/categories/" + testCategory.type) //Route to call
+        .set(
+            "Cookie",
+            `accessToken=${adminAccessTokenValid}; refreshToken=${adminAccessTokenValid}`
+        ) //Setting cookies in the request
+        .send(newValues) //Definition of the request body
+        .then((response) => {
+          //After obtaining the response, we check its actual body content
+          //The status must represent successful execution
+          expect(response.status).toBe(200);
+          //The "data" object must have a field named "message" that confirms that changes are successful
+          //The actual value of the field could be any string, so it's not checked
+          expect(response.body).toHaveProperty("message");
+          expect(response.body).toHaveProperty("count");
+          //Must be called at the end of every test or the test will fail while waiting for it to be called
+          //done();
+        });
   });
 });
 

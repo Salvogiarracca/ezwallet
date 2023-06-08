@@ -308,7 +308,7 @@ describe("updateCategory", () => {
         return {authorized: false, cause: "authorized"};
       }
     });
-    jest.spyOn(categories, 'findOne').mockReturnValue({})
+    jest.spyOn(categories, 'findOne').mockReturnValue(null)
     await updateCategory(mockReq, mockRes);
     expect(mockRes.status).toHaveBeenCalledWith(400);
     expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
