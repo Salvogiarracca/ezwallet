@@ -38,7 +38,7 @@ describe("handleDateFilterParams", () => {
         const mockReq = {
             query: {upTo: '2023-04-01'},
         };
-        const expectedResponse= "{date: {$lte: 2023-01-01T23:59:59.999Z}}";
+        const expectedResponse= "{date: {$lte: 2023-04-01T23:59:59.999Z}}";
         const res = handleDateFilterParams(mockReq);
         expect(res).toEqual(expectedResponse);
     });

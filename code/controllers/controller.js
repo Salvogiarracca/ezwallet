@@ -123,7 +123,7 @@ export const updateCategory = async (req, res) => {
         if (!cookie.accessToken) {
           return res.status(401).json({ message: "Unauthorized" }); // unauthorized
         }
-        if(!req.body){
+        if(!req.body.types){
           throw new Error("Missing attributes");
         }
         const adminAuth = verifyAuth(req, res, { authType: "Admin" });
@@ -131,7 +131,7 @@ export const updateCategory = async (req, res) => {
         if (!adminAuth.authorized) {
           return res.status(401).json({message: "Unauthorized"})
         }
-        const types  = req.body;
+        const types  = req.body.types;
         if (types.length === 0) {
           //empty input
           throw new Error("Missing attributes");
@@ -149,11 +149,11 @@ export const updateCategory = async (req, res) => {
             //empty "type" string
             throw new Error("Empty string in array");
           }
-          const exists = await categories.findOne({ type: str });
-          if (!exists) {
-            // type not found in db
-            throw new Error("Category does not exist, deletion not possible!");
-          }
+        }
+        const exists = await categories.find({ type: {$in: types} });
+        if (exists.length !== types.length) {
+          // one or more types not found in db
+          throw new Error("Category does not exist, deletion not possible!");
         }
         const nT = types.length;
         if (nCat > nT) {

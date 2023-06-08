@@ -5,6 +5,7 @@ import jwt from "jsonwebtoken";
 import {
   getCategories,
   createCategory,
+  updateCategory,
   deleteCategory,
   createTransaction,
   deleteTransaction,
@@ -471,6 +472,7 @@ describe("deleteCategory", () => {
   test("Missing attributes [deleteCategory] - Test #1", async () => {
     const mockReq = {
       params: {username: "testuser"},
+      body: {},
       cookies: {
         accessToken: "adminAccessTokenValid",
         refreshToken: "adminRefreshTokenValid",
@@ -499,7 +501,7 @@ describe("deleteCategory", () => {
   test("Only one category [deleteCategory] - Test #2", async () => {
     const mockReq = {
       params: {username: "testuser"},
-      body: ["investment", "fuel"],
+      body: {types: ["investment", "fuel"]},
       cookies: {
         accessToken: "adminAccessTokenValid",
         refreshToken: "adminRefreshTokenValid",
@@ -528,8 +530,7 @@ describe("deleteCategory", () => {
   test("Empty string [deleteCategory] - Test #3", async () => {
     const mockReq = {
       params: {username: "testuser"},
-      body: ["investment", "", "fuel"]
-      ,
+      body: {types: ["investment", "", "fuel"]},
       cookies: {
         accessToken: "adminAccessTokenValid",
         refreshToken: "adminRefreshTokenValid",
@@ -559,7 +560,7 @@ describe("deleteCategory", () => {
   test("Category does not exist [deleteCategory] - Test #4", async () => {
     const mockReq = {
       params: {username: "testuser"},
-      body: ["investment", "test", "fuel"],
+      body: {types: ["investment", "test", "fuel"]},
       cookies: {
         accessToken: "adminAccessTokenValid",
         refreshToken: "adminRefreshTokenValid",
@@ -580,9 +581,8 @@ describe("deleteCategory", () => {
       }
     });
     jest.spyOn(categories, 'countDocuments').mockImplementation(() => 4);
-    jest.spyOn(categories, 'findOne').mockReturnValueOnce({type: 'test', color: '#ffffff'})
-        .mockReturnValueOnce(null)
-        .mockReturnValue({type: 'test', color: '#ff0000'});
+    jest.spyOn(categories, 'find').mockReturnValueOnce([{type: 'test', color: '#ffffff'},
+      {type: 'test', color: '#ffffff'}]);
     await deleteCategory(mockReq, mockRes);
     expect(mockRes.status).toHaveBeenCalledWith(400);
     expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
@@ -591,7 +591,7 @@ describe("deleteCategory", () => {
   test("Success N>T [deleteCategory] - Test #5", async () => {
     const mockReq = {
       params: {username: "testuser"},
-      body: ["fuel"],
+      body: {types: ["fuel"]},
       cookies: {
         accessToken: "adminAccessTokenValid",
         refreshToken: "adminRefreshTokenValid",
@@ -613,9 +613,8 @@ describe("deleteCategory", () => {
       }
     });
     jest.spyOn(categories, 'countDocuments').mockImplementation(() => 5);
-    jest.spyOn(categories, 'findOne').mockReturnValue({type: 'test', color: '#ffffff'});
+    jest.spyOn(categories, 'find').mockReturnValueOnce([{type: 'test', color: '#ffffff'}]);
     jest.spyOn(categories, 'findOneAndRemove').mockImplementation(() => ({}));
-    jest.spyOn(categories, 'find').mockImplementation(() => ({type: 'oldest', color: '#ffffff'}));
     jest.spyOn(transactions, 'updateMany').mockImplementation(() => ({modifiedCount: 23}));
     jest.spyOn(categories, "find").mockImplementation(() => ({
       sort: () => ({
@@ -634,7 +633,7 @@ describe("deleteCategory", () => {
   test("Success N=T [deleteCategory] - Test #6", async () => {
     const mockReq = {
       params: {username: "testuser"},
-      body: ["fuel", "investment", "supermarket", "test"],
+      body: {types: ["fuel", "investment", "supermarket", "test"]},
       cookies: {
         accessToken: "adminAccessTokenValid",
         refreshToken: "adminRefreshTokenValid",
@@ -656,7 +655,8 @@ describe("deleteCategory", () => {
       }
     });
     jest.spyOn(categories, 'countDocuments').mockImplementation(() => 4);
-    jest.spyOn(categories, 'findOne').mockReturnValue({type: 'test', color: '#ffffff'});
+    jest.spyOn(categories, 'find').mockReturnValueOnce([{type: 'test', color: '#ffffff'},
+      {type: 'test', color: '#ffffff'}, {type: 'test', color: '#ffffff'}, {type: 'test', color: '#ffffff'},]);
     jest.spyOn(categories, 'findOneAndRemove').mockImplementation(() => ({}));
     jest.spyOn(categories, 'find').mockImplementation(() => ({type: 'fuel', color: '#ffffff'}));
     jest.spyOn(transactions, 'updateMany').mockImplementation(() => ({modifiedCount: 17}));
@@ -878,7 +878,7 @@ describe("getCategories", () => {
 });
 
 describe("createTransaction", () => {
-  test("Successful User creation [createTransaction] - Test #1", async () => {
+  test("Successful transaction creation by user [createTransaction] - Unit Test #1", async () => {
     const testTransaction = {
       username: "Pippo",
       amount: 3500,
@@ -886,7 +886,6 @@ describe("createTransaction", () => {
     };
     const expectedResponse = {
       data: testTransaction,
-      refreshedTokenMessage: "",
       message: "Transaction created",
       refreshedTokenMessage: "",
     };
@@ -932,7 +931,7 @@ describe("createTransaction", () => {
     expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
   });
 
-  test("Unauthorized User creation [createTransaction] - Test #2", async () => {
+  test("Unauthorized transaction creation by user [createTransaction] - Unit Test #2", async () => {
     const testTransaction = {
       username: "Pippo",
       amount: 3500,
@@ -984,7 +983,7 @@ describe("createTransaction", () => {
     expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
   });
 
-  test("Different user [createTransaction] - Test #3", async () => {
+  test("Different user request by user [createTransaction] - Unit Test #3", async () => {
     const testTransaction = {
       username: "Pippo",
       amount: 3500,
@@ -1036,7 +1035,7 @@ describe("createTransaction", () => {
     expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
   });
 
-  test("Successful Admin transaction for different users [createTransaction] - Test #4", async () => {
+  test("Successful admin transaction creation for different user [createTransaction] - Unit Test #4", async () => {
     const testTransaction = {
       username: "Pippo",
       amount: 3500,
@@ -1089,13 +1088,12 @@ describe("createTransaction", () => {
     expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
   });
 
-  test("Invalid parameters [createTransaction] - Test #5", async () => {
+  test("Invalid parameters [createTransaction] - Unit Test #5", async () => {
     const testTransaction = {
       username: "Pippo",
       amount: 3500,
     };
     const expectedResponse = {
-      refreshedTokenMessage: "",
       message: "Invalid parameters",
       refreshedTokenMessage: "",
     };
@@ -1137,7 +1135,7 @@ describe("createTransaction", () => {
     expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
   });
 
-  test("Database Error Transaction Request [createTransaction] - Test #6", async () => {
+  test("Database Error Transaction Request [createTransaction] - Unit Test #6", async () => {
     const testTransaction = {
       username: "Pippo",
       amount: 3500,
@@ -1188,7 +1186,7 @@ describe("createTransaction", () => {
     expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
   });
 
-  test("User or Category not found [createTransaction] - Test #6", async () => {
+  test("User or Category not found [createTransaction] - Unit Test #7", async () => {
     const testTransaction = {
       username: "Pippo",
       amount: 3500,
@@ -1238,7 +1236,7 @@ describe("createTransaction", () => {
 });
 
 describe("getAllTransactions", () => {
-  test("Successful Request [getAllTransactions] - Test #1", async () => {
+  test("Successful Request [getAllTransactions] - Unit Test #1", async () => {
     const mockReq = {
       params: { username: "testuser" },
       cookies: {
@@ -1313,7 +1311,7 @@ describe("getAllTransactions", () => {
     expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
   });
 
-  test("Unauthorized Request [getAllTransactions] - Test #2", async () => {
+  test("Unauthorized Request [getAllTransactions] - Unit Test #2", async () => {
     const mockReq = {
       params: { username: "testuser" },
       cookies: {
@@ -1375,7 +1373,7 @@ describe("getAllTransactions", () => {
     expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
   });
 
-  test("Empty Request [getAllTransactions] - Test #3", async () => {
+  test("Empty Request [getAllTransactions] - Unit Test #3", async () => {
     const mockReq = {
       params: { username: "testuser" },
       cookies: {
@@ -1425,7 +1423,7 @@ describe("getAllTransactions", () => {
     expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
   });
 
-  test("Database Error Request [getAllTransactions] - Test #4", async () => {
+  test("Database Error Request [getAllTransactions] - Unit Test #4", async () => {
     const mockReq = {
       params: { username: "testuser" },
       cookies: {
@@ -1462,7 +1460,7 @@ describe("getAllTransactions", () => {
 });
 
 describe("getTransactionsByUser", () => {
-  test("Successful User Request [getTransactionsByUser] - Test #1", async () => {
+  test("Successful User Request [getTransactionsByUser] - Unit Test #1", async () => {
     const mockReq = {
       params: { username: "Pippo" },
       cookies: {
@@ -1543,7 +1541,7 @@ describe("getTransactionsByUser", () => {
     expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
   });
 
-  test("Unauthorized User Request [getTransactionsByUser] - Test #2", async () => {
+  test("Unauthorized User Request [getTransactionsByUser] - Unit Test #2", async () => {
     const url_un = "Gianluca";
     const mockReq = {
       params: { username: url_un },
@@ -1583,7 +1581,7 @@ describe("getTransactionsByUser", () => {
     expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
   });
 
-  test("Successful Admin Request [getTransactionsByUser] - Test #3", async () => {
+  test("Successful Admin Request [getTransactionsByUser] - Unit Test #3", async () => {
     const url_un = "Pippo";
     const mockReq = {
       params: { username: url_un },
@@ -1665,7 +1663,7 @@ describe("getTransactionsByUser", () => {
     expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
   });
 
-  test("Unauthorized Admin Request [getTransactionsByUser] - Test #3", async () => {
+  test("Unauthorized Admin Request [getTransactionsByUser] - Unit Test #3", async () => {
     const url_un = "Pippo";
     const mockReq = {
       params: { username: url_un },
@@ -1734,7 +1732,7 @@ describe("getTransactionsByUser", () => {
     expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
   });
 
-  test("Inexistent User Request [getTransactionsByUser] - Test #4", async () => {
+  test("Inexistent User Request [getTransactionsByUser] - Unit Test #4", async () => {
     const url_un = "Pippo";
     const mockReq = {
       params: { username: url_un },
@@ -1799,7 +1797,7 @@ describe("getTransactionsByUser", () => {
     expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
   });
 
-  test("Database Error Request [getTransactionsByUser] - Test #5", async () => {
+  test("Database Error Request [getTransactionsByUser] - Unit Test #5", async () => {
     const url_un = "Pippo";
     const mockReq = {
       params: { username: url_un },
@@ -1843,7 +1841,7 @@ describe("getTransactionsByUser", () => {
 });
 
 describe("getTransactionsByUserByCategory", () => {
-  test("Successful User Request [getTransactionsByUserByCategory] - Test #1", async () => {
+  test("Successful User Request [getTransactionsByUserByCategory] - Unit Test #1", async () => {
     const mockReq = {
       params: { username: "Pippo" },
       cookies: {
@@ -1930,7 +1928,7 @@ describe("getTransactionsByUserByCategory", () => {
     expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
   });
 
-  test("Unauthorized User Request [getTransactionsByUserByCategory] - Test #2", async () => {
+  test("Unauthorized User Request [getTransactionsByUserByCategory] - Unit Test #2", async () => {
     const url_un = "Gianluca";
     const mockReq = {
       params: { username: url_un },
@@ -1976,7 +1974,7 @@ describe("getTransactionsByUserByCategory", () => {
     expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
   });
 
-  test("Successful Admin Request [getTransactionsByUserByCategory] - Test #3", async () => {
+  test("Successful Admin Request [getTransactionsByUserByCategory] - Unit Test #3", async () => {
     const url_un = "Pippo";
     const mockReq = {
       params: { username: url_un },
@@ -2071,7 +2069,7 @@ describe("getTransactionsByUserByCategory", () => {
     expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
   });
 
-  test("Unauthorized Admin Request [getTransactionsByUserByCategory] - Test #3", async () => {
+  test("Unauthorized Admin Request [getTransactionsByUserByCategory] - Unit Test #4", async () => {
     const url_un = "Pippo";
     const mockReq = {
       params: { username: url_un },
@@ -2153,7 +2151,7 @@ describe("getTransactionsByUserByCategory", () => {
     expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
   });
 
-  test("Inexistent User Request [getTransactionsByUserByCategory] - Test #4", async () => {
+  test("Inexistent User or Category Request [getTransactionsByUserByCategory] - Unit Test #5", async () => {
     const url_un = "Pippo";
     const mockReq = {
       params: { username: url_un },
@@ -2224,7 +2222,7 @@ describe("getTransactionsByUserByCategory", () => {
     expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
   });
 
-  test("Database Error Request [getTransactionsByUserByCategory] - Test #5", async () => {
+  test("Database Error Request [getTransactionsByUserByCategory] - Unit Test #6", async () => {
     const url_un = "Pippo";
     const mockReq = {
       params: { username: url_un },
@@ -2275,7 +2273,7 @@ describe("getTransactionsByUserByCategory", () => {
 
 //errors
 describe("getTransactionsByGroup", () => {
-  test("Successful User Request [getTransactionsByGroup] - Test #1", async () => {
+  test("Successful User Request [getTransactionsByGroup] - Unit Test #1", async () => {
     const groupName = "testGroup";
     const mockReq = {
       params: { name: groupName },
@@ -2374,7 +2372,7 @@ describe("getTransactionsByGroup", () => {
     expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
   });
 
-  test("Unauthorized User Request [getTransactionsByGroup] - Test #2", async () => {
+  test("Unauthorized User Request [getTransactionsByGroup] - Unit Test #2", async () => {
     const groupName = "testGroup";
     const mockReq = {
       params: { name: groupName },
@@ -2459,7 +2457,7 @@ describe("getTransactionsByGroup", () => {
     expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
   });
 
-  test("Successful Admin Request [getTransactionsByGroup] - Test #3", async () => {
+  test("Successful Admin Request [getTransactionsByGroup] - Unit Test #3", async () => {
     const groupName = "testGroup";
     const mockReq = {
       params: { name: groupName },
@@ -2557,7 +2555,7 @@ describe("getTransactionsByGroup", () => {
     expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
   });
 
-  test("Unauthorized Admin Request [getTransactionsByGroup] - Test #4", async () => {
+  test("Unauthorized Admin Request [getTransactionsByGroup] - Unit Test #4", async () => {
     const groupName = "testGroup";
     const mockReq = {
       params: { name: groupName },
@@ -2642,7 +2640,7 @@ describe("getTransactionsByGroup", () => {
     expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
   });
 
-  test("Inexistent Group Request [getTransactionsByGroup] - Test #5", async () => {
+  test("Inexistent Group Request [getTransactionsByGroup] - Unit Test #5", async () => {
     const groupName = "testGroup";
     const mockReq = {
       params: { name: groupName },
@@ -2671,7 +2669,7 @@ describe("getTransactionsByGroup", () => {
     expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
   });
 
-  test("Database Error (Group) Request [getTransactionsByGroup] - Test #6", async () => {
+  test("Database Error (Group) Request [getTransactionsByGroup] - Unit Test #6", async () => {
     const groupName = "testGroup";
     const mockReq = {
       params: { name: groupName },
@@ -2701,7 +2699,7 @@ describe("getTransactionsByGroup", () => {
     expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
   });
 
-  test("Database Error (User) Request [getTransactionsByGroup] - Test #7", async () => {
+  test("Database Error (User) Request [getTransactionsByGroup] - Unit Test #7", async () => {
     const groupName = "testGroup";
     const mockReq = {
       params: { name: groupName },
@@ -2740,7 +2738,7 @@ describe("getTransactionsByGroup", () => {
     expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
   });
 
-  test("Database Error (Aggregate) Request [getTransactionsByGroup] - Test #8", async () => {
+  test("Database Error (Aggregate) Request [getTransactionsByGroup] - Unit Test #8", async () => {
     const groupName = "testGroup";
     const mockReq = {
       params: { name: groupName },
@@ -2800,7 +2798,7 @@ describe("getTransactionsByGroup", () => {
 });
 
 describe("getTransactionsByGroupByCategory", () => {
-  test("Successful User Request [getTransactionsByGroupByCategory] - Test #1", async () => {
+  test("Successful User Request [getTransactionsByGroupByCategory] - Unit Test #1", async () => {
     const groupName = "testGroup";
     const mockReq = {
       params: { name: groupName },
@@ -2902,7 +2900,7 @@ describe("getTransactionsByGroupByCategory", () => {
     expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
   });
 
-  test("Unauthorized User Request [getTransactionsByGroupByCategory] - Test #2", async () => {
+  test("Unauthorized User Request [getTransactionsByGroupByCategory] - Unit Test #2", async () => {
     const groupName = "testGroup";
     const mockReq = {
       params: { name: groupName },
@@ -2990,7 +2988,7 @@ describe("getTransactionsByGroupByCategory", () => {
     expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
   });
 
-  test("Successful Admin Request [getTransactionsByGroupByCategory] - Test #3", async () => {
+  test("Successful Admin Request [getTransactionsByGroupByCategory] - Unit Test #3", async () => {
     const groupName = "testGroup";
     const mockReq = {
       params: { name: groupName },
@@ -3091,7 +3089,7 @@ describe("getTransactionsByGroupByCategory", () => {
     expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
   });
 
-  test("Unauthorized Admin Request [getTransactionsByGroupByCategory] - Test #4", async () => {
+  test("Unauthorized Admin Request [getTransactionsByGroupByCategory] - Unit Test #4", async () => {
     const groupName = "testGroup";
     const mockReq = {
       params: { name: groupName },
@@ -3179,7 +3177,7 @@ describe("getTransactionsByGroupByCategory", () => {
     expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
   });
 
-  test("Inexistent Group Request [getTransactionsByGroupByCategory] - Test #5", async () => {
+  test("Inexistent Group Request [getTransactionsByGroupByCategory] - Unit Test #5", async () => {
     const groupName = "testGroup";
     const mockReq = {
       params: { name: groupName },
@@ -3211,7 +3209,7 @@ describe("getTransactionsByGroupByCategory", () => {
     expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
   });
 
-  test("Database Error (Group) Request [getTransactionsByGroupByCategory] - Test #6", async () => {
+  test("Database Error (Group) Request [getTransactionsByGroupByCategory] - Unit Test #6", async () => {
     const groupName = "testGroup";
     const mockReq = {
       params: { name: groupName },
@@ -3244,7 +3242,7 @@ describe("getTransactionsByGroupByCategory", () => {
     expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
   });
 
-  test("Database Error (User) Request [getTransactionsByGroup] - Test #7", async () => {
+  test("Database Error (User) Request [getTransactionsByGroupByCategory] - Unit Test #7", async () => {
     const groupName = "testGroup";
     const mockReq = {
       params: { name: groupName },
@@ -3286,7 +3284,7 @@ describe("getTransactionsByGroupByCategory", () => {
     expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
   });
 
-  test("Database Error (Aggregate) Request [getTransactionsByGroup] - Test #8", async () => {
+  test("Database Error (Aggregate) Request [getTransactionsByGroupByCategory] - Unit Test #8", async () => {
     const groupName = "testGroup";
     const mockReq = {
       params: { name: groupName },
@@ -3349,7 +3347,7 @@ describe("getTransactionsByGroupByCategory", () => {
 });
 
 describe("deleteTransaction", () => {
-  test("Successful delete Transaction [deleteTransaction] - Test #1", async () => {
+  test("Successful User Delete Transaction [deleteTransaction] - Unit Test #1", async () => {
     const testTransaction = {
       username: "Pippo",
       amount: 3500,
@@ -3396,7 +3394,7 @@ describe("deleteTransaction", () => {
     expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
   });
 
-  test("Unauthorized User [deleteTransaction] - Test #2", async () => {
+  test("Unauthorized User [deleteTransaction] - Unit Test #2", async () => {
     const testTransaction = {
       username: "Pippo",
       amount: 3500,
@@ -3443,7 +3441,7 @@ describe("deleteTransaction", () => {
     expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
   });
 
-  test("User or transaction not found [deleteTransaction] - Test #1", async () => {
+  test("User or transaction not found [deleteTransaction] - Unit Test #3", async () => {
     const testTransaction = {
       username: "Pippo",
       amount: 3500,
@@ -3484,7 +3482,7 @@ describe("deleteTransaction", () => {
     expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
   });
 
-  test("Successful Admin transaction for different users [deleteTransaction] - Test #3", async () => {
+  test("Successful Admin transaction for different users [deleteTransaction] - Unit Test #4", async () => {
     const testTransaction = {
       username: "Pippo",
       amount: 3500,
@@ -3531,7 +3529,7 @@ describe("deleteTransaction", () => {
     expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
   });
 
-  test("Missing transaction attributes [deleteTransaction] - Test #4", async () => {
+  test("Missing transaction attributes [deleteTransaction] - Unit Test #5", async () => {
     const testTransaction = {
       username: "Pippo",
       amount: 3500,
@@ -3569,7 +3567,7 @@ describe("deleteTransaction", () => {
     //expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
   });
 
-  test("Database Error Transaction Request [deleteTransaction] - Test #5", async () => {
+  test("Database Error Transaction Request [deleteTransaction] - Unit Test #6", async () => {
     const expectedResponse = {
       error: "Database Error",
     };
@@ -3622,7 +3620,7 @@ describe("deleteTransaction", () => {
 });
 
 describe("deleteTransactions", () => {
-  test("Successful Request [deleteTransactions] - Test #1", async () => {
+  test("Successful Request [deleteTransactions] - Unit Test #1", async () => {
     const mockReq = {
       body: { _ids: ["testID1", "testID2", "testID3"] },
       params: { username: "testuser" },
@@ -3694,7 +3692,7 @@ describe("deleteTransactions", () => {
     expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
   });
 
-  test("Unauthorized Request [deleteTransactions] - Test #2", async () => {
+  test("Unauthorized Request [deleteTransactions] - Unit Test #2", async () => {
     const mockReq = {
       body: { _ids: ["testID1", "testID2", "testID3"] },
       params: { username: "testuser" },
@@ -3771,7 +3769,7 @@ describe("deleteTransactions", () => {
     expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
   });
 
-  test("Invalid ID [deleteTransactions] - Test #3", async () => {
+  test("Invalid ID [deleteTransactions] - Unit Test #3", async () => {
     const mockReq = {
       body: { _ids: ["testID1", "testID2", "testID3"] },
       params: { username: "testuser" },
@@ -3833,7 +3831,7 @@ describe("deleteTransactions", () => {
     expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
   });
 
-  test("Empty Request [deleteTransactions] - Test #3", async () => {
+  test("Empty Request [deleteTransactions] - Unit Test #3", async () => {
     const mockReq = {
       body: {},
       params: { username: "testuser" },
@@ -3904,7 +3902,7 @@ describe("deleteTransactions", () => {
     expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
   });
 
-  test("Database Error Request [deleteTransactions] - Test #4", async () => {
+  test("Database Error Request [deleteTransactions] - Unit Test #4", async () => {
     const mockReq = {
       body: { _ids: ["testID1", "testID2", "testID3"] },
       params: { username: "testuser" },
