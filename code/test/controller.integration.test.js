@@ -177,8 +177,7 @@ describe("createCategory", () => {
       type: 'test',
       color: '#ff0000',
     };
-    const exist = new categories(testCategory);
-    exist.save();
+    await categories.create(testCategory);
     await request(app)
         .post("/api/categories") //Route to call
         .set(

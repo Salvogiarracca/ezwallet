@@ -151,7 +151,7 @@ describe("registerAdmin", () => {
     });
 
     test('Already existing admin email: Error test #1', async () => {
-        User.create({
+        await User.create({
             username : "PippoAdmin",
             email : "a239834@studenti.polito.it",
             password : "12345" 
