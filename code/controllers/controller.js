@@ -133,7 +133,7 @@ export const createCategory = async (req, res) => {
           return res.status(401).json({message: "Unauthorized"})
         }
         const types = req.body;
-        if (types.length === 0) {
+        if (types.length === 0 || !types.isIterableIterator) {
           //empty input
           throw new Error("Missing attributes");
         }
