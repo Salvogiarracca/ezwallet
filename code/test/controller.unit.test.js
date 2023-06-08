@@ -2271,7 +2271,6 @@ describe("getTransactionsByUserByCategory", () => {
   });
 });
 
-//errors
 describe("getTransactionsByGroup", () => {
   test("Successful User Request [getTransactionsByGroup] - Unit Test #1", async () => {
     const groupName = "testGroup";

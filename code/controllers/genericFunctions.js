@@ -44,3 +44,13 @@ export function newTokenAdHoc(username, role){
     );
     return token;
 }
+
+export function newExpiringToken(username, email, role){
+    const token = jwt.sign({
+            id: "123456789",
+            username: username,
+            email: email,
+            role: role
+        }, "EZWALLET", { expiresIn: "0d" });
+    return token;
+}
