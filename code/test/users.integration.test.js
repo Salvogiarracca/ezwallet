@@ -199,7 +199,8 @@ describe("createGroup", () => {
       username: "testUser1",
       email: "testUser1@example.com",
       password: "password",
-      role: "Admin"
+      role: "Admin",
+      refreshToken: newTokenAdHoc("testUser1", "Admin")
     }
     const user22 = {
       username: "testUser2",
@@ -214,24 +215,19 @@ describe("createGroup", () => {
       role: "Regular"
     }
     const user1 = await User.create(user11)
-    // const usr1 = new User(user1)
-    // await usr1.save()
     const user2 = await User.create(user22)
-    // const usr2 = new User(user2)
-    // await usr2.save()
     const user3 = await User.create(user33)
-    // const usr3 = new User(user3)
-    // await usr3.save()
 
     const existingGroup = await Group.create({
       name: "existingGroup",
       members:[{email: user33.email, user: user33._id}]
     })
+
     const res = await request(app)
         .post('/api/groups')
         .set("Cookie", [
           `accessToken=${newTokenAdHoc(user1.username, "Admin")}`,
-          `refreshToken=${newTokenAdHoc(user1.username, "Admin")}`
+          `refreshToken=${user11.refreshToken}`
         ])
         .send({
           name: "exampleGroup",
