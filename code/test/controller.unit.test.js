@@ -5,7 +5,7 @@ import jwt from "jsonwebtoken";
 import {
   getCategories,
   createCategory,
-  deleteCategory
+  deleteCategory,
   createTransaction,
   deleteTransaction,
   deleteTransactions,
@@ -967,7 +967,6 @@ describe("createTransaction", () => {
       email: "test@gmail.com",
       password: "test",
     };
-    console.log("test");
     jest.spyOn(User, "findOne").mockResolvedValue(testUser);
     jest.spyOn(categories, "find").mockResolvedValue([testCategory]);
     jest

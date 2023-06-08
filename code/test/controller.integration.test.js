@@ -828,12 +828,7 @@ describe("getCategories", () => {
           ) //Setting cookies in the request
           .send()
           .then((response) => {
-              //After obtaining the response, we check its actual body content
-              //The status must represent successful execution
-              //console.log(response)
               expect(response.status).toBe(200);
-              //The "data" object must have a field named "message" that confirms that changes are successful
-              //The actual value of the field could be any string, so it's not checked
               expect(response.body).toHaveProperty("message");
               expect(
                   response.body.data.map((obj) => {
@@ -843,8 +838,6 @@ describe("getCategories", () => {
                       };
                   })
               ).toEqual(testCategories);
-              //Must be called at the end of every test or the test will fail while waiting for it to be called
-              //done();
           });
   });
 
