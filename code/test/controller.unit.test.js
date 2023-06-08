@@ -887,7 +887,6 @@ describe("createTransaction", () => {
     };
     const expectedResponse = {
       data: testTransaction,
-      refreshedTokenMessage: "",
       message: "Transaction created",
       refreshedTokenMessage: "",
     };
@@ -1096,7 +1095,6 @@ describe("createTransaction", () => {
       amount: 3500,
     };
     const expectedResponse = {
-      refreshedTokenMessage: "",
       message: "Invalid parameters",
       refreshedTokenMessage: "",
     };
