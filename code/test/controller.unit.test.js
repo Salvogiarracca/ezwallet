@@ -465,10 +465,6 @@ describe("updateCategory", () => {
         return {authorized: false, cause: "authorized"};
       }
     });
-    jest.spyOn(categories, 'findOne').mockReturnValueOnce({type: 'exists', color: '#ffffff'})
-        .mockReturnValueOnce(null);
-    jest.spyOn(categories, 'findOneAndUpdate').mockReturnValue({type: 'investment', color: '#ff0000'});
-    jest.spyOn(transactions, 'updateMany').mockReturnValue({modifiedCount: 15});
     await updateCategory(mockReq, mockRes);
     expect(mockRes.status).toHaveBeenCalledWith(400);
     expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);

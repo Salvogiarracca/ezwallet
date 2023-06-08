@@ -82,15 +82,14 @@ export const createCategory = async (req, res) => {
         if (!newType || !newColor) {
           throw new Error("Missing attributes");
         }
-        const oldCat = await categories.findOne({type: oldType});
-        if(!oldCat.type || !oldCat.color){
-          throw new Error ("Old category type does not exist");
-        }
         if (typeof newType !== "string" || typeof newColor !== "string") {
           //check input
           throw new Error("Mismatched types in req.body!");
         }
-    
+        const oldCat = await categories.findOne({type: oldType});
+        if(oldCat === null){
+          throw new Error ("Old category type does not exist");
+        }
         if (newColor.length !== 7 || newColor[0] !== "#") {
           throw new Error("Wrong format for color");
         }
