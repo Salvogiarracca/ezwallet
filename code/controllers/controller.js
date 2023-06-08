@@ -1015,15 +1015,16 @@ export const deleteTransactions = async (req, res) => {
       });
     } else {
       for (const id of ids) {
-        const transaction = await transactions.find({ _id: id });
-        if (transaction) {
+        let transaction = await transactions.find({ _id: id });
+        if (!transaction) {
+          transaction=[];
+        }
           if (!id || id === "" || !transaction.length > 0) {
             return res.status(400).json({
               refreshedTokenMessage: res.locals.refreshedTokenMessage,
               message: "Invalid ID:" + id,
             });
           }
-        }
       }
       const adminAuth = verifyAuth(req, res, { authType: "Admin" });
       ///if the user is an Admin ok, otherwise unauthorized

@@ -3859,7 +3859,7 @@ describe("deleteTransactions", () => {
         return { authorized: true, cause: "authorized" };
       }
     });
-    jest.spyOn(transactions, "find").mockResolvedValue([]);
+    jest.spyOn(transactions, "find").mockResolvedValue(undefined);
     jest.spyOn(transactions, "deleteMany").mockResolvedValue(testTransactions);
     await deleteTransactions(mockReq, mockRes);
     //expect(transactions.deleteOne).toHaveBeenCalled();
