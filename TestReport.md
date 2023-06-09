@@ -74,7 +74,8 @@
 | Unauthorized User Request | getTransactionsByUserByCategory | Unit | WB/ statement coverage |
 | Successful Admin Request | getTransactionsByUserByCategory | Unit | WB/ statement coverage |
 | Unauthorized Admin Request | getTransactionsByUserByCategory | Unit | WB/ statement coverage |
-| Inexistent User or Category Request | getTransactionsByUserByCategory | Unit | WB/ statement coverage |
+| User not found Request | getTransactionsByUserByCategory | Unit | WB/ statement coverage |
+| Category not found Request | getTransactionsByUserByCategory | Unit | WB/ statement coverage |
 | Database Error Request | getTransactionsByUserByCategory | Unit | WB/ statement coverage |
 | Successful user request | getTransactionsByUserByCategory | Integration | BB/ Bottom Up |
 | Unauthorized user request | getTransactionsByUserByCategory | Integration | BB/ Bottom Up |
@@ -101,7 +102,8 @@
 | Unauthorized User Request | getTransactionsByGroupByCategory | Unit | WB/ statement coverage |
 | Successful Admin Request | getTransactionsByGroupByCategory | Unit | WB/ statement coverage |
 | Unauthorized Admin Request | getTransactionsByGroupByCategory | Unit | WB/ statement coverage |
-| Inexistent Group or category Request | getTransactionsByGroupByCategory | Unit | WB/ statement coverage |
+| Group not found Request | getTransactionsByGroupByCategory | Unit | WB/ statement coverage |
+| Category not found Request | getTransactionsByGroupByCategory | Unit | WB/ statement coverage |
 | Database Error (Group) Request | getTransactionsByGroupByCategory | Unit | WB/ statement coverage |
 | Database Error (User) Request | getTransactionsByGroupByCategory | Unit | WB/ statement coverage |
 | Database Error (Aggregate) Request | getTransactionsByGroupByCategory | Unit | WB/ statement coverage |
@@ -182,12 +184,78 @@
 |   |Database Error Request |
 |   |Retrieved all transactions |
 |   |Unauthorized admin |
-| FR33|  |
-| FR34|  |
-| FR35|  |
-| FR36|  |
-| FR37|  |
-| FR38|  |
+| FR33 | Successful User Request |
+|   |Unauthorized User Request |
+|   |Successful Admin Request |
+|   |Unauthorized Admin Request |
+|   |Inexistent User Request | 
+|   |Database Error Request |
+|   |Successful user request |
+|   |Unauthorized user request |
+|   |Unauthorized admin request |
+|   |User not found |
+| FR34| Successful User Request | 
+|  | Unauthorized User Request | 
+|  | Successful Admin Request | 
+|  | Unauthorized Admin Request |
+|  | User not found Request | 
+|  | Category not found Request |
+|  | Database Error Request |
+|  | Successful user request | 
+|  | Unauthorized user request | 
+|  | Successful admin request |
+|  | Unauthorized admin request | 
+|  | User not found request | 
+|  | Category not found request |
+| FR35| Successful User Request |
+|  |Unauthorized User Request |
+|  |Successful Admin Request |
+|  |Unauthorized Admin Request |
+|  |Inexistent Group Request |
+|  |Database Error (Group) Request |
+|  |Database Error (User) Request |
+|  |Database Error (Aggregate) Request | 
+|  |Successful user request |
+|  |Unauthorized user request | 
+|  |Successful admin request | 
+|  |Unauthorized admin request |
+|  |Group not found | 
+| FR36| Successful User Request | 
+| | Unauthorized User Request | 
+| | Successful Admin Request | 
+| | Unauthorized Admin Request | 
+| | Group not found Request | 
+| | Category not found Request | 
+| | Database Error (Group) Request | 
+| | Database Error (User) Request | 
+| | Database Error (Aggregate) Request | 
+| | Successful user request | 
+| | Unauthorized user request | 
+| | Successful admin request | 
+| | Unauthorized admin request | 
+| | Group not found |
+| | Category not found | 
+| FR37| Successful User Delete Transaction | 
+|  | Unauthorized User |
+|  | User or transaction not found |
+|  | Successful Admin transaction for different users |
+|  | Missing transaction attributes |
+|  | Database Error Transaction Request | 
+|  | Transaction deleted by user | 
+|  | Transaction deleted by admin |
+|  | User not authorized |
+|  | User not found |
+|  | Transaction not found |
+|  | Missing ID |
+|  | FR38 | Successful Request |
+|  | Unauthorized Request | 
+|  | Invalid ID |
+|  | Empty Request | 
+|  | Database Error Request | 
+|  | Transactions deleted by admin | 
+|  | Unauthorized admin | 
+|  | Invalid transaction | 
+|  | Invalid ids | 
 |  FR4   | -------------|
 | FR41|  |
 | FR42|  |
