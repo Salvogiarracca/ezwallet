@@ -2326,7 +2326,7 @@ describe("getTransactionsByUserByCategory", () => {
     expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
   });
 
-  test("Inexistent User or Category Request [getTransactionsByUserByCategory] - Unit Test #5", async () => {
+  test("User not found Request [getTransactionsByUserByCategory] - Unit Test #5", async () => {
     const url_un = "Pippo";
     const mockReq = {
       params: { username: url_un },
@@ -3420,7 +3420,7 @@ describe("getTransactionsByGroupByCategory", () => {
     expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
   });
 
-  test("Inexistent Group Request [getTransactionsByGroupByCategory] - Unit Test #5", async () => {
+  test("Group not found Request [getTransactionsByGroupByCategory] - Unit Test #5", async () => {
     const groupName = "testGroup";
     const mockReq = {
       params: { name: groupName },

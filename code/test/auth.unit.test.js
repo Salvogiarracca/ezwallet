@@ -311,14 +311,14 @@ describe("registerAdmin", () => {
     test('should fail if email is not valid', async () => {
         const sentUser = {
             username : "PlutoAdmin",
-            email : "a392892@studenti.polito.it",
+            email : "a392892studenti.polito.it",
             password : "12345"
         };
 
         const createdUser = {
             id: "1",
             username : "PlutoAdmin",
-            email : "a392892@studenti.polito.it",
+            email : "a392892studenti.polito.it",
             password : "12345",
             refreshToken: "",
             role: "Admin"

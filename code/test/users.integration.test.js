@@ -456,7 +456,8 @@ describe("getGroups", () => {
         {email: user4.email, user:user4._id}
       ]
     }
-    await Group.create(group1, group2)
+    await Group.create(group1)
+    await Group.create(group2)
     const res = await request(app)
         .get('/api/groups')
         .set("Cookie", [
@@ -465,13 +466,21 @@ describe("getGroups", () => {
         ])
     expect(res.status).toBe(200)
     expect(res.body).toEqual(expect.objectContaining({
-      data: [group1, group2].map(group => {
-            return {
-              name: group.name,
-              members: group.members.map(member => { return {email: member.email}})
-            }
-          }
-      )
+      data: [
+        {
+          name: group1.name,
+          members: [
+            {email: user2.email, user: user2._id},
+            {email: user3.email, user: user3._id}
+          ]
+        },
+        {
+          name: group2.name,
+          members: [
+            {email: user4.email, user: user4._id}
+          ]
+        }
+      ]
     }))
   })
 })
