@@ -44,20 +44,20 @@
 | Invalid parameters| createTransaction | Unit | WB/ statement coverage |
 | Database Error Transaction| createTransaction | Unit | WB/ statement coverage |
 | User or Category not found| createTransaction | Unit | WB/ statement coverage |
-| Transaction created by user | createTransaction | Integration | WB/ Bottom Up |
-| Different url | createTransaction | Integration | WB/ Bottom Up |
-| Invalid parameters | createTransaction | Integration | WB/ Bottom Up |
-| Category dosen't exist | createTransaction | Integration | WB/ Bottom Up |
-| Unauthorized User | createTransaction | Integration | WB/ Bottom Up |
-| Transaction created by admin | createTransaction | Integration | WB/ Bottom Up |
-| Transaction for another user created by admin | createTransaction | Integration | WB/ Bottom Up |
+| Transaction created by user | createTransaction | Integration | BB/ Bottom Up |
+| Different url | createTransaction | Integration | BB/ Bottom Up |
+| Invalid parameters | createTransaction | Integration | BB/ Bottom Up |
+| Category dosen't exist | createTransaction | Integration | BB/ Bottom Up |
+| Unauthorized User | createTransaction | Integration | BB/ Bottom Up |
+| Transaction created by admin | createTransaction | Integration | BB/ Bottom Up |
+| Transaction for another user created by admin | createTransaction | Integration | BB/ Bottom Up |
 |--|--|--|--|
 | Successful Request | getAllTransactions | Unit | WB/ statement coverage |
 | Unauthorized Request | getAllTransactions | Unit | WB/ statement coverage |
 | Empty Request | getAllTransactions | Unit | WB/ statement coverage |
 | Database Error Request | getAllTransactions | Unit | WB/ statement coverage |
-| Retrieved all transactions | getAllTransactions | Integration | WB/ Bottom Up |
-| Unauthorized admin | getAllTransactions | Integration | WB/ Bottom Up |
+| Retrieved all transactions | getAllTransactions | Integration | BB/ Bottom Up |
+| Unauthorized admin | getAllTransactions | Integration | BB/ Bottom Up |
 |--|--|--|--|
 | Successful User Request | getTransactionsByUser | Unit | WB/ statement 
 | Unauthorized User Request | getTransactionsByUser | Unit | WB/ statement coverage |
@@ -65,10 +65,10 @@
 | Unauthorized Admin Request | getTransactionsByUser | Unit | WB/ statement coverage |
 | Inexistent User Request | getTransactionsByUser | Unit | WB/ statement coverage |
 | Database Error Request | getTransactionsByUser | Unit | WB/ statement coverage |
-| Successful user request | getTransactionsByUser | Integration | WB/ Bottom Up |
-| Unauthorized user request | getTransactionsByUser | Integration | WB/ Bottom Up |
-| Unauthorized admin request | getTransactionsByUser | Integration | WB/ Bottom Up |
-| User not found | getTransactionsByUser | Integration | WB/ Bottom Up |
+| Successful user request | getTransactionsByUser | Integration | BB/ Bottom Up |
+| Unauthorized user request | getTransactionsByUser | Integration | BB/ Bottom Up |
+| Unauthorized admin request | getTransactionsByUser | Integration | BB/ Bottom Up |
+| User not found | getTransactionsByUser | Integration | BB/ Bottom Up |
 |--|--|--|--|
 | Successful User Request | getTransactionsByUserByCategory | Unit | WB/ statement coverage |
 | Unauthorized User Request | getTransactionsByUserByCategory | Unit | WB/ statement coverage |
@@ -76,12 +76,12 @@
 | Unauthorized Admin Request | getTransactionsByUserByCategory | Unit | WB/ statement coverage |
 | Inexistent User or Category Request | getTransactionsByUserByCategory | Unit | WB/ statement coverage |
 | Database Error Request | getTransactionsByUserByCategory | Unit | WB/ statement coverage |
-| Successful user request | getTransactionsByUserByCategory | Integration | WB/ Bottom Up |
-| Unauthorized user request | getTransactionsByUserByCategory | Integration | WB/ Bottom Up |
-| Successful admin request | getTransactionsByUserByCategory | Integration | WB/ Bottom Up |
-| Unauthorized admin request | getTransactionsByUserByCategory | Integration | WB/ Bottom Up |
-| User not found request | getTransactionsByUserByCategory | Integration | WB/ Bottom Up |
-| Category not found request | getTransactionsByUserByCategory | Integration | WB/ Bottom Up |
+| Successful user request | getTransactionsByUserByCategory | Integration | BB/ Bottom Up |
+| Unauthorized user request | getTransactionsByUserByCategory | Integration | BB/ Bottom Up |
+| Successful admin request | getTransactionsByUserByCategory | Integration | BB/ Bottom Up |
+| Unauthorized admin request | getTransactionsByUserByCategory | Integration | BB/ Bottom Up |
+| User not found request | getTransactionsByUserByCategory | Integration | BB/ Bottom Up |
+| Category not found request | getTransactionsByUserByCategory | Integration | BB/ Bottom Up |
 |--|--|--|--|
 | Successful User Request | getTransactionsByGroup | Unit | WB/ statement coverage |
 | Unauthorized User Request | getTransactionsByGroup | Unit | WB/ statement coverage |
@@ -91,11 +91,11 @@
 | Database Error (Group) Request | getTransactionsByGroup | Unit | WB/ statement coverage |
 | Database Error (User) Request | getTransactionsByGroup | Unit | WB/ statement coverage |
 | Database Error (Aggregate) Request | getTransactionsByGroup | Unit | WB/ statement coverage |
-| Successful user request | getTransactionsByGroup | Integration | WB/ Bottom Up |
-| Unauthorized user request | getTransactionsByGroup | Integration | WB/ Bottom Up |
-| Successful admin request | getTransactionsByGroup | Integration | WB/ Bottom Up |
-| Unauthorized admin request | getTransactionsByGroup | Integration | WB/ Bottom Up |
-| Group not found | getTransactionsByGroup | Integration | WB/ Bottom Up |
+| Successful user request | getTransactionsByGroup | Integration | BB/ Bottom Up |
+| Unauthorized user request | getTransactionsByGroup | Integration | BB/ Bottom Up |
+| Successful admin request | getTransactionsByGroup | Integration | BB/ Bottom Up |
+| Unauthorized admin request | getTransactionsByGroup | Integration | BB/ Bottom Up |
+| Group not found | getTransactionsByGroup | Integration | BB/ Bottom Up |
 |--|--|--|--|
 | Successful User Request | getTransactionsByGroupByCategory | Unit | WB/ statement coverage |
 | Unauthorized User Request | getTransactionsByGroupByCategory | Unit | WB/ statement coverage |
@@ -105,12 +105,12 @@
 | Database Error (Group) Request | getTransactionsByGroupByCategory | Unit | WB/ statement coverage |
 | Database Error (User) Request | getTransactionsByGroupByCategory | Unit | WB/ statement coverage |
 | Database Error (Aggregate) Request | getTransactionsByGroupByCategory | Unit | WB/ statement coverage |
-| Successful user request | getTransactionsByGroupByCategory | Integration | WB/ Bottom Up |
-| Unauthorized user request | getTransactionsByGroupByCategory | Integration | WB/ Bottom Up |
-| Successful admin request | getTransactionsByGroupByCategory | Integration | WB/ Bottom Up |
-| Unauthorized admin request | getTransactionsByGroupByCategory | Integration | WB/ Bottom Up |
-| Group not found | getTransactionsByGroupByCategory | Integration | WB/ Bottom Up |
-| Category not found | getTransactionsByGroupByCategory | Integration | WB/ Bottom Up |
+| Successful user request | getTransactionsByGroupByCategory | Integration | BB/ Bottom Up |
+| Unauthorized user request | getTransactionsByGroupByCategory | Integration | BB/ Bottom Up |
+| Successful admin request | getTransactionsByGroupByCategory | Integration | BB/ Bottom Up |
+| Unauthorized admin request | getTransactionsByGroupByCategory | Integration | BB/ Bottom Up |
+| Group not found | getTransactionsByGroupByCategory | Integration | BB/ Bottom Up |
+| Category not found | getTransactionsByGroupByCategory | Integration | BB/ Bottom Up |
 |--|--|--|--|
 | Successful User Delete Transaction | deleteTransaction | Unit | WB/ statement coverage |
 | Unauthorized User | deleteTransaction | Unit | WB/ statement coverage |
@@ -118,22 +118,22 @@
 | Successful Admin transaction for different users | deleteTransaction | Unit | WB/ statement coverage |
 | Missing transaction attributes | deleteTransaction | Unit | WB/ statement coverage |
 | Database Error Transaction Request | deleteTransaction | Unit | WB/ statement coverage |
-| Transaction deleted by user | deleteTransaction | Integration | WB/ Bottom Up |
-| Transaction deleted by admin | deleteTransaction | Integration | WB/ Bottom Up |
-| User not authorized | deleteTransaction | Integration | WB/ Bottom Up |
-| User not found | deleteTransaction | Integration | WB/ Bottom Up |
-| Transaction not found | deleteTransaction | Integration | WB/ Bottom Up |
-| Missing ID | deleteTransaction | Integration | WB/ Bottom Up |
+| Transaction deleted by user | deleteTransaction | Integration | BB/ Bottom Up |
+| Transaction deleted by admin | deleteTransaction | Integration | BB/ Bottom Up |
+| User not authorized | deleteTransaction | Integration | BB/ Bottom Up |
+| User not found | deleteTransaction | Integration | BB/ Bottom Up |
+| Transaction not found | deleteTransaction | Integration | BB/ Bottom Up |
+| Missing ID | deleteTransaction | Integration | BB/ Bottom Up |
 |--|--|--|--|
 | Successful Request | deleteTransactions | Unit | WB/ statement coverage |
 | Unauthorized Request | deleteTransactions | Unit | WB/ statement coverage |
 | Invalid ID | deleteTransactions | Unit | WB/ statement coverage |
 | Empty Request | deleteTransactions | Unit | WB/ statement coverage |
 | Database Error Request | deleteTransactions | Unit | WB/ statement coverage |
-| Transactions deleted by admin | deleteTransactions | Integration | WB/ Bottom Up |
-| Unauthorized admin | deleteTransactions | Integration | WB/ Bottom Up |
-| Invalid transaction | deleteTransactions | Integration | WB/ Bottom Up |
-| Invalid ids | deleteTransactions | Integration | WB/ Bottom Up |
+| Transactions deleted by admin | deleteTransactions | Integration | BB/ Bottom Up |
+| Unauthorized admin | deleteTransactions | Integration | BB/ Bottom Up |
+| Invalid transaction | deleteTransactions | Integration | BB/ Bottom Up |
+| Invalid ids | deleteTransactions | Integration | BB/ Bottom Up |
 |||||
 
 # Coverage
@@ -146,11 +146,53 @@
 
 | Functional Requirements covered |   Test(s) | 
 | ------------------------------- | ----------- | 
-| FRx                             |             |             
-| FRy                             |             | 
-| ... ||
-
-
+|  FR1  | ------------- |
+| FR11 |  |
+| FR12|  |
+| FR13|  |
+| FR14 |  |
+| FR15 |  |
+| FR16 |  |
+| FR17 |  |
+| FR2   | ------------- |
+| FR21 |  |
+| FR22|  |
+| FR23|  |
+| FR24|  |
+| FR26|  |
+| FR28|  |
+|  FR3   | -------------|
+|FR31| Successful transaction creation by user | 
+| | Unauthorized transaction creation by user| 
+| | Different user request by user|
+| | Successful admin transaction creation for different user| 
+| | Invalid parameters|
+| | Database Error Transaction|
+| | User or Category not found|
+| | Transaction created by user |
+| | Different url |
+| | Invalid parameters |
+| | Category dosen't exist |
+| | Unauthorized User |
+| | Transaction created by admin | 
+| | Transaction for another user created by admin | 
+|FR32| Successful Request |
+|   |Unauthorized Request |
+|   |Empty Request |
+|   |Database Error Request |
+|   |Retrieved all transactions |
+|   |Unauthorized admin |
+| FR33|  |
+| FR34|  |
+| FR35|  |
+| FR36|  |
+| FR37|  |
+| FR38|  |
+|  FR4   | -------------|
+| FR41|  |
+| FR42|  |
+| FR43|  |
+| FR44 |  |
 
 ## Coverage white box
 
