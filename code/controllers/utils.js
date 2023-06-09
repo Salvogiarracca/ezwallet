@@ -214,7 +214,7 @@ export const handleAmountFilterParams = (req) => {
             return `{amount: {$gte: ${min}} }`;
         } else if (max) {
             if (isNaN(max)) {
-                throw new Error("min is not a number!");
+                throw new Error("max is not a number!");
             }
             return `{amount: {$lte: ${max}} }`;
         }
