@@ -52,6 +52,36 @@ describe("handleDateFilterParams", () => {
         const res = handleDateFilterParams(mockReq);
         expect(res).toEqual(expectedResponse);
     });
+
+    test('Test #6 - upTo before from', () => {
+        const mockReq = {
+            query: {from: '2023-04-01',
+                upTo: '2023-01-01'},
+        };
+        const expectedResponse= 'Invalid dates';
+        const res = handleDateFilterParams(mockReq);
+        expect(res).toEqual(expectedResponse);
+    });
+
+    test('Test #7 - upTo and from - Invalid date', () => {
+        const mockReq = {
+            query: {from: '01-01-2000',
+                upTo: '2023-01-01'},
+        };
+        const expectedResponse= 'Invalid date';
+        const res = handleDateFilterParams(mockReq);
+        expect(res).toEqual(expectedResponse);
+    });
+
+    test('Test #8 - upTo - Invalid date', () => {
+        const mockReq = {
+            query: {
+                upTo: '01-01-2000'},
+        };
+        const expectedResponse= 'Invalid date';
+        const res = handleDateFilterParams(mockReq);
+        expect(res).toEqual(expectedResponse);
+    });
 })
 
 describe("verifyAuth", () => { 
@@ -840,4 +870,33 @@ describe("handleAmountFilterParams", () => {
         const res = handleAmountFilterParams(mockReq);
         expect(res).toEqual(expectedResponse);
     });
+
+    test('Test #5, min bigger than max', () => {
+        const mockReq = {
+            query: {min: 200,
+                max: 20},
+        };
+        const expectedResponse = "min can't be bigger than max!";
+        const res = handleAmountFilterParams(mockReq);
+        expect(res).toEqual(expectedResponse);
+    });
+
+    test('Test #6, NaN (min)', () => {
+        const mockReq = {
+            query: {min: 'abcde'},
+        };
+        const expectedResponse = "min is not a number!";
+        const res = handleAmountFilterParams(mockReq);
+        expect(res).toEqual(expectedResponse);
+    });
+
+    test('Test #7, NaN (max)', () => {
+        const mockReq = {
+            query: {max: 'abcde'},
+        };
+        const expectedResponse = "max is not a number!";
+        const res = handleAmountFilterParams(mockReq);
+        expect(res).toEqual(expectedResponse);
+    });
+
 })
