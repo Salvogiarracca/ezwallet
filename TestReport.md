@@ -21,7 +21,7 @@
 ![Dependency Graph](./images/dependency_graph.png)   
 # Integration approach
     
-    Bottom-up integration: In this approach, integration starts with the lowest-level modules and progresses upward. The dependent modules are integrated first, followed by the main modules that depend on them. The sequence can be defined as:
+    Bottom-up integration: in this approach, integration starts with the lowest-level modules and progresses upwards. The independent modules are integrated first, followed by the main modules that depend on them. The sequence can be defined as:
     
     Step 1: Unit testing of lower-level functions (Auth.js and Utils.js) and lowest-level modules (models.js and User.js). WB/ statement coverage technique is used to define the test cases, covering all the possible statements.
     Step 2: Unit testing of higher-level functions (controller.js, users.js, and genericFunctions.js). WB/ statement coverage technique is used to define the test cases, covering all the possible statements.
