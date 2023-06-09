@@ -312,7 +312,7 @@ describe("verifyAuth", () => {
         }
 
         jwt.verify = jest.fn().mockImplementation(() => {throw new Error("TokenExpiredError");})
-                              .mockImplementation(decodedRefreshToken);
+                              .mockImplementation(() => decodedRefreshToken);
 
         // Call the function
         const result = verifyAuth(req, res, info);
