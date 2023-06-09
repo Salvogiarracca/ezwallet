@@ -20,12 +20,15 @@
 # Dependency graph 
 ![Dependency Graph](./images/dependency_graph.png)   
 # Integration approach
-
-    <Write here the integration sequence you adopted, in general terms (top down, bottom up, mixed) and as sequence
-    (ex: step1: unit A, step 2: unit A+B, step 3: unit A+B+C, etc)> 
-    <Some steps may  correspond to unit testing (ex step1 in ex above)>
-    <One step will  correspond to API testing, or testing unit route.js>
     
+    Bottom-up integration: In this approach, integration starts with the lowest-level modules and progresses upward. The dependent modules are integrated first, followed by the main modules that depend on them. The sequence can be defined as:
+    
+    Step 1: Unit testing of lower-level functions (Auth.js and Utils.js) and lowest-level modules (models.js and User.js). WB/ statement coverage technique is used to define the test cases, covering all the possible statements.
+    Step 2: Unit testing of higher-level functions (controller.js, users.js, and genericFunctions.js). WB/ statement coverage technique is used to define the test cases, covering all the possible statements.
+    Step 3: Integration testing of the lower-level modules (models.js and User.js) and higher-level functions (controller.js, users.js, and genericFunctions.js). 
+    Step 4: API testing of the routes.js file, verifying the correct interaction between the endpoints, functions, and modules.
+    Step 5: System testing of the application, verifying the correct interaction between the endpoints, functions, database, and modules.
+
 
 
 # Tests
