@@ -405,10 +405,31 @@
 | Functional Requirements covered | Test(s)                                              | 
 | ------------------------------- |------------------------------------------------------| 
 |  FR1  | -------------                                        |
-| FR11 |                                                      |
-| FR12|                                                      |
-| FR13|                                                      |
-| FR14 |                                                      |
+| FR11 | Successful user registration |
+|| Wrong email sent for user registration |
+|| Missing parameter for user registration: email |
+|| Missing parameter for user registration: username |
+|| Already existing username during user registration |
+|| Already existing email during user registration |
+
+| FR12| Successful log in |
+|| Missing parameter for correct log in operation: email |
+|| Sent an invalid log in email |
+|| Email not associated to any user: user not found error |
+|| Password mismatch during log in |
+
+| FR13| Successful log out operation |
+|| Sent user is not logged in |
+|| Sent user is not correct |
+
+| FR14 | Successuful admin registration |
+|| Wrong email sent for user registration |
+|| Missing parameter for user registration: email |
+|| Missing parameter for user registration: username |
+|| Already existing username during user registration |
+|| Already existing email during user registration |
+
+
 | FR15 |                                                      |
 | FR16 |                                                      |
 | FR17 |                                                      |
