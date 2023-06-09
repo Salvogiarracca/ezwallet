@@ -36,6 +36,20 @@ beforeEach(() => {
 });
 
 describe("getUsers", () => {
+  test("should handle errors and return a 500 code", async () => {
+    const mockReq = {}; // Mock the request object
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn()
+    }; // Mock the response object
+
+    jest.spyOn(utils, "verifyAuth").mockReturnValue({authorized: true, cause: "Authorized"})
+    jest.spyOn(User, "find").mockRejectedValue(new Error("Database error"))
+    await getUsers(mockReq, mockRes);
+
+    expect(mockRes.status).toHaveBeenCalledWith(500);
+    expect(mockRes.json).toHaveBeenCalledWith('Database error');
+  })
   test("should return empty list if there are no users", async () => {
     jest.spyOn(utils, "verifyAuth").mockReturnValue({ authorized: true, cause: "Authorized" })
     const mockReq = {
@@ -120,6 +134,21 @@ describe("getUsers", () => {
 })
 
 describe("getUser", () => {
+  test("should handle errors and return a 500 code", async () => {
+    jest.spyOn(utils, "verifyAuth").mockReturnValue({authorized: true, cause: "Authorized"})
+    const mockReq = {
+      params: { username: "testUser" }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn()
+    }; // Mock the response object
+    jest.spyOn(User, "findOne").mockRejectedValue(new Error("Database error"))
+    await getUser(mockReq, mockRes);
+
+    expect(mockRes.status).toHaveBeenCalledWith(500);
+    expect(mockRes.json).toHaveBeenCalledWith('Database error');
+  })
   test("should return caller user info", async () => {
     jest.spyOn(utils, "verifyAuth").mockReturnValue({ authorized: true, cause: "Authorized" })
     const fakeRes = {
@@ -242,6 +271,24 @@ describe("getUser", () => {
 })
 
 describe("createGroup", () => {
+  test("should handle errors and return a 500 code", async () => {
+    jest.spyOn(utils, "verifyAuth").mockReturnValue({authorized: true, cause: "Authorized"})
+    const mockReq = {
+      body: {
+        name: "testGroup",
+        memberEmails: ["testUser1@gmail.com"]
+      }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn()
+    }; // Mock the response object
+    jest.spyOn(Group, "findOne").mockRejectedValue(new Error("Database error"))
+    await createGroup(mockReq, mockRes);
+
+    expect(mockRes.status).toHaveBeenCalledWith(500);
+    expect(mockRes.json).toHaveBeenCalledWith('Database error');
+  })
   test("should create a new group", async () => {
     const user1 = {
       _id: "11111",
@@ -561,7 +608,19 @@ describe("createGroup", () => {
 })
 
 describe("getGroups", () => {
+  test("should handle errors and return a 500 code", async () => {
+    jest.spyOn(utils, "verifyAuth").mockReturnValue({authorized: true, cause: "Authorized"})
+    const mockReq = {}
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn()
+    }; // Mock the response object
+    jest.spyOn(Group, "find").mockRejectedValue(new Error("Database error"))
+    await getGroups(mockReq, mockRes);
 
+    expect(mockRes.status).toHaveBeenCalledWith(500);
+    expect(mockRes.json).toHaveBeenCalledWith('Database error');
+  })
   test("should fail if caller is not an Admin", async () => {
     jest.spyOn(utils, "verifyAuth").mockReturnValue({ authorized: false, cause: "Unauthorized" })
     const mockReq = {
@@ -626,7 +685,21 @@ describe("getGroups", () => {
 })
 
 describe("getGroup", () => {
+  test("should handle errors and return a 500 code", async () => {
+    jest.spyOn(utils, "verifyAuth").mockReturnValue({authorized: true, cause: "Authorized"})
+    const mockReq = {
+      params:{ name: "testGroup" }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn()
+    }; // Mock the response object
+    jest.spyOn(Group, "findOne").mockRejectedValue(new Error("Database error"))
+    await getGroup(mockReq, mockRes);
 
+    expect(mockRes.status).toHaveBeenCalledWith(500);
+    expect(mockRes.json).toHaveBeenCalledWith('Database error');
+  })
   test("should return own group info", async () => {
     const group1 = {
       name: "testGroup1",
@@ -784,6 +857,32 @@ describe("getGroup", () => {
 })
 
 describe("addToGroup", () => {
+  test("should handle errors and return a 500 code", async () => {
+    const group1 = {
+      name: "testGroup1",
+      members: [
+        {email: "testUser1@example.com", user: "11111"}
+      ]
+    }
+    jest.spyOn(utils, "verifyAuth").mockReturnValue({authorized: true, cause: "Authorized"})
+    const mockReq = {
+      params:{ name: "testGroup" },
+      body: {
+        emails: ["testUser1@example.com", "testUser2@example.com"]
+      },
+      originalUrl: "fakeRoute"
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn()
+    }; // Mock the response object
+    jest.spyOn(Group, "findOne").mockReturnValueOnce(group1)
+    jest.spyOn(Group, "find").mockReturnValueOnce([group1])
+    await addToGroup(mockReq, mockRes);
+
+    expect(mockRes.status).toHaveBeenCalledWith(500);
+    expect(mockRes.json).toHaveBeenCalledWith("invalid route");
+  })
   test("should add users to own group (User)", async () => {
     const user1 = {
       _id: "11111",
@@ -1436,7 +1535,33 @@ describe("addToGroup", () => {
 
 describe("removeFromGroup", () => {
   beforeEach(() => { jest.restoreAllMocks()})
+  test("should handle errors and return a 500 code", async () => {
+    const group1 = {
+      name: "testGroup1",
+      members: [
+        {email: "testUser1@example.com", user: "11111"},
+        {email: "testUser2@example.com", user: "22222"}
+      ]
+    }
+    jest.spyOn(utils, "verifyAuth").mockReturnValue({authorized: true, cause: "Authorized"})
+    const mockReq = {
+      params:{ name: "testGroup" },
+      body: {
+        emails: ["testUser1@example.com", "testUser2@example.com"]
+      },
+      originalUrl: "fakeRoute"
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn()
+    }; // Mock the response object
+    jest.spyOn(Group, "findOne").mockReturnValueOnce(group1)
+    jest.spyOn(Group, "find").mockReturnValueOnce([group1])
+    await removeFromGroup(mockReq, mockRes);
 
+    expect(mockRes.status).toHaveBeenCalledWith(500);
+    expect(mockRes.json).toHaveBeenCalledWith("invalid route");
+  })
   test("should remove a member of own group (User)", async () => {
     const user1 = {
       _id: "11111",
@@ -1966,6 +2091,23 @@ describe("removeFromGroup", () => {
 })
 
 describe("deleteUser", () => {
+  test("should handle errors and return a 500 code", async () => {
+    jest.spyOn(utils, "verifyAuth").mockReturnValue({authorized: true, cause: "Authorized"})
+    const mockReq = {
+      body: {
+        email: "testUser1@example.com"
+      }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn()
+    }; // Mock the response object
+    jest.spyOn(User, "findOne").mockRejectedValue(new Error("Database error"))
+    await deleteUser(mockReq, mockRes);
+
+    expect(mockRes.status).toHaveBeenCalledWith(500);
+    expect(mockRes.json).toHaveBeenCalledWith("Database error");
+  })
   test("should fail if the user is not an admin", async () => {
     jest.spyOn(utils, "verifyAuth").mockReturnValue({authorized: false, cause: "Unauthorized" })
     const mockReq = {
@@ -2189,6 +2331,23 @@ describe("deleteUser", () => {
 })
 
 describe("deleteGroup", () => {
+  test("should handle errors and return a 500 code", async () => {
+    jest.spyOn(utils, "verifyAuth").mockReturnValue({authorized: true, cause: "Authorized"})
+    const mockReq = {
+      body: {
+        name: "testGroup"
+      }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn()
+    }; // Mock the response object
+    jest.spyOn(Group, "findOne").mockRejectedValue(new Error("Database error"))
+    await deleteGroup(mockReq, mockRes);
+
+    expect(mockRes.status).toHaveBeenCalledWith(500);
+    expect(mockRes.json).toHaveBeenCalledWith("Database error");
+  })
   test("should fail if user is not an admin", async () => {
     jest.spyOn(utils, "verifyAuth").mockReturnValue({authorized: false, cause: "Unauthorized" })
     const mockReq = {

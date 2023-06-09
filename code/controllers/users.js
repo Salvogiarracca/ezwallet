@@ -412,7 +412,7 @@ export const addToGroup = async (req, res) => {
             }
         }
         default:
-          break
+          throw new Error("invalid route")
       }
     }
 
@@ -561,7 +561,7 @@ export const removeFromGroup = async (req, res) => {
           }
         }
         default:
-          break;
+          throw new Error("invalid route")
       }
     }
   } catch(err){
