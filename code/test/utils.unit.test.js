@@ -259,9 +259,7 @@ describe("verifyAuth", () => {
         }
 
         //The same reasoning applies for the response object: we must manually define the functions used and then check if they are called (and with which values)
-        const res = {
-            cookie: jest.fn()
-        } 
+        const res = {} 
 
         // Info object for the verifyAuth function
         const info = {
