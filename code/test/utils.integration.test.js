@@ -147,9 +147,6 @@ describe("verifyAuth", () => {
             body: {},
             cookies: { accessToken: accessToken, refreshToken: refreshToken }
         }
-        const cookieMock = (name, value, options) => {
-            res.cookieArgs = (name, value, options);
-        }
 
 
         //The same reasoning applies for the response object: we must manually define the functions used and then check if they are called (and with which values)
