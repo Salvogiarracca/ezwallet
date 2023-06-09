@@ -230,12 +230,9 @@ function checkDateValue(value) {
             return false
     }
     const ary = value.split('-');
-    const yyyy = ary[0];
-    const mm = ary[1];
-    const dd = ary[2];
-    if (isNaN(yyyy) || isNaN(dd) || isNaN(mm)) {
-            return false
-    }
+    const yyyy = parseInt(ary[0]);
+    const mm = parseInt(ary[1]);
+    const dd = parseInt(ary[2]);
     if (dd > 31) {
         return false
     }
@@ -248,7 +245,7 @@ function checkDateValue(value) {
         }
     }
     if ((mm === 4 || mm === 6 || mm === 9 || mm === 11) && (dd > 30)) {
-        return false
+        return false;
     }
     return true;
 }

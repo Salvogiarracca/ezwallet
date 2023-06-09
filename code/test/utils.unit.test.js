@@ -82,6 +82,66 @@ describe("handleDateFilterParams", () => {
         const res = handleDateFilterParams(mockReq);
         expect(res).toEqual(expectedResponse);
     });
+
+    test('Test #9 - upTo - dd > 31', () => {
+        const mockReq = {
+            query: {
+                upTo: '2000-01-32'},
+        };
+        const expectedResponse= 'Invalid date';
+        const res = handleDateFilterParams(mockReq);
+        expect(res).toEqual(expectedResponse);
+    });
+
+    test('Test #10 - upTo - mm > 12', () => {
+        const mockReq = {
+            query: {
+                upTo: '2000-13-31'},
+        };
+        const expectedResponse= 'Invalid date';
+        const res = handleDateFilterParams(mockReq);
+        expect(res).toEqual(expectedResponse);
+    });
+
+    test('Test #11 - wrong leap year', () => {
+        const mockReq = {
+            query: {
+                upTo: '2021-02-29'},
+        };
+        const expectedResponse= 'Invalid date';
+        const res = handleDateFilterParams(mockReq);
+        expect(res).toEqual(expectedResponse);
+    });
+
+    test('Test #12 - dd > 30 for april', () => {
+        const mockReq = {
+            query: {
+                upTo: '2021-04-31'},
+        };
+        const expectedResponse= 'Invalid date';
+        const res = handleDateFilterParams(mockReq);
+        expect(res).toEqual(expectedResponse);
+    });
+
+    test('Test #13 - upTo before from', () => {
+        const mockReq = {
+            query: {from: '2023-04-01',
+                upTo: '2022-01-01'},
+        };
+        const expectedResponse= 'Invalid dates';
+        const res = handleDateFilterParams(mockReq);
+        expect(res).toEqual(expectedResponse);
+    });
+
+    test('Test #14 - upTo before from', () => {
+        const mockReq = {
+            query: {from: '2023-04-04',
+                upTo: '2023-04-02'},
+        };
+        const expectedResponse= 'Invalid dates';
+        const res = handleDateFilterParams(mockReq);
+        expect(res).toEqual(expectedResponse);
+    });
 })
 
 describe("verifyAuth", () => { 
