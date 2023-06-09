@@ -4,11 +4,11 @@ import { app } from '../app';
 import jwt from 'jsonwebtoken';
 import { User } from '../models/User.js';
 import { login, logout, register, registerAdmin } from '../controllers/auth';
-import { verifyEmail } from '../controllers/genericFunctions';
+import { verifyEmail } from '../controllers/genericFunctions.js';
 const bcrypt = require("bcryptjs")
 
 jest.mock("bcryptjs")
-jest.mock("../controllers/genericFunctions")
+jest.mock("../controllers/genericFunctions.js")
 jest.mock('../models/User.js');
 jest.mock("jsonwebtoken");
 
@@ -18,11 +18,80 @@ jest.mock("jsonwebtoken");
  * Not doing this `mockClear()` means that test cases may use a mock implementation intended for other test cases.
  */
 beforeEach(() => {
-    jest.restoreAllMocks();
+    jest.clearAllMocks();
+    jest.restoreAllMocks()
+    //additional `mockClear()` must be placed here
 });
 
-describe('register', () => { 
+describe('register', () => {
+    test('should handle errors and return a 500 code', async () => {
+        const sentUser = {
+            username : "Pippo",
+            email : "s239834@studenti.polito.it",
+            password : "12345"
+        };
 
+        //Since we are calling the function directly, we need to manually define a request object with all the necessary parameters (route params, body, cookies, url)
+        const mockReq = {
+            body: sentUser
+        }
+
+        //The same reasoning applies for the response object: we must manually define the functions used and then check if they are called (and with which values)
+        const mockRes = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn(),
+            locals: {
+                //The name can also be message, what matters is consistency with the one used in the code
+                refreshedTokenMessage: ""
+            }
+        };
+
+        jest.spyOn(User, "findOne").mockRejectedValue(new Error("Database error"));
+        await register(mockReq, mockRes)
+        expect(mockRes.status).toHaveBeenCalledWith(500)
+        expect(mockRes.json).toHaveBeenCalledWith("Database error")
+
+    })
+    test('should fail if email is not valid', async () => {
+        const sentUser = {
+            username : "Pippo",
+            email : "s239834studenti.polito.it",
+            password : "12345"
+        };
+        const createdUser = {
+            id: "1",
+            username : "Pippo",
+            email : "s239834@studenti.polito.it",
+            password : "12345",
+            refreshToken: "",
+            role: "Regular"
+        };
+
+        //Since we are calling the function directly, we need to manually define a request object with all the necessary parameters (route params, body, cookies, url)
+        const mockReq = {
+            body: sentUser
+        }
+
+        //The same reasoning applies for the response object: we must manually define the functions used and then check if they are called (and with which values)
+        const mockRes = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn(),
+            locals: {
+                //The name can also be message, what matters is consistency with the one used in the code
+                refreshedTokenMessage: ""
+            }
+        };
+
+        // Mock DB-realted functions
+        User.findOne.mockResolvedValue(false);
+        User.create.mockResolvedValue(createdUser);
+        await register(mockReq, mockRes)
+        expect(mockRes.status).toHaveBeenCalledWith(400)
+        expect(mockRes.json).toHaveBeenCalledWith({
+            error: "The used email is not valid, please check it."
+        })
+
+    })
     // Regular user insertion tests
     test('Regular user registration', async () => {
         const mockUser = {};
@@ -211,8 +280,76 @@ describe('register', () => {
     });
 });
 
-describe("registerAdmin", () => { 
+describe("registerAdmin", () => {
+    test('should handle errors and return a 500 code', async () => {
+        const sentUser = {
+            username : "PlutoAdmin",
+            email : "a392892studenti.polito.it",
+            password : "12345"
+        }
+        //Since we are calling the function directly, we need to manually define a request object with all the necessary parameters (route params, body, cookies, url)
+        const mockReq = {
+            body: sentUser
+        }
 
+        //The same reasoning applies for the response object: we must manually define the functions used and then check if they are called (and with which values)
+        const mockRes = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn(),
+            locals: {
+                //The name can also be message, what matters is consistency with the one used in the code
+                refreshedTokenMessage: ""
+            }
+        };
+
+        jest.spyOn(User, "findOne").mockRejectedValue(new Error("Database error"));
+        await register(mockReq, mockRes)
+        expect(mockRes.status).toHaveBeenCalledWith(500)
+        expect(mockRes.json).toHaveBeenCalledWith("Database error")
+
+    })
+    test('should fail if email is not valid', async () => {
+        const sentUser = {
+            username : "PlutoAdmin",
+            email : "a392892@studenti.polito.it",
+            password : "12345"
+        };
+
+        const createdUser = {
+            id: "1",
+            username : "PlutoAdmin",
+            email : "a392892@studenti.polito.it",
+            password : "12345",
+            refreshToken: "",
+            role: "Admin"
+        };
+
+        //Since we are calling the function directly, we need to manually define a request object with all the necessary parameters (route params, body, cookies, url)
+        const mockReq = {
+            body: sentUser
+        }
+
+        //The same reasoning applies for the response object: we must manually define the functions used and then check if they are called (and with which values)
+        const mockRes = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn(),
+            locals: {
+                //The name can also be message, what matters is consistency with the one used in the code
+                refreshedTokenMessage: ""
+            }
+        };
+
+        // Mock DB-realted functions
+        User.findOne.mockResolvedValueOnce(false);
+        User.findOne.mockResolvedValueOnce(false);
+        User.create.mockResolvedValue(createdUser);
+        await register(mockReq, mockRes)
+        expect(mockRes.status).toHaveBeenCalledWith(400)
+        expect(mockRes.json).toHaveBeenCalledWith({
+            error: "The used email is not valid, please check it."
+        })
+
+    })
     // Administrator insertion tests
     test('Regular admin registration', async () => {
         const mockUser = {};
@@ -514,6 +651,35 @@ describe('login', () => {
         }));
     });
 
+    test('Invalid email', async () => {
+        // Sent credentials
+        const sentUser = {
+            email : "notAnEmail.com",
+            password : "12345"
+        };
+
+        //Since we are calling the function directly, we need to manually define a request object with all the necessary parameters (route params, body, cookies, url)
+        const req = {
+            body: sentUser
+        }
+
+        //The same reasoning applies for the response object: we must manually define the functions used and then check if they are called (and with which values)
+        const res = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn(),
+            cookies: jest.fn(),
+            locals: {
+                //The name can also be message, what matters is consistency with the one used in the code
+                refreshedTokenMessage: ""
+            }
+        };
+
+        await login(req, res);
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
+            error: "The email is not valid, please check it"
+        }));
+    });
     
     test('Log in error test: User not found #1', async () => {
         const mockUser = {};

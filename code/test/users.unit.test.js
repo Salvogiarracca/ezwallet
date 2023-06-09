@@ -319,6 +319,7 @@ describe("createGroup", () => {
       body: {
         name: "testGroup",
         memberEmails: [
+          "testUser1@example.com",
           "testUser2@example.com",
           "testUser3@example.com",
           "testUser4@example.com"
@@ -343,6 +344,7 @@ describe("createGroup", () => {
 
 
     jest.spyOn(User, "findOne").mockResolvedValueOnce(user1)
+        .mockResolvedValueOnce(user1)
         .mockResolvedValueOnce(user3) //toadd
         .mockResolvedValueOnce(null) //notExist
         .mockResolvedValueOnce(user2) //inGroup
@@ -361,8 +363,8 @@ describe("createGroup", () => {
         group: fakeRes,
         alreadyInGroup: [{ email: user2.email }],
         membersNotFound: [{ email: user4.email }],
-      }
-
+      },
+      refreshedTokenMessage: mockRes?.locals?.refreshedTokenMessage
     }))
   })
 

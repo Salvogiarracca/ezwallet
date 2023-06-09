@@ -145,7 +145,7 @@ export const createGroup = async (req, res) => {
           notFoundEmails.push({ email: member });
 
         } else if (member === req_issuer.email){
-          //do nothing
+          continue;
         } else if(emailsInGroup.includes(member)){
           ///if user is already in a group
           alreadyInGroup.push({ email: member });
