@@ -142,6 +142,10 @@ export const updateCategory = async (req, res) => {
           //one category in db, deletion not possible
           throw new Error("Only one category, deletion not possible!");
         }
+        if(nCat < types.length){
+          //one category in db, deletion not possible
+          throw new Error("More categories to delete than actual!");
+        }
     
         for (const str of types) {
           //check array in req.body
@@ -168,7 +172,7 @@ export const updateCategory = async (req, res) => {
           });
         }
     
-        else if (nCat === nT) {
+        else{
           // N == T
           const oldestCat = await categories.find().sort({createdAt: 1}).limit(1);
           const typesRemove = types.filter(word => word !== oldestCat[0].type);

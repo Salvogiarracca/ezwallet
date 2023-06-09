@@ -796,7 +796,7 @@ describe("deleteCategory", () => {
     expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
   });
 
-  test("Unauthorized (no access token) [deleteCategory] - Test #7", async () => {
+  test("Unauthorized (no access token) [deleteCategory] - Test #9", async () => {
     const mockReq = {
       params: {username: "testuser"},
       body: {
@@ -822,6 +822,35 @@ describe("deleteCategory", () => {
     });
     await deleteCategory(mockReq, mockRes);
     expect(mockRes.status).toHaveBeenCalledWith(401);
+    expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
+  });
+
+  test("Fail N<T [deleteCategory] - Test #10", async () => {
+    const mockReq = {
+      params: {username: "testuser"},
+      body: {types: ["fuel", "test", "supermarket", "pharmacy"]},
+      cookies: {
+        accessToken: "adminAccessTokenValid",
+        refreshToken: "adminRefreshTokenValid",
+      },
+    };
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn()
+    };
+    const expectedResponse = {
+      error: "More categories to delete than actual!",
+    };
+    verifyAuth.mockImplementation((mockReq, mockRes, params) => {
+      if (params.authType == "Admin") {
+        return {authorized: true, cause: "authorized"};
+      } else {
+        return {authorized: false, cause: "authorized"};
+      }
+    });
+    jest.spyOn(categories, 'countDocuments').mockImplementation(() => 2);
+    await deleteCategory(mockReq, mockRes);
+    expect(mockRes.status).toHaveBeenCalledWith(400);
     expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
   });
 });

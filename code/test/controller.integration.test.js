@@ -906,6 +906,38 @@ describe("deleteCategory", () => {
           //done();
         });
   });
+
+  test("Fail N<T", async () => {
+    const mockReq = { types: ['test', "fuel", "bills"] };
+    const oldCategories = [{
+      type: "test",
+      color: "#ff1234"
+    },
+      {
+        type: "fuel",
+        color: "#ff1234"
+      },
+    ];
+    await categories.insertMany(oldCategories);
+    await request(app)
+        .delete("/api/categories") //Route to call
+        .set(
+            "Cookie",
+            `accessToken=${adminAccessTokenValid}; refreshToken=${adminAccessTokenValid}`
+        ) //Setting cookies in the request
+        .send(mockReq) //Definition of the request body
+        .then((response) => {
+          //After obtaining the response, we check its actual body content
+          //The status must represent successful execution
+          expect(response.status).toBe(400);
+          //The "data" object must have a field named "message" that confirms that changes are successful
+          //The actual value of the field could be any string, so it's not checked
+          expect(response.body).toHaveProperty("error");
+          expect(response.body).toHaveProperty("error", "More categories to delete than actual!")
+          //Must be called at the end of every test or the test will fail while waiting for it to be called
+          //done();
+        });
+  });
 });
 
 describe("getCategories", () => {
