@@ -5,6 +5,7 @@ import { Group, User } from "../models/User";
 import mongoose, { Model } from "mongoose";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
+import {verifyAuth} from "../controllers/utils.js";
 
 dotenv.config();
 
@@ -226,6 +227,36 @@ describe("createCategory", () => {
         });
   });
 
+  test("No access token", async () => {
+    const testAdmin = {
+      username: "test",
+      email: "test@test.com",
+      password: "notadmin",
+      refreshToken: testerAccessTokenValid,
+    };
+    const testCategory = {
+      type: 'test',
+      color: '#ff0000',
+    };
+    await request(app)
+        .post("/api/categories") //Route to call
+        .set(
+            "Cookie",
+            `refreshToken=${testerAccessTokenValid}`
+        ) //Setting cookies in the request
+        .send(testCategory) //Definition of the request body
+        .then((response) => {
+          //After obtaining the response, we check its actual body content
+          //The status must represent successful execution
+          expect(response.status).toBe(401);
+          //The "data" object must have a field named "message" that confirms that changes are successful
+          //The actual value of the field could be any string, so it's not checked
+          expect(response.body).toHaveProperty("message");
+          //Must be called at the end of every test or the test will fail while waiting for it to be called
+          //done();
+        });
+  });
+
 });
 
 describe("updateCategory", () => {
@@ -412,6 +443,35 @@ describe("updateCategory", () => {
           //The actual value of the field could be any string, so it's not checked
           expect(response.body).toHaveProperty("message");
           expect(response.body).toHaveProperty("count");
+          //Must be called at the end of every test or the test will fail while waiting for it to be called
+          //done();
+        });
+  });
+
+  test("Missing access token", async () => {
+    const testCategory = {
+      type: 'test',
+      color: '#ff0000',
+    };
+    const newValues = {
+      type: 'newType',
+      color: '#ff0000',
+    };
+    await categories.create(testCategory)
+    await request(app)
+        .patch("/api/categories/" + testCategory.type) //Route to call
+        .set(
+            "Cookie",
+            `refreshToken=${testerAccessTokenValid}`
+        ) //Setting cookies in the request
+        .send(newValues) //Definition of the request body
+        .then((response) => {
+          //After obtaining the response, we check its actual body content
+          //The status must represent successful execution
+          expect(response.status).toBe(401);
+          //The "data" object must have a field named "message" that confirms that changes are successful
+          //The actual value of the field could be any string, so it's not checked
+          expect(response.body).toHaveProperty("message");
           //Must be called at the end of every test or the test will fail while waiting for it to be called
           //done();
         });
@@ -804,6 +864,48 @@ describe("deleteCategory", () => {
           //done();
         });
   });
+
+  test("Category created by unauthorized user (missing accessToken)", async () => {
+    const mockReq = { types: ['test', "fuel"] };
+    const oldCategories = [{
+      type: "test",
+      color: "#ff1234"
+    },
+      {
+        type: "fuel",
+        color: "#ff1234"
+      },
+      {
+        type: "supermarket",
+        color: "#ff1234"
+      },
+      {
+        type: "bills",
+        color: "#ff1234"
+      },
+      {
+        type: "pharmacy",
+        color: "#ff1234"
+      }]
+    await categories.insertMany(oldCategories)
+    await request(app)
+        .delete("/api/categories") //Route to call
+        .set(
+            "Cookie",
+            `refreshToken=${testerAccessTokenValid}`
+        ) //Setting cookies in the request
+        .send(mockReq) //Definition of the request body
+        .then((response) => {
+          //After obtaining the response, we check its actual body content
+          //The status must represent successful execution
+          expect(response.status).toBe(401);
+          //The "data" object must have a field named "message" that confirms that changes are successful
+          //The actual value of the field could be any string, so it's not checked
+          expect(response.body).toHaveProperty("message");
+          //Must be called at the end of every test or the test will fail while waiting for it to be called
+          //done();
+        });
+  });
 });
 
 describe("getCategories", () => {
@@ -894,6 +996,38 @@ describe("getCategories", () => {
               //Must be called at the end of every test or the test will fail while waiting for it to be called
               //done();
           });
+  });
+
+  test("No access token", async () => {
+    const testCategories = [
+      {
+        type: "test",
+        color: "#ff0000",
+      },
+      {
+        type: "fuel",
+        color: "#002aff",
+      },
+    ];
+    await categories.insertMany(testCategories);
+    await request(app)
+        .get("/api/categories") //Route to call
+        .set(
+            "Cookie",
+            `refreshToken=${testerAccessTokenEmpty}`
+        ) //Setting cookies in the request
+        .send()
+        .then((response) => {
+          //After obtaining the response, we check its actual body content
+          //The status must represent successful execution
+          //console.log(response)
+          expect(response.status).toBe(401);
+          //The "data" object must have a field named "message" that confirms that changes are successful
+          //The actual value of the field could be any string, so it's not checked
+          expect(response.body).toHaveProperty("message");
+          //Must be called at the end of every test or the test will fail while waiting for it to be called
+          //done();
+        });
   });
 });
 

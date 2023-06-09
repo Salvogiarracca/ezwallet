@@ -208,6 +208,40 @@ describe("createCategory", () => {
     expect(mockRes.status).toHaveBeenCalledWith(400);
     expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
   });
+
+  test("Missing access token [createCategory] - Test #6", async () => {
+    const testCategory = {
+      type: "investment",
+      color: "#ff0000",
+    };
+    const expectedResponse = {
+      message: "Unauthorized",
+    };
+    const mockReq = {
+      body: testCategory,
+      params: { username: "Pippo" },
+      cookies: {
+        accessToken: "adminAccessTokenValid",
+        refreshToken: "adminRefreshTokenValid",
+      },
+    };
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+
+    jest.spyOn(categories.prototype, "save").mockResolvedValue(testCategory);
+    verifyAuth.mockImplementation((mockReq, mockRes, params) => {
+      if (params.authType == "Admin") {
+        return { authorized: false, cause: "unauthorized" };
+      } else {
+        return { authorized: false, cause: "unauthorized" };
+      }
+    });
+    await createCategory(mockReq, mockRes);
+    expect(mockRes.status).toHaveBeenCalledWith(401);
+    expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
+  });
 });
 
 describe("updateCategory", () => {
@@ -464,6 +498,36 @@ describe("updateCategory", () => {
     });
     await updateCategory(mockReq, mockRes);
     expect(mockRes.status).toHaveBeenCalledWith(400);
+    expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
+  });
+
+  test("No access token [updateCategory] - Test #9", async () => {
+    const mockReq = {
+      params: { username: "testuser", type: "noexist" },
+      body: { type: "investment", color: "#ff0000" },
+      cookies: {
+        refreshToken: "adminRefreshTokenValid",
+      },
+    };
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+    const expectedResponse = {
+      message: "Unauthorized",
+    };
+    verifyAuth.mockImplementation((mockReq, mockRes, params) => {
+      if (params.authType == "Admin") {
+        return { authorized: false, cause: "Unauthorized" };
+      } else {
+        return { authorized: false, cause: "Unauthorized" };
+      }
+    });
+    jest
+        .spyOn(categories, "findOne")
+        .mockReturnValue({ type: "exists", color: "#ffffff" });
+    await updateCategory(mockReq, mockRes);
+    expect(mockRes.status).toHaveBeenCalledWith(401);
     expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
   });
 });
@@ -731,6 +795,35 @@ describe("deleteCategory", () => {
     expect(mockRes.status).toHaveBeenCalledWith(400);
     expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
   });
+
+  test("Unauthorized (no access token) [deleteCategory] - Test #7", async () => {
+    const mockReq = {
+      params: {username: "testuser"},
+      body: {
+        types: ["fuel", "investment", "supermarket", "test"],
+      },
+      cookies: {
+        refreshToken: "adminRefreshTokenValid",
+      },
+    };
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn()
+    }
+    const expectedResponse = {
+      message: 'Unauthorized'
+    };
+    verifyAuth.mockImplementation((mockReq, mockRes, params) => {
+      if (params.authType == "Admin") {
+        return {authorized: false, cause: "Unauthorized"};
+      } else {
+        return {authorized: false, cause: "Unauthorized"};
+      }
+    });
+    await deleteCategory(mockReq, mockRes);
+    expect(mockRes.status).toHaveBeenCalledWith(401);
+    expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
+  });
 });
 
 
@@ -872,6 +965,88 @@ describe("getCategories", () => {
     await getCategories(mockReq, mockRes);
     expect(categories.find).toHaveBeenCalled();
     expect(mockRes.status).toHaveBeenCalledWith(200);
+    expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
+  });
+
+  test("Unauthorized Request (no accessToken) [getCategories] - Test #4", async () => {
+    const mockReq = {
+      params: { username: "testuser" },
+      cookies: {
+        refreshToken: "adminRefreshTokenValid",
+      },
+    };
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+    const retrievedCategories = [
+      {
+        type: "investment",
+        color: "#fc0123",
+      },
+      {
+        type: "supermarket",
+        color: "#0090ff",
+      },
+      {
+        type: "fuel",
+        color: "#64ff63",
+      },
+    ];
+    const expectedResponse = {
+      message: "Unauthorized",
+    };
+    verifyAuth.mockImplementation((mockReq, mockRes, params) => {
+      if (params.authType == "Simple") {
+        return { authorized: false, cause: "unauthorized" };
+      } else {
+        return { authorized: false, cause: "unauthorized" };
+      }
+    });
+    jest
+        .spyOn(categories, "find")
+        .mockResolvedValue(retrievedCategories);
+    await getCategories(mockReq, mockRes);
+    expect(categories.find).not.toHaveBeenCalled();
+    expect(mockRes.status).toHaveBeenCalledWith(401);
+    expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
+  });
+
+  test("Generic error [getCategories] - Test #5", async () => {
+    const mockReq = {
+      params: { username: "testuser" },
+      cookies: {
+        accessToken: "adminAccessTokenValid",
+        refreshToken: "adminRefreshTokenValid",
+      },
+    };
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+    const retrievedCategories = [
+      {
+        type: "investment",
+        color: "#fc0123",
+      },
+      {
+        type: "supermarket",
+        color: "#0090ff",
+      },
+      {
+        type: "fuel",
+        color: "#64ff63",
+      },
+    ];
+    const expectedResponse = {
+      error: "generic error",
+    };
+    verifyAuth.mockImplementation((mockReq, mockRes, params) => {
+      throw new Error("generic error")
+    });
+    await getCategories(mockReq, mockRes);
+    expect(categories.find).not.toHaveBeenCalled();
+    expect(mockRes.status).toHaveBeenCalledWith(400);
     expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
   });
 
