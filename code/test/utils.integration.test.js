@@ -134,6 +134,10 @@ describe("verifyAuth", () => {
             password: "12345"
         };
 
+        const cookieMock = (name, value, options) => {
+            res.cookieArgs = { name, value, options };
+        }
+
         const response = await request(app).post("/api/login").send(registeredUserSent);
         const accessToken = newExpiringToken("Topolino", "s127896@studenti.polito.it", "Regular")
         const refreshToken = response.body.data.refreshToken;
@@ -145,7 +149,10 @@ describe("verifyAuth", () => {
         }
 
         //The same reasoning applies for the response object: we must manually define the functions used and then check if they are called (and with which values)
-        const res = { cookies : {} } 
+        const res = {
+            cookie: cookieMock,
+            locals: {},
+        }
 
         // Info object for the verifyAuth function
         const info = {
@@ -247,6 +254,10 @@ describe("verifyAuth", () => {
             password: "12345"
         };
 
+        const cookieMock = (name, value, options) => {
+            res.cookieArgs = { name, value, options };
+        }
+
         const response = await request(app).post("/api/login").send(registeredUserSent);
         const accessToken = newExpiringToken("Topolino", "s127896@studenti.polito.it", "Regular")
         const refreshToken = response.body.data.refreshToken;
@@ -258,7 +269,10 @@ describe("verifyAuth", () => {
         }
 
         //The same reasoning applies for the response object: we must manually define the functions used and then check if they are called (and with which values)
-        const res = {} 
+        const res = {
+            cookie: cookieMock,
+            locals: {},
+        }
 
         // Info object for the verifyAuth function
         const info = {
@@ -306,11 +320,15 @@ describe("verifyAuth", () => {
         expect(result).toHaveProperty("cause");
     });
 
-    test('Administrator authentication: access token expired and correct username', async () => {
+    test('Administrator authentication: access token expired and correct role', async () => {
         const registeredUserSent = {
             email: "a334278@studenti.polito.it",
             password: "12345"
         };
+
+        const cookieMock = (name, value, options) => {
+            res.cookieArgs = { name, value, options };
+        }
 
         const response = await request(app).post("/api/login").send(registeredUserSent);
         const accessToken = newExpiringToken("Pluto", "a334278@studenti.polito.it", "Admin")
@@ -323,12 +341,14 @@ describe("verifyAuth", () => {
         }
 
         //The same reasoning applies for the response object: we must manually define the functions used and then check if they are called (and with which values)
-        const res = {} 
+        const res = {
+            cookie: cookieMock,
+            locals: {},
+        }
 
         // Info object for the verifyAuth function
         const info = {
-            authType: "Admin",
-            username: "Pluto"
+            authType: "Admin"
         }
         
         // Call the function
@@ -339,7 +359,7 @@ describe("verifyAuth", () => {
         expect(result).toHaveProperty("cause");
     });
 
-    test('Administrator authentication: username of token doesnt match the request #1', async () => {  
+    test('Administrator authentication: role of token doesnt match the request #1', async () => {  
         const registeredUserSent = {
             email: "a334278@studenti.polito.it",
             password: "12345"
@@ -378,7 +398,7 @@ describe("verifyAuth", () => {
         expect(result).toHaveProperty("cause");
     });
 
-    test('Administrator authentication: username of token doesnt match the request #2', async () => {  
+    test('Administrator authentication: role of token doesnt match the request #2', async () => {  
         const registeredUserSent = {
             email: "a334278@studenti.polito.it",
             password: "12345"
@@ -417,15 +437,19 @@ describe("verifyAuth", () => {
         expect(result).toHaveProperty("cause");
     });
 
-    test('Administrator authentication: access token expired and incorrect username', async () => {
-        const registeredUserSent = {
-            email: "a334278@studenti.polito.it",
+    test('Administrator authentication: access token expired and incorrect role', async () => {
+        const errorUser = {
+            email: "s127896@studenti.polito.it",
             password: "12345"
-        };
+        }
 
-        const response = await request(app).post("/api/login").send(registeredUserSent);
+        const cookieMock = (name, value, options) => {
+            res.cookieArgs = { name, value, options };
+        }
+        
+        const errResponse = await request(app).post("/api/login").send(errorUser);
         const accessToken = newExpiringToken("Pluto", "a334278@studenti.polito.it", "Admin")
-        const refreshToken = response.body.data.refreshToken;
+        const refreshToken = errResponse.body.data.refreshToken;
 
         //Since we are calling the function directly, we need to manually define a request object with all the necessary parameters (route params, body, cookies, url)
         const req = {
@@ -434,12 +458,14 @@ describe("verifyAuth", () => {
         }
 
         //The same reasoning applies for the response object: we must manually define the functions used and then check if they are called (and with which values)
-        const res = {} 
+        const res = {
+            cookie: cookieMock,
+            locals: {},
+        } 
 
         // Info object for the verifyAuth function
         const info = {
-            authType: "Admin",
-            username: "Pippo"
+            authType: "Admin"
         }
         
         // Call the function
@@ -489,6 +515,10 @@ describe("verifyAuth", () => {
             password: "12345"
         };
 
+        const cookieMock = (name, value, options) => {
+            res.cookieArgs = { name, value, options };
+        }
+
         const response = await request(app).post("/api/login").send(registeredUserSent);
         const accessToken = newExpiringToken("Pluto", "a334278@studenti.polito.it", "Admin")
         const refreshToken = response.body.data.refreshToken;
@@ -500,8 +530,10 @@ describe("verifyAuth", () => {
         }
 
         //The same reasoning applies for the response object: we must manually define the functions used and then check if they are called (and with which values)
-        const res = {} 
-
+        const res = {
+            cookie: cookieMock,
+            locals: {},
+        }
         // Info object for the verifyAuth function
         const info = {
             authType: "Group",
@@ -602,6 +634,10 @@ describe("verifyAuth", () => {
             password: "12345"
         };
 
+        const cookieMock = (name, value, options) => {
+            res.cookieArgs = { name, value, options };
+        }
+
         const response = await request(app).post("/api/login").send(registeredUserSent);
         const accessToken = newExpiringToken("Pluto", "a334278@studenti.polito.it", "Admin")
         const refreshToken = response.body.data.refreshToken;
@@ -613,7 +649,10 @@ describe("verifyAuth", () => {
         }
 
         //The same reasoning applies for the response object: we must manually define the functions used and then check if they are called (and with which values)
-        const res = {} 
+        const res = {
+            cookie: cookieMock,
+            locals: {},
+        }
 
         // Info object for the verifyAuth function
         const info = {

@@ -115,7 +115,7 @@ export const registerAdmin = async (req, res) => {
 
         res.status(200).json(returnValue);
     } catch (err) {
-        res.status(500).json({ error: err });
+        res.status(400).json({ error: err.message });
     }
 
 }
@@ -187,7 +187,7 @@ export const login = async (req, res) => {
         res.status(200).json({ data: { accessToken: accessToken, refreshToken: refreshToken }})
     
     } catch (error) {
-        res.status(400).json({ error: error })
+        res.status(400).json({ error: error.message })
     }
 }
 
@@ -230,7 +230,7 @@ export const logout = async (req, res) => {
             res.status(400).json({ error: "User is already logged out of the system" });
         }
         else {
-            res.status(400).json({ error: error})
+            res.status(400).json({ error: error.message })
         }
     }
 }
