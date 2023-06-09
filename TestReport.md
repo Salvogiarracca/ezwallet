@@ -267,6 +267,7 @@
 
 Report here the screenshot of coverage values obtained with jest-- coverage 
 
+![coverage_results](./images/coverage_results.png) 
 
 
 
