@@ -18,9 +18,7 @@
 
 
 # Dependency graph 
-
-     <report the here the dependency graph of EzWallet>
-     
+![Dependency Graph](./images/dependency_graph.png)   
 # Integration approach
 
     <Write here the integration sequence you adopted, in general terms (top down, bottom up, mixed) and as sequence
