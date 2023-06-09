@@ -639,6 +639,6 @@ describe("verifyAuth", () => {
 
 describe("handleAmountFilterParams", () => { 
     test('Dummy test, change it', () => {  
-        expect(true).toBe(true);  
+        expect(true).toBe(true);
     });
 })
