@@ -29,3 +29,6 @@ services:
       dockerfile: test.Dockerfile
     depends_on:
       - app
+    environment:
+      - MONGO_URI=mongodb://db:27017
+

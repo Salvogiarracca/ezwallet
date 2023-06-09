@@ -1741,7 +1741,7 @@ describe("removeFromGroup", () => {
     }))
   })
 
-  test("should not add users to a group and suggests to change api (Admin)", async () => {
+  test("should not remove users from group and suggests to change api (Admin)", async () => {
     const user1 = {
       _id: "11111",
       username: "testUser1",

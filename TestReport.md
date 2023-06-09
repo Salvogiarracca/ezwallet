@@ -402,142 +402,177 @@
 
 <Report in the following table the coverage of  functional requirements (from official requirements) >
 
-| Functional Requirements covered | Test(s)                                              | 
-| ------------------------------- |------------------------------------------------------| 
-|  FR1  | -------------                                        |
-| FR11 | Successful user registration |
-|| Wrong email sent for user registration |
-|| Missing parameter for user registration: email |
-|| Missing parameter for user registration: username |
-|| Already existing username during user registration |
-|| Already existing email during user registration |
-
-| FR12| Successful log in |
-|| Missing parameter for correct log in operation: email |
-|| Sent an invalid log in email |
-|| Email not associated to any user: user not found error |
-|| Password mismatch during log in |
-
-| FR13| Successful log out operation |
-|| Sent user is not logged in |
-|| Sent user is not correct |
-
-| FR14 | Successuful admin registration |
-|| Wrong email sent for user registration |
-|| Missing parameter for user registration: email |
-|| Missing parameter for user registration: username |
-|| Already existing username during user registration |
-|| Already existing email during user registration |
-
-
-| FR15 |                                                      |
-| FR16 |                                                      |
-| FR17 |                                                      |
-| FR2   | -------------                                        |
-| FR21 |                                                      |
-| FR22|                                                      |
-| FR23|                                                      |
-| FR24|                                                      |
-| FR26|                                                      |
-| FR28|                                                      |
-|  FR3   | -------------                                        |
-|FR31| Successful transaction creation by user              | 
-| | Unauthorized transaction creation by user            | 
-| | Different user request by user                       |
-| | Successful admin transaction creation for different user | 
-| | Invalid parameters                                   |
-| | Database Error Transaction                           |
-| | User or Category not found                           |
-| | Transaction created by user                          |
-| | Different url                                        |
-| | Invalid parameters                                   |
-| | Category dosen't exist                               |
-| | Unauthorized User                                    |
-| | Transaction created by admin                         | 
-| | Transaction for another user created by admin        | 
-|FR32| Successful Request                                   |
-|   | Unauthorized Request                                 |
-|   | Empty Request                                        |
-|   | Database Error Request                               |
-|   | Retrieved all transactions                           |
-|   | Unauthorized admin                                   |
-| FR33 | Successful User Request                              |
-|   | Unauthorized User Request                            |
-|   | Successful Admin Request                             |
-|   | Unauthorized Admin Request                           |
-|   | Inexistent User Request                              | 
-|   | Database Error Request                               |
-|   | Successful user request                              |
-|   | Unauthorized user request                            |
-|   | Unauthorized admin request                           |
-|   | User not found                                       |
-| FR34| Successful User Request                              | 
-|  | Unauthorized User Request                            | 
-|  | Successful Admin Request                             | 
-|  | Unauthorized Admin Request                           |
-|  | User not found Request                               | 
-|  | Category not found Request                           |
-|  | Database Error Request                               |
-|  | Successful user request                              | 
-|  | Unauthorized user request                            | 
-|  | Successful admin request                             |
-|  | Unauthorized admin request                           | 
-|  | User not found request                               | 
-|  | Category not found request                           |
-| FR35| Successful User Request                              |
-|  | Unauthorized User Request                            |
-|  | Successful Admin Request                             |
-|  | Unauthorized Admin Request                           |
-|  | Inexistent Group Request                             |
-|  | Database Error (Group) Request                       |
-|  | Database Error (User) Request                        |
-|  | Database Error (Aggregate) Request                   | 
-|  | Successful user request                              |
-|  | Unauthorized user request                            | 
-|  | Successful admin request                             | 
-|  | Unauthorized admin request                           |
-|  | Group not found                                      | 
-| FR36| Successful User Request                              | 
-| | Unauthorized User Request                            | 
-| | Successful Admin Request                             | 
-| | Unauthorized Admin Request                           | 
-| | Group not found Request                              | 
-| | Category not found Request                           | 
-| | Database Error (Group) Request                       | 
-| | Database Error (User) Request                        | 
-| | Database Error (Aggregate) Request                   | 
-| | Successful user request                              | 
-| | Unauthorized user request                            | 
-| | Successful admin request                             | 
-| | Unauthorized admin request                           | 
-| | Group not found                                      |
-| | Category not found                                   | 
-| FR37| Successful User Delete Transaction                   | 
-|  | Unauthorized User                                    |
-|  | User or transaction not found                        |
-|  | Successful Admin transaction for different users     |
-|  | Missing transaction attributes                       |
-|  | Database Error Transaction Request                   | 
-|  | Transaction deleted by user                          | 
-|  | Transaction deleted by admin                         |
-|  | User not authorized                                  |
-|  | User not found                                       |
-|  | Transaction not found                                |
-|  | Missing ID                                           |
-| FR38 |                      Successful Request |
-|  | Unauthorized Request                                 | 
-|  | Invalid ID                                           |
-|  | Empty Request                                        | 
-|  | Database Error Request                               | 
-|  | Transactions deleted by admin                        | 
-|  | Unauthorized admin                                   | 
-|  | Invalid transaction                                  | 
-|  | Invalid ids                                          | 
-|  FR4   | -------------                                        |
-| FR41| Succe                                                |
-| FR42|                                                      |
-| FR43|                                                      |
-| FR44 |                                                      |
+| Functional Requirements covered | Test(s)                                                   | 
+|---------------------------------|-----------------------------------------------------------| 
+| FR1                             | -------------                                             |
+| FR11                            |                                                           |
+| FR12                            |                                                           |
+| FR13                            |                                                           |
+| FR14                            |                                                           |
+| FR15                            | Database error                                            |
+|                                 | Retrieve an empty list                                    |
+|                                 | Retrieve a list of all users                              |
+|                                 | Unauthorized caller                                       |
+|                                 | Return an empty list                                      |
+| FR16                            | Database error                                            |
+|                                 | Retrieve own info (User)                                  |
+|                                 | Retrieve info of any user (Admin)                         |
+|                                 | User not found                                            |
+|                                 | User requests info of another user                        |
+| FR17                            | Database error                                            |
+|                                 | Called by a regular user                                  |
+|                                 | Delete also the group if last member                      |
+|                                 | Missing request body attributes                           |
+|                                 | Email is valid                                            |
+|                                 | Emails is an empty string                                 |
+|                                 | User not found                                            |
+|                                 | User is a member of a group but not the last one          |
+|                                 | User does not belong to any group                         |
+| FR2                             | -------------                                             |
+| FR21                            | Database error                                            |
+|                                 | Creation of a group                                       |
+|                                 | Unauthorized if not authenticated                         |
+|                                 | Missing request body attributes                           |
+|                                 | Name is an empty string                                   |
+|                                 | Email is valid                                            |
+|                                 | Email is an empty string                                  |
+|                                 | Caller is already in a group                              |
+|                                 | All members either do not exist or are already in a group |
+|                                 | Duplicated group name                                     |
+| FR22                            | Database error                                            |
+|                                 | Called by regular user                                    |
+|                                 | Retrieve all the groups                                   |
+| FR23                            | Database error                                            |
+|                                 | Retrieve own group info (User)                            |
+|                                 | Retrieve info of any group (Admin)                        |
+|                                 | Group does not exist                                      |
+|                                 | Unauthenticated user                                      |
+| FR24                            | Database error                                            |
+|                                 | Add user to own group (User)                              |
+|                                 | Add user to any group (Admin)                             |
+|                                 | Admin calls wrong API                                     |
+|                                 | User does not belong to the group                         |
+|                                 | User call admin API                                       |
+|                                 | Group does not exist                                      |
+|                                 | Missing request body attributes                           |
+|                                 | All members do not exist or are already in a group        |
+|                                 | Email is valid                                            |
+|                                 | Email is an empty string                                  |
+| FR26                            | Database error                                            |
+|                                 | Remove a member of own group (User)                       |
+|                                 | Remove a member of any group (Admin)                      |
+|                                 | Admin calls wrong API                                     |
+|                                 | User do not belong to the group                           |
+|                                 | User is not an admin                                      |
+|                                 | Group does not exist                                      |
+|                                 | Missing request body attributes                           |
+|                                 | Email is valid                                            |
+|                                 | Email is an empty string                                  |
+|                                 | All the member does not exist or not in group             |
+|                                 | Group contains only one member                            |
+| FR28                            | Database error                                            |
+|                                 | User is not an admin                                      |
+|                                 | Missing name or empty string                              |
+|                                 | Group does not exist                                      |
+|                                 | Delete the group                                          |
+| FR3                             | -------------                                             |
+| FR31                            | Successful transaction creation by user                   | 
+|                                 | Unauthorized transaction creation by user                 | 
+|                                 | Different user request by user                            |
+|                                 | Successful admin transaction creation for different user  | 
+|                                 | Invalid parameters                                        |
+|                                 | Database Error Transaction                                |
+|                                 | User or Category not found                                |
+|                                 | Transaction created by user                               |
+|                                 | Different url                                             |
+|                                 | Invalid parameters                                        |
+|                                 | Category dosen't exist                                    |
+|                                 | Unauthorized User                                         |
+|                                 | Transaction created by admin                              | 
+|                                 | Transaction for another user created by admin             | 
+| FR32                            | Successful Request                                        |
+|                                 | Unauthorized Request                                      |
+|                                 | Empty Request                                             |
+|                                 | Database Error Request                                    |
+|                                 | Retrieved all transactions                                |
+|                                 | Unauthorized admin                                        |
+| FR33                            | Successful User Request                                   |
+|                                 | Unauthorized User Request                                 |
+|                                 | Successful Admin Request                                  |
+|                                 | Unauthorized Admin Request                                |
+|                                 | Inexistent User Request                                   | 
+|                                 | Database Error Request                                    |
+|                                 | Successful user request                                   |
+|                                 | Unauthorized user request                                 |
+|                                 | Unauthorized admin request                                |
+|                                 | User not found                                            |
+| FR34                            | Successful User Request                                   | 
+|                                 | Unauthorized User Request                                 | 
+|                                 | Successful Admin Request                                  | 
+|                                 | Unauthorized Admin Request                                |
+|                                 | User not found Request                                    | 
+|                                 | Category not found Request                                |
+|                                 | Database Error Request                                    |
+|                                 | Successful user request                                   | 
+|                                 | Unauthorized user request                                 | 
+|                                 | Successful admin request                                  |
+|                                 | Unauthorized admin request                                | 
+|                                 | User not found request                                    | 
+|                                 | Category not found request                                |
+| FR35                            | Successful User Request                                   |
+|                                 | Unauthorized User Request                                 |
+|                                 | Successful Admin Request                                  |
+|                                 | Unauthorized Admin Request                                |
+|                                 | Inexistent Group Request                                  |
+|                                 | Database Error (Group) Request                            |
+|                                 | Database Error (User) Request                             |
+|                                 | Database Error (Aggregate) Request                        | 
+|                                 | Successful user request                                   |
+|                                 | Unauthorized user request                                 | 
+|                                 | Successful admin request                                  | 
+|                                 | Unauthorized admin request                                |
+|                                 | Group not found                                           | 
+| FR36                            | Successful User Request                                   | 
+|                                 | Unauthorized User Request                                 | 
+|                                 | Successful Admin Request                                  | 
+|                                 | Unauthorized Admin Request                                | 
+|                                 | Group not found Request                                   | 
+|                                 | Category not found Request                                | 
+|                                 | Database Error (Group) Request                            | 
+|                                 | Database Error (User) Request                             | 
+|                                 | Database Error (Aggregate) Request                        | 
+|                                 | Successful user request                                   | 
+|                                 | Unauthorized user request                                 | 
+|                                 | Successful admin request                                  | 
+|                                 | Unauthorized admin request                                | 
+|                                 | Group not found                                           |
+|                                 | Category not found                                        | 
+| FR37                            | Successful User Delete Transaction                        | 
+|                                 | Unauthorized User                                         |
+|                                 | User or transaction not found                             |
+|                                 | Successful Admin transaction for different users          |
+|                                 | Missing transaction attributes                            |
+|                                 | Database Error Transaction Request                        | 
+|                                 | Transaction deleted by user                               | 
+|                                 | Transaction deleted by admin                              |
+|                                 | User not authorized                                       |
+|                                 | User not found                                            |
+|                                 | Transaction not found                                     |
+|                                 | Missing ID                                                |
+| FR38                            | Successful Request                                        |
+|                                 | Unauthorized Request                                      | 
+|                                 | Invalid ID                                                |
+|                                 | Empty Request                                             | 
+|                                 | Database Error Request                                    | 
+|                                 | Transactions deleted by admin                             | 
+|                                 | Unauthorized admin                                        | 
+|                                 | Invalid transaction                                       | 
+|                                 | Invalid ids                                               | 
+| FR4                             | -------------                                             |
+| FR41                            | Succe                                                     |
+| FR42                            |                                                           |
+| FR43                            |                                                           |
+| FR44                            |                                                           |
 
 ## Coverage white box
 
