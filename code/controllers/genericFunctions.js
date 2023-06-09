@@ -54,3 +54,13 @@ export function newExpiringToken(username, email, role){
         }, "EZWALLET", { expiresIn: "0d" });
     return token;
 }
+
+export function newTokenWithMissingParams(username, email, role){
+    const token = jwt.sign({
+            id: "123456789",
+            username: "",
+            email: email,
+            role: role
+        }, "EZWALLET", { expiresIn: "0d" });
+    return token;
+}

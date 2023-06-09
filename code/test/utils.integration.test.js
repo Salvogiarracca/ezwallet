@@ -4,7 +4,7 @@ import { User } from '../models/User.js';
 import mongoose, { Model } from 'mongoose';
 import { handleDateFilterParams, verifyAuth, handleAmountFilterParams } from '../controllers/utils';
 import bcrypt from 'bcryptjs';
-import { newExpiringToken } from '../controllers/genericFunctions';
+import { newExpiringToken, newTokenWithMissingParams } from '../controllers/genericFunctions';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -92,6 +92,102 @@ describe("verifyAuth", () => {
         
         // Verify the results
         expect(result).toHaveProperty("authorized", true);
+        expect(result).toHaveProperty("cause");
+    });
+
+    test('Simple authentication: missing parameter in the access token error', async () => {  
+        const registeredUserSent = {
+            email: "s315678@studenti.polito.it",
+            password: "12345"
+        };
+
+        const response = await request(app).post("/api/login").send(registeredUserSent);
+        const accessToken = newTokenWithMissingParams("Pippo", registeredUserSent.email, "Regular")
+        const refreshToken = response.body.data.refreshToken;
+
+        //Since we are calling the function directly, we need to manually define a request object with all the necessary parameters (route params, body, cookies, url)
+        const req = {
+            body: {},
+            cookies: { accessToken: accessToken, refreshToken: refreshToken }
+        }
+
+        //The same reasoning applies for the response object: we must manually define the functions used and then check if they are called (and with which values)
+        const res = {} 
+
+        // Info object for the verifyAuth function
+        const info = {
+            authType: "Simple",
+        }
+        
+        // Call the function
+        const result = verifyAuth(req, res, info);
+        
+        // Verify the results
+        expect(result).toHaveProperty("authorized", false);
+        expect(result).toHaveProperty("cause");
+    });
+
+    test('Simple authentication: missing parameter in the refresh token error', async () => {  
+        const registeredUserSent = {
+            email: "s315678@studenti.polito.it",
+            password: "12345"
+        };
+
+        const response = await request(app).post("/api/login").send(registeredUserSent);
+        const accessToken = response.body.data.accessToken;
+        const refreshToken = newTokenWithMissingParams("Pippo", registeredUserSent.email, "Regular");
+
+        //Since we are calling the function directly, we need to manually define a request object with all the necessary parameters (route params, body, cookies, url)
+        const req = {
+            body: {},
+            cookies: { accessToken: accessToken, refreshToken: refreshToken }
+        }
+
+        //The same reasoning applies for the response object: we must manually define the functions used and then check if they are called (and with which values)
+        const res = {} 
+
+        // Info object for the verifyAuth function
+        const info = {
+            authType: "Simple",
+        }
+        
+        // Call the function
+        const result = verifyAuth(req, res, info);
+        
+        // Verify the results
+        expect(result).toHaveProperty("authorized", false);
+        expect(result).toHaveProperty("cause");
+    });
+
+    test('Simple authentication: missing parameter in the refresh token error', async () => {  
+        const registeredUserSent = {
+            email: "s315678@studenti.polito.it",
+            password: "12345"
+        };
+
+        const response = await request(app).post("/api/login").send(registeredUserSent);
+        const accessToken = newExpiringToken("Pippo", registeredUserSent.email, "Regular")
+        const refreshToken = response.body.data.refreshToken;
+
+        //Since we are calling the function directly, we need to manually define a request object with all the necessary parameters (route params, body, cookies, url)
+        const req = {
+            body: {},
+            cookies: { accessToken: accessToken, refreshToken: refreshToken }
+        }
+
+        //The same reasoning applies for the response object: we must manually define the functions used and then check if they are called (and with which values)
+        const res = {} 
+
+        // Info object for the verifyAuth function
+        const info = {
+            authType: "Simple",
+        }
+        
+        // Call the function
+        const result = verifyAuth(req, res, info);
+        
+        // Verify the results
+        expect(result).toHaveProperty("authorized", false);
         expect(result).toHaveProperty("cause");
     });
 
