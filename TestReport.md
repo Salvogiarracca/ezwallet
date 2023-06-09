@@ -318,8 +318,8 @@
 | 278 | Unauthorized User [createTransaction] - Integration Test #5 | createTransaction | Integration | WB - Statement Coverage |
 | 279 | Transaction created by admin [createTransaction] - Integration Test #6 | createTransaction | Integration | WB - Statement Coverage |
 | 280 | Transaction for another user created by admin [createTransaction] - Integration Test #7 | createTransaction | Integration | WB - Statement Coverage |
-| 281 | Retrieved all transactions [getAllTransactions] - Integration Test #1 | <re.Match object; span=(9, 29), match='"getAllTransactions"'> | Integration | WB - Statement Coverage |
-| 282 | Unauthorized admin [getAllTransactions] - Integration Test #2 | <re.Match object; span=(9, 29), match='"getAllTransactions"'> | Integration | WB - Statement Coverage |
+| 281 | Retrieved all transactions [getAllTransactions] - Integration Test #1 | getAllTransactions | Integration | WB - Statement Coverage |
+| 282 | Unauthorized admin [getAllTransactions] - Integration Test #2 | getAllTransactions | Integration | WB - Statement Coverage |
 | 283 | Successful user request [getTransactionsByUser] - Integration Test #1 | getTransactionsByUser | Integration | WB - Statement Coverage |
 | 284 | Unauthorized user request [getTransactionsByUser] - Integration Test #2 | getTransactionsByUser | Integration | WB - Statement Coverage |
 | 285 | Successful admin request [getTransactionsByUser] - Integration Test #3 | getTransactionsByUser | Integration | WB - Statement Coverage |
@@ -331,23 +331,23 @@
 | 291 | Unauthorized admin request [getTransactionsByUserByCategory] - Integration Test #4 | getTransactionsByUserByCategory | Integration | WB - Statement Coverage |
 | 292 | User not found request [getTransactionsByUserByCategory] - Integration Test #5 | getTransactionsByUserByCategory | Integration | WB - Statement Coverage |
 | 293 | Category not found request [getTransactionsByUserByCategory] - Integration Test #6 | getTransactionsByUserByCategory | Integration | WB - Statement Coverage |
-| 294 | Successful user request [getTransactionsByGroup] - Integration Test #1 | <re.Match object; span=(9, 33), match='"getTransactionsByGroup"'> | Integration | WB - Statement Coverage |
-| 295 | Unauthorized user request [getTransactionsByGroup] - Integration Test #2 | <re.Match object; span=(9, 33), match='"getTransactionsByGroup"'> | Integration | WB - Statement Coverage |
-| 296 | Successful admin request [getTransactionsByGroup] - Integration Test #3 | <re.Match object; span=(9, 33), match='"getTransactionsByGroup"'> | Integration | WB - Statement Coverage |
-| 297 | Unauthorized admin request [getTransactionsByGroup] - Integration Test #4 | <re.Match object; span=(9, 33), match='"getTransactionsByGroup"'> | Integration | WB - Statement Coverage |
-| 298 | Group not found [getTransactionsByGroup] - Integration Test #5 | <re.Match object; span=(9, 33), match='"getTransactionsByGroup"'> | Integration | WB - Statement Coverage |
+| 294 | Successful user request [getTransactionsByGroup] - Integration Test #1 | getTransactionsByGroup | Integration | WB - Statement Coverage |
+| 295 | Unauthorized user request [getTransactionsByGroup] - Integration Test #2 | getTransactionsByGroup | Integration | WB - Statement Coverage |
+| 296 | Successful admin request [getTransactionsByGroup] - Integration Test #3 | getTransactionsByGroup | Integration | WB - Statement Coverage |
+| 297 | Unauthorized admin request [getTransactionsByGroup] - Integration Test #4 | getTransactionsByGroup | Integration | WB - Statement Coverage |
+| 298 | Group not found [getTransactionsByGroup] - Integration Test #5 | getTransactionsByGroup | Integration | WB - Statement Coverage |
 | 299 | Successful user request [getTransactionsByGroupByCategory] - Integration Test #1 | getTransactionsByGroupByCategory | Integration | WB - Statement Coverage |
 | 300 | Unauthorized user request [getTransactionsByGroupByCategory] - Integration Test #2 | getTransactionsByGroupByCategory | Integration | WB - Statement Coverage |
 | 301 | Successful admin request [getTransactionsByGroupByCategory] - Integration Test #3 | getTransactionsByGroupByCategory | Integration | WB - Statement Coverage |
 | 302 | Unauthorized admin request [getTransactionsByGroupByCategory] - Integration Test #4 | getTransactionsByGroupByCategory | Integration | WB - Statement Coverage |
 | 303 | Group not found request [getTransactionsByGroupByCategory] - Integration Test #5 | getTransactionsByGroupByCategory | Integration | WB - Statement Coverage |
 | 304 | Category not found request [getTransactionsByGroupByCategory] - Integration Test #6 | getTransactionsByGroupByCategory | Integration | WB - Statement Coverage |
-| 305 | Transaction deleted by user [deleteTransaction] - Integration Test #1 | <re.Match object; span=(9, 28), match='"deleteTransaction"'> | Integration | WB - Statement Coverage |
-| 306 | Transaction deleted by admin [deleteTransaction] - Integration Test #2 | <re.Match object; span=(9, 28), match='"deleteTransaction"'> | Integration | WB - Statement Coverage |
-| 307 | User not authorized [deleteTransaction] - Integration Test #3 | <re.Match object; span=(9, 28), match='"deleteTransaction"'> | Integration | WB - Statement Coverage |
-| 308 | User not found [deleteTransaction] - Integration Test #4 | <re.Match object; span=(9, 28), match='"deleteTransaction"'> | Integration | WB - Statement Coverage |
-| 309 | Transaction not found [deleteTransaction] - Integration Test #5 | <re.Match object; span=(9, 28), match='"deleteTransaction"'> | Integration | WB - Statement Coverage |
-| 310 | Missing ID [deleteTransaction] - Integration Test #6 | <re.Match object; span=(9, 28), match='"deleteTransaction"'> | Integration | WB - Statement Coverage |
+| 305 | Transaction deleted by user [deleteTransaction] - Integration Test #1 | deleteTransaction | Integration | WB - Statement Coverage |
+| 306 | Transaction deleted by admin [deleteTransaction] - Integration Test #2 | deleteTransaction| Integration | WB - Statement Coverage |
+| 307 | User not authorized [deleteTransaction] - Integration Test #3 | deleteTransaction | Integration | WB - Statement Coverage |
+| 308 | User not found [deleteTransaction] - Integration Test #4 | deleteTransaction | Integration | WB - Statement Coverage |
+| 309 | Transaction not found [deleteTransaction] - Integration Test #5 | deleteTransaction | Integration | WB - Statement Coverage |
+| 310 | Missing ID [deleteTransaction] - Integration Test #6 | deleteTransaction | Integration | WB - Statement Coverage |
 | 311 | Transactions deleted by admin [deleteTransactions] - Integration Test #1 | deleteTransactions | Integration | WB - Statement Coverage |
 | 312 | Unauthorized admin [deleteTransactions] - Integration Test #2 | deleteTransactions | Integration | WB - Statement Coverage |
 | 313 | Invalid transaction [deleteTransactions] - Integration Test #3 | deleteTransactions | Integration | WB - Statement Coverage |
