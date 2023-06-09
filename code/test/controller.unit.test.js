@@ -2397,6 +2397,75 @@ describe("getTransactionsByUserByCategory", () => {
     expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
   });
 
+  test("Category not found [getTransactionsByUserByCategory] - Unit Test #1", async () => {
+    const mockReq = {
+      params: { username: "Pippo" },
+      cookies: {
+        accessToken: "adminAccessTokenValid",
+        refreshToken: "adminRefreshTokenValid",
+      },
+      url: "/api/users/Pippo/transactions",
+    };
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      locals: {
+        //The name can also be message, what matters is consistency with the one used in the code
+        refreshedTokenMessage: "",
+      },
+    };
+    const retrievedTransactions = [
+      {
+        _id: 1,
+        username: "Pippo",
+        amount: 3500,
+        type: "Personal",
+        categories_info: { color: "testColor" },
+        date: "2023/4/3",
+      },
+      {
+        _id: 2,
+        username: "Pippo",
+        amount: 12000,
+        type: "Personal",
+        categories_info: { color: "testColor" },
+        date: "2023/4/3",
+      },
+      {
+        _id: 3,
+        username: "Pippo",
+        amount: 34,
+        type: "Personal",
+        categories_info: { color: "testColor" },
+        date: "2023/4/3",
+      },
+    ];
+    const expectedResponse = {
+      refreshedTokenMessage: "",
+      message: "User or category not found",
+    };
+    verifyAuth.mockImplementation((mockReq, mockRes, params) => {
+      if (params.authType == "User") {
+        return { authorized: true, cause: "authorized" };
+      } else {
+        return { authorized: false, cause: "unauthorized" };
+      }
+    });
+    jest.spyOn(User, "findOne").mockReturnValue({
+      username: "mockedUsername",
+      email: "mockedEmail",
+      role: "mockedRole",
+    });
+    jest.spyOn(categories, "find").mockReturnValue(undefined);
+    jest
+      .spyOn(transactions, "aggregate")
+      .mockResolvedValue(retrievedTransactions);
+    await getTransactionsByUserByCategory(mockReq, mockRes);
+    expect(transactions.aggregate).not.toHaveBeenCalled();
+    expect(mockRes.status).toHaveBeenCalledWith(400);
+    expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
+  });
+
   test("Database Error Request [getTransactionsByUserByCategory] - Unit Test #6", async () => {
     const url_un = "Pippo";
     const mockReq = {
@@ -3377,6 +3446,94 @@ describe("getTransactionsByGroupByCategory", () => {
     jest
       .spyOn(categories, "find")
       .mockResolvedValue([{ type: "test", color: "red" }]);
+    await getTransactionsByGroupByCategory(mockReq, mockRes);
+    expect(transactions.aggregate).not.toHaveBeenCalled();
+    expect(mockRes.status).toHaveBeenCalledWith(400);
+    expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
+  });
+
+  test("Category not found Request [getTransactionsByGroupByCategory] - Unit Test #1", async () => {
+    const groupName = "testGroup";
+    const mockReq = {
+      params: { name: groupName },
+      cookies: {
+        accessToken: "adminAccessTokenValid",
+        refreshToken: "adminRefreshTokenValid",
+      },
+      url: "/api/groups/" + groupName + "/transactions",
+    };
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      locals: {
+        //The name can also be message, what matters is consistency with the one used in the code
+        refreshedTokenMessage: "",
+      },
+    };
+    const retrievedTransactions = [
+      {
+        _id: 1,
+        username: "Pippo",
+        amount: 3500,
+        type: "Personal",
+        categories_info: { color: "testColor" },
+        date: "2023/4/3",
+      },
+      {
+        _id: 2,
+        username: "Pippo",
+        amount: 12000,
+        type: "Personal",
+        categories_info: { color: "testColor" },
+        date: "2023/4/3",
+      },
+      {
+        _id: 3,
+        username: "Pippo",
+        amount: 34,
+        type: "Personal",
+        categories_info: { color: "testColor" },
+        date: "2023/4/3",
+      },
+    ];
+    const expectedResponse = {
+      refreshedTokenMessage: "",
+      message: "Group or category not found",
+    };
+    const testGroup = {
+      name: "testGroup",
+      members: [
+        { email: "testEmail1@test.com" },
+        { email: "testEmail2@test.com" },
+        { email: "testEmail3@test.com" },
+      ],
+    };
+    verifyAuth.mockImplementation((mockReq, mockRes, params) => {
+      if (params.authType == "Group") {
+        return { authorized: true, cause: "authorized" };
+      } else {
+        return { authorized: false, cause: "unauthorized" };
+      }
+    });
+    jest
+      .spyOn(transactions, "aggregate")
+      .mockResolvedValue(retrievedTransactions);
+    jest.spyOn(Group, "findOne").mockResolvedValue(testGroup);
+    jest
+      .spyOn(categories, "find")
+      .mockResolvedValue(undefined);
+    jest.spyOn(User, "find").mockResolvedValue([
+      {
+        username: "tester1",
+        email: "test@gmail.com",
+        password: "test",
+      },
+      {
+        username: "tester2",
+        email: "test@gmail.com",
+        password: "test",
+      },
+    ]);
     await getTransactionsByGroupByCategory(mockReq, mockRes);
     expect(transactions.aggregate).not.toHaveBeenCalled();
     expect(mockRes.status).toHaveBeenCalledWith(400);
