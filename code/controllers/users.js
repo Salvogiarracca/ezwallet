@@ -452,13 +452,13 @@ export const removeFromGroup = async (req, res) => {
     const emails = req.body.emails;
     const route = req.originalUrl;
 
-    if (!groupName || emails.length === 0 ){
+    if (!req.body.hasOwnProperty(emails)){
       return res.status(400).json({ error: 'Request body does not contain all the necessary attributes' });
     }
 
     /// check if all provided emails are valid or an empty string
     if(emails.some(member => !isValidEmail(member))){
-      return res.status(400).json({ error: 'at least one of the members emails is not in a valid email format or is an empty string' });
+      return res.status(400).json({ error: 'At least one of the members emails is not in a valid email format or is an empty string' });
     }
 
     const group = await Group.findOne({ name: groupName });
