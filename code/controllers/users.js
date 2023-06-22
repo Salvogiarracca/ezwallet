@@ -602,7 +602,9 @@ export const deleteUser = async (req, res) => {
       const user = await User.findOne({ email });
       if(!user){
         return res.status(400).json({ error: 'User not found' });
-      } else {
+      } else if (user.role === "Admin") {
+        return res.status(400).json({ error: "Admin cannot be deleted" })
+      } {
         const group = await Group.findOne({ 'members.email': email });
         if(!group){
           //remove user that not belong to any group
