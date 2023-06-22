@@ -3,4 +3,4 @@ WORKDIR /app
 COPY . /app
 RUN rm -rf node_modules
 RUN npm install
-CMD [ "npm", "run", "test:coverage" ]
+CMD [ "npm", "run", "test:coverage", "--", "--detectOpenHandles"]
