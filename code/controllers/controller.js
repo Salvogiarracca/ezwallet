@@ -257,8 +257,8 @@ export const createTransaction = async (req, res) => {
     });
     if (category_exists.length > 0 && user_body && user_params) {
       if (userAuth.authorized) {
-        if (caller_username == username) {
-          const new_transactions = new transactions({ username, amount, type });
+        if (caller_username === username) {
+          const new_transactions = await transactions.create({ username, amount, type });
           new_transactions.save().then((data) =>
             res.status(200).json({
               data,
@@ -276,7 +276,7 @@ export const createTransaction = async (req, res) => {
         const adminAuth = verifyAuth(req, res, { authType: "Admin" });
         ///if the user is an Admin ok, otherwise unauthorized
         if (adminAuth.authorized) {
-          const new_transactions = new transactions({ username, amount, type });
+          const new_transactions = await transactions.create({ username, amount, type });
           new_transactions.save().then((data) =>
             res.status(200).json({
               data,
