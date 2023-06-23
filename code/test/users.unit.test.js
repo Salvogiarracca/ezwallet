@@ -1946,7 +1946,6 @@ describe("removeFromGroup", () => {
         refreshToken: newToken("Regular")
       },
       body: {
-        emails:[],
       },
       params: { name: "NotAGroup" }
     }
@@ -1984,7 +1983,7 @@ describe("removeFromGroup", () => {
     await removeFromGroup(mockReq, mockRes)
     expect(mockRes.status).toHaveBeenCalledWith(400)
     expect(mockRes.json).toHaveBeenCalledWith(expect.objectContaining({
-      error: "at least one of the members emails is not in a valid email format or is an empty string"
+      error: "At least one of the members emails is not in a valid email format or is an empty string"
     }))
   })
 

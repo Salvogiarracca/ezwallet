@@ -849,9 +849,6 @@ describe("removeFromGroup", () => {
           `accessToken=${newTokenAdHoc(user2.username, "Regular")}`,
           `refreshToken=${user2.refreshToken}`
         ])
-        .send({
-          emails: []
-        })
     expect(res.status).toBe(400)
     expect(res.body).toEqual({
       error: "Request body does not contain all the necessary attributes"

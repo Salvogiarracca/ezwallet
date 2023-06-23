@@ -452,7 +452,7 @@ export const removeFromGroup = async (req, res) => {
     const emails = req.body.emails;
     const route = req.originalUrl;
 
-    if (!req.body.hasOwnProperty(emails)){
+    if (!req.body.hasOwnProperty('emails')){
       return res.status(400).json({ error: 'Request body does not contain all the necessary attributes' });
     }
 
