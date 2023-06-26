@@ -1447,6 +1447,60 @@ describe("createTransaction", () => {
     expect(mockRes.status).toHaveBeenCalledWith(400);
     expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
   });
+
+  test("Successful transaction creation by user [createTransaction] - Unit Test #1", async () => {
+    const testTransaction = {
+      username: "admin",
+      amount: 3500,
+      type: "Personal",
+    };
+    const testUser = {
+      username: testTransaction.username,
+      email: "test@gmail.com",
+      password: "test",
+    };
+    const expectedResponse = {
+      data: testTransaction,
+      message: "Transaction created",
+      refreshedTokenMessage: "",
+    };
+    const mockReq = {
+      body: testTransaction,
+      params: { username: testUser.username },
+      cookies: {
+        accessToken: "adminAccessTokenValid",
+        refreshToken: "adminRefreshTokenValid",
+      },
+    };
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      locals: {
+        //The name can also be message, what matters is consistency with the one used in the code
+        refreshedTokenMessage: "",
+      },
+    };
+    const testCategory = {
+      type: "test",
+      color: "testColor",
+    };
+    jest.spyOn(User, "findOne").mockResolvedValue(testUser);
+    jest.spyOn(categories, "find").mockResolvedValue([testCategory]);
+    jest.spyOn(jwt, "verify").mockResolvedValue({username:testUser.username});
+    jest
+      .spyOn(transactions, "create")
+      .mockResolvedValue(testTransaction);
+    verifyAuth.mockImplementation((mockReq, mockRes, params) => {
+      if (params.authType == "User") {
+        return { authorized: false, cause: "unauthorized" };
+      } else {
+        return { authorized: true, cause: "authorized" };
+      }
+    });
+    await createTransaction(mockReq, mockRes);
+    expect(mockRes.status).toHaveBeenCalledWith(200);
+    expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
+  });
 });
 
 describe("getAllTransactions", () => {
