@@ -668,8 +668,10 @@ describe("deleteCategory", () => {
       json: jest.fn()
     };
     const expectedResponse = {
-      message: "Deletion completed successfully",
-      count: 23,
+      data: {
+        message: "Deletion completed successfully",
+        count: 23,
+      }
     };
     verifyAuth.mockImplementation((mockReq, mockRes, params) => {
       if (params.authType == "Admin") {
@@ -710,8 +712,10 @@ describe("deleteCategory", () => {
       json: jest.fn()
     };
     const expectedResponse = {
-      message: "Deletion completed successfully",
-      count: 17,
+      data: {
+        message: "Deletion completed successfully",
+        count: 17,
+      }
     };
     verifyAuth.mockImplementation((mockReq, mockRes, params) => {
       if (params.authType == "Admin") {
