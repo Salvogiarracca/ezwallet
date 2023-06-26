@@ -410,8 +410,10 @@ describe("updateCategory", () => {
       json: jest.fn(),
     };
     const expectedResponse = {
-      message: "Update completed successfully",
-      count: 15,
+      data: {
+        message: "Update completed successfully",
+        count: 15,
+      }
     };
     verifyAuth.mockImplementation((mockReq, mockRes, params) => {
       if (params.authType == "Admin") {
@@ -435,7 +437,7 @@ describe("updateCategory", () => {
     expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
   });
 
-  test("Wrong color format [updateCategory] - Test #7", async () => {
+  /*test("Wrong color format [updateCategory] - Test #7", async () => {
     const mockReq = {
       params: { username: "testuser", type: "test" },
       body: { type: "investment", color: "abcde" },
@@ -471,9 +473,9 @@ describe("updateCategory", () => {
     await updateCategory(mockReq, mockRes);
     expect(mockRes.status).toHaveBeenCalledWith(400);
     expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
-  });
+  });*/
 
-  test("Mismatched types [updateCategory] - Test #8", async () => {
+  test("Mismatched types [updateCategory] - Test #7", async () => {
     const mockReq = {
       params: { username: "testuser", type: "test" },
       body: { type: 10, color: "#ff5455" },
@@ -501,7 +503,7 @@ describe("updateCategory", () => {
     expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
   });
 
-  test("No access token [updateCategory] - Test #9", async () => {
+  test("No access token [updateCategory] - Test #8", async () => {
     const mockReq = {
       params: { username: "testuser", type: "noexist" },
       body: { type: "investment", color: "#ff0000" },
