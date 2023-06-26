@@ -441,8 +441,8 @@ describe("updateCategory", () => {
           expect(response.status).toBe(200);
           //The "data" object must have a field named "message" that confirms that changes are successful
           //The actual value of the field could be any string, so it's not checked
-          expect(response.body).toHaveProperty("message");
-          expect(response.body).toHaveProperty("count");
+          expect(response.body.data).toHaveProperty("message");
+          expect(response.body.data).toHaveProperty("count");
           //Must be called at the end of every test or the test will fail while waiting for it to be called
           //done();
         });
@@ -789,8 +789,8 @@ describe("deleteCategory", () => {
           expect(response.status).toBe(200);
           //The "data" object must have a field named "message" that confirms that changes are successful
           //The actual value of the field could be any string, so it's not checked
-          expect(response.body).toHaveProperty("message");
-          expect(response.body).toHaveProperty("count", 4)
+          expect(response.body.data).toHaveProperty("message");
+          expect(response.body.data).toHaveProperty("count", 4)
           //Must be called at the end of every test or the test will fail while waiting for it to be called
           //done();
         });
@@ -858,8 +858,8 @@ describe("deleteCategory", () => {
           expect(response.status).toBe(200);
           //The "data" object must have a field named "message" that confirms that changes are successful
           //The actual value of the field could be any string, so it's not checked
-          expect(response.body).toHaveProperty("message");
-          expect(response.body).toHaveProperty("count", 4)
+          expect(response.body.data).toHaveProperty("message");
+          expect(response.body.data).toHaveProperty("count", 4)
           //Must be called at the end of every test or the test will fail while waiting for it to be called
           //done();
         });

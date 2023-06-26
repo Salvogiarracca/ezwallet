@@ -167,8 +167,10 @@ export const updateCategory = async (req, res) => {
           const updated = await transactions.updateMany({type: {$in: types}},
               {$set: {type: oldestCat[0].type}});
           return res.status(200).json({
-            message: "Deletion completed successfully",
-            count: updated.modifiedCount
+            data: {
+              message: "Deletion completed successfully",
+              count: updated.modifiedCount
+            }
           });
         }
     
@@ -180,8 +182,10 @@ export const updateCategory = async (req, res) => {
           const updated = await transactions.updateMany({type: {$in: typesRemove}},
               {$set: {type: oldestCat[0].type}});
           return res.status(200).json({
-            message: "Deletion completed successfully",
-            count: updated.modifiedCount,
+            data: {
+              message: "Deletion completed successfully",
+              count: updated.modifiedCount,
+            }
           });
         }
       } catch (error) {
