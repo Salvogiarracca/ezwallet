@@ -1,8 +1,0 @@
-2023-06-26 11:32:55.865 - Notification - You are making progress on an achievement! You have already reached 25,00% of the next level of the 'Take some breaks' achievement!
-2023-06-26 11:37:09.783 - Notification - Congratulations! You unlocked level 1 of the 'Bug Finder' achievement!
-2023-06-26 11:50:21.347 - Notification - You are making progress on an achievement! You have already reached 25,00% of the next level of the 'Break the Line' achievement!
-2023-06-26 12:09:17.151 - Notification - You are making progress on an achievement! You have already reached 50,00% of the next level of the 'Bug Finder' achievement!
-2023-06-26 12:14:53.817 - Notification - You are making progress on an achievement! You have already reached 25,30% of the next level of the 'Test Executor' achievement!
-2023-06-26 12:26:32.578 - Notification - You are making progress on an achievement! You have already reached 80,00% of the next level of the 'Bug Finder' achievement!
-2023-06-26 12:57:50.24 - Notification - Congratulations! You unlocked level 2 of the 'Bug Finder' achievement!
-2023-06-26 12:57:55.762 - Notification - Congratulations! You unlocked level 2 of the 'Bug Finder' achievement!
