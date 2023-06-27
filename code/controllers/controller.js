@@ -84,9 +84,6 @@ export const updateCategory = async (req, res) => {
     if (oldCat === null) {
       throw new Error("Old category type does not exist");
     }
-    /*if (newColor.length !== 7 || newColor[0] !== "#") {
-      throw new Error("Wrong format for color");
-    }*/
 
     const alreadyExists = await categories.findOne({ type: newType }); //if new type value refers to an existing category, fails
     if (alreadyExists !== null) {

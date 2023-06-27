@@ -437,44 +437,6 @@ describe("updateCategory", () => {
     expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
   });
 
-  /*test("Wrong color format [updateCategory] - Test #7", async () => {
-    const mockReq = {
-      params: { username: "testuser", type: "test" },
-      body: { type: "investment", color: "abcde" },
-      cookies: {
-        accessToken: "adminAccessTokenValid",
-        refreshToken: "adminRefreshTokenValid",
-      },
-    };
-    const mockRes = {
-      status: jest.fn().mockReturnThis(),
-      json: jest.fn(),
-    };
-    const expectedResponse = {
-      error: "Wrong format for color",
-    };
-    verifyAuth.mockImplementation((mockReq, mockRes, params) => {
-      if (params.authType == "Admin") {
-        return { authorized: true, cause: "authorized" };
-      } else {
-        return { authorized: false, cause: "authorized" };
-      }
-    });
-    jest
-      .spyOn(categories, "findOne")
-      .mockReturnValueOnce({ type: "exists", color: "#ffffff" })
-      .mockReturnValueOnce(null);
-    jest
-      .spyOn(categories, "findOneAndUpdate")
-      .mockReturnValue({ type: "investment", color: "#ff0000" });
-    jest
-      .spyOn(transactions, "updateMany")
-      .mockReturnValue({ modifiedCount: 15 });
-    await updateCategory(mockReq, mockRes);
-    expect(mockRes.status).toHaveBeenCalledWith(400);
-    expect(mockRes.json).toHaveBeenCalledWith(expectedResponse);
-  });*/
-
   test("Mismatched types [updateCategory] - Test #7", async () => {
     const mockReq = {
       params: { username: "testuser", type: "test" },
