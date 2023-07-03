@@ -441,8 +441,8 @@ describe("updateCategory", () => {
           expect(response.status).toBe(200);
           //The "data" object must have a field named "message" that confirms that changes are successful
           //The actual value of the field could be any string, so it's not checked
-          expect(response.body).toHaveProperty("message");
-          expect(response.body).toHaveProperty("count");
+          expect(response.body.data).toHaveProperty("message");
+          expect(response.body.data).toHaveProperty("count");
           //Must be called at the end of every test or the test will fail while waiting for it to be called
           //done();
         });
@@ -789,8 +789,8 @@ describe("deleteCategory", () => {
           expect(response.status).toBe(200);
           //The "data" object must have a field named "message" that confirms that changes are successful
           //The actual value of the field could be any string, so it's not checked
-          expect(response.body).toHaveProperty("message");
-          expect(response.body).toHaveProperty("count", 4)
+          expect(response.body.data).toHaveProperty("message");
+          expect(response.body.data).toHaveProperty("count", 4)
           //Must be called at the end of every test or the test will fail while waiting for it to be called
           //done();
         });
@@ -858,8 +858,8 @@ describe("deleteCategory", () => {
           expect(response.status).toBe(200);
           //The "data" object must have a field named "message" that confirms that changes are successful
           //The actual value of the field could be any string, so it's not checked
-          expect(response.body).toHaveProperty("message");
-          expect(response.body).toHaveProperty("count", 4)
+          expect(response.body.data).toHaveProperty("message");
+          expect(response.body.data).toHaveProperty("count", 4)
           //Must be called at the end of every test or the test will fail while waiting for it to be called
           //done();
         });
@@ -1266,7 +1266,7 @@ describe("createTransaction", () => {
       .post("/api/users/" + testUser.username + "/transactions") //Route to call
       .set(
         "Cookie",
-        `accessToken=${testerAccessTokenExpired}; refreshToken=${testerAccessTokenExpired}`
+        `accessToken=${testerAccessTokenEmpty}; refreshToken=${testerAccessTokenEmpty}`
       ) //Setting cookies in the request
       .send(testTransaction) //Definition of the request body
       .then((response) => {
@@ -1285,7 +1285,7 @@ describe("createTransaction", () => {
 
   test("Transaction created by admin [createTransaction] - Integration Test #6", async () => {
     const testUser = {
-      username: "tester",
+      username: "admin",
       email: "tester@test.com",
       password: "tester",
       refreshToken: adminAccessTokenValid,
@@ -1367,22 +1367,11 @@ describe("createTransaction", () => {
         //After obtaining the response, we check its actual body content
         //The status must represent successful execution
         //console.log(response)
-        expect(response.status).toBe(200);
+        expect(response.status).toBe(400);
         //The "data" object must have a field named "message" that confirms that changes are successful
         //The actual value of the field could be any string, so it's not checked
         expect(response.body).toHaveProperty("message");
         //We expect the count of edited transactions returned to be equal to 2 (the two transactions we placed in the database)
-        expect(response.body.data).toHaveProperty(
-          "username",
-          testTransaction.username
-        );
-        expect(response.body.data).toHaveProperty(
-          "amount",
-          testTransaction.amount
-        );
-        expect(response.body.data).toHaveProperty("type", testTransaction.type);
-        //Must be called at the end of every test or the test will fail while waiting for it to be called
-        //done();
       });
   });
 });
@@ -3355,6 +3344,7 @@ describe("deleteTransaction", () => {
         expect(response.body.data).toEqual({
           acknowledged: true,
           deletedCount: 1,
+          message: "Transaction deleted"
         });
       });
   });
@@ -3416,7 +3406,7 @@ describe("deleteTransaction", () => {
       refreshToken: testerAccessTokenValid,
     };
     const testTransaction = {
-      username: testUser.username,
+      username: testAdmin.username,
       amount: 9000,
       type: "test",
     };
@@ -3471,7 +3461,7 @@ describe("deleteTransaction", () => {
       .send({ _id: createdID }) //Definition of the request body
       .then((response) => {
         expect(response.status).toBe(400);
-        expect(response.body.message).toEqual("User or transaction not found");
+        expect(response.body.message).toEqual("User not found");
       });
   });
 
@@ -3503,7 +3493,7 @@ describe("deleteTransaction", () => {
       .send({ _id: createdID }) //Definition of the request body
       .then((response) => {
         expect(response.status).toBe(400);
-        expect(response.body.message).toEqual("User or transaction not found");
+        expect(response.body.message).toEqual("Transaction not found");
       });
   });
 
@@ -3589,6 +3579,7 @@ describe("deleteTransactions", () => {
         expect(response.body.data).toEqual({
           acknowledged: true,
           deletedCount: createdIDs.length,
+          message:"Transactions deleted"
         });
       });
   });

@@ -5,6 +5,7 @@ import {
   handleAmountFilterParams,
   verifyAuth,
 } from "./utils.js";
+import jwt from "jsonwebtoken";
 
 /**
  * Create a new category
@@ -35,7 +36,7 @@ export const createCategory = async (req, res) => {
     if (existing !== null) {
       throw new Error("Category already exists");
     }
-    const new_categories = new categories({ type:newType, color:newColor });
+    const new_categories = new categories({ type: newType, color: newColor });
     await new_categories.save();
     res.status(200).json({
       data: { type: newType, color: newColor },
@@ -83,9 +84,6 @@ export const updateCategory = async (req, res) => {
     if (oldCat === null) {
       throw new Error("Old category type does not exist");
     }
-    if (newColor.length !== 7 || newColor[0] !== "#") {
-      throw new Error("Wrong format for color");
-    }
 
     const alreadyExists = await categories.findOne({ type: newType }); //if new type value refers to an existing category, fails
     if (alreadyExists !== null) {
@@ -102,8 +100,10 @@ export const updateCategory = async (req, res) => {
     );
 
     return res.status(200).json({
-      message: "Update completed successfully",
-      count: updTransactions.modifiedCount,
+      data: {
+        message: "Update completed successfully",
+        count: updTransactions.modifiedCount,
+      },
     });
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -167,8 +167,10 @@ export const updateCategory = async (req, res) => {
           const updated = await transactions.updateMany({type: {$in: types}},
               {$set: {type: oldestCat[0].type}});
           return res.status(200).json({
-            message: "Deletion completed successfully",
-            count: updated.modifiedCount
+            data: {
+              message: "Deletion completed successfully",
+              count: updated.modifiedCount
+            }
           });
         }
     
@@ -180,8 +182,10 @@ export const updateCategory = async (req, res) => {
           const updated = await transactions.updateMany({type: {$in: typesRemove}},
               {$set: {type: oldestCat[0].type}});
           return res.status(200).json({
-            message: "Deletion completed successfully",
-            count: updated.modifiedCount,
+            data: {
+              message: "Deletion completed successfully",
+              count: updated.modifiedCount,
+            }
           });
         }
       } catch (error) {
@@ -237,7 +241,7 @@ export const createTransaction = async (req, res) => {
       username === "" ||
       type === "" ||
       amount === "" ||
-      parseFloat(amount) === NaN
+      isNaN(parseFloat(amount))
     ) {
       return res.status(400).json({
         message: "Invalid parameters",
@@ -246,44 +250,55 @@ export const createTransaction = async (req, res) => {
     }
     const caller_username = req.params.username;
     let category_exists = await categories.find({ type: type });
-    if (!category_exists){
-      category_exists=[];
+    if (!category_exists) {
+      category_exists = [];
+    }
+    if (caller_username != username) {
+      return res.status(400).json({
+        refreshedTokenMessage: res.locals.refreshedTokenMessage,
+        message: "Username dosen't match transaction's username",
+      });
     }
     const user_body = await User.findOne({ username: username });
-    const user_params = await User.findOne({ username: caller_username });
     const userAuth = verifyAuth(req, res, {
       authType: "User",
       username: caller_username,
     });
-    if (category_exists.length > 0 && user_body && user_params) {
+    const cookie = req.cookies;
+    const decodedAccessToken = await jwt.verify(
+      cookie.accessToken,
+      process.env.ACCESS_KEY
+    );
+    if (decodedAccessToken.username!=caller_username){
+      return res.status(401).json({
+        refreshedTokenMessage: res.locals.refreshedTokenMessage,
+        message: "Unauthorized",
+      });
+    }
+    if (category_exists.length > 0 && user_body) {
       if (userAuth.authorized) {
-        if (caller_username == username) {
-          const new_transactions = new transactions({ username, amount, type });
-          new_transactions.save().then((data) =>
+        await transactions
+          .create({ username: username, amount: amount, type: type })
+          .then((data) =>
             res.status(200).json({
               data,
               message: "Transaction created",
               refreshedTokenMessage: res.locals.refreshedTokenMessage,
             })
           );
-        } else {
-          return res.status(400).json({
-            refreshedTokenMessage: res.locals.refreshedTokenMessage,
-            message: "Username dosen't match transaction's username",
-          });
-        }
       } else {
         const adminAuth = verifyAuth(req, res, { authType: "Admin" });
         ///if the user is an Admin ok, otherwise unauthorized
         if (adminAuth.authorized) {
-          const new_transactions = new transactions({ username, amount, type });
-          new_transactions.save().then((data) =>
-            res.status(200).json({
-              data,
-              message: "Transaction created",
-              refreshedTokenMessage: res.locals.refreshedTokenMessage,
-            })
-          );
+          await transactions
+            .create({ username: username, amount: amount, type: type })
+            .then((data) =>
+              res.status(200).json({
+                data,
+                message: "Transaction created",
+                refreshedTokenMessage: res.locals.refreshedTokenMessage,
+              })
+            );
         } else {
           return res.status(401).json({
             refreshedTokenMessage: res.locals.refreshedTokenMessage,
@@ -516,8 +531,8 @@ export const getTransactionsByUserByCategory = async (req, res) => {
     const cat = req.params.category;
     const user = await User.findOne({ username: username });
     let category = await categories.find({ type: cat });
-    if (!category){
-      category=[];
+    if (!category) {
+      category = [];
     }
     if (user && category.length > 0) {
       if (req.url.includes("/users/" + username + "/transactions")) {
@@ -786,8 +801,8 @@ export const getTransactionsByGroupByCategory = async (req, res) => {
     const categoryType = req.params.category;
     const group = await Group.findOne({ name: groupName });
     let category = await categories.find({ type: categoryType });
-    if (!category){
-      category=[];
+    if (!category) {
+      category = [];
     }
     if (group && category.length > 0) {
       const emails = group.members.map((member) => member.email);
@@ -933,10 +948,22 @@ export const deleteTransaction = async (req, res) => {
       const username = req.params.username;
       let transaction = await transactions.find({ _id: id });
       const user = await User.findOne({ username: username });
-      if (!transaction){
-        transaction=[];
-      }
-      if (user && transaction.length > 0) {
+      if (!transaction || transaction.length === 0) {
+        return res.status(400).json({
+          refreshedTokenMessage: res.locals.refreshedTokenMessage,
+          message: "Transaction not found",
+        });
+      } else if (!user) {
+        return res.status(400).json({
+          refreshedTokenMessage: res.locals.refreshedTokenMessage,
+          message: "User not found",
+        });
+      } else if (transaction[0].username != username) {
+        return res.status(400).json({
+          refreshedTokenMessage: res.locals.refreshedTokenMessage,
+          message: "Transaction does not belong to the calling user",
+        });
+      } else {
         const caller_username = req.params.username;
         const userAuth = verifyAuth(req, res, {
           authType: "User",
@@ -946,7 +973,7 @@ export const deleteTransaction = async (req, res) => {
         if (userAuth.authorized) {
           const data = await transactions.deleteOne({ _id: id });
           return res.status(200).json({
-            data: data,
+            data: { ...data, message: "Transaction deleted" },
             refreshedTokenMessage: res.locals.refreshedTokenMessage,
             message: "Transaction deleted",
           });
@@ -967,11 +994,6 @@ export const deleteTransaction = async (req, res) => {
             });
           }
         }
-      } else {
-        return res.status(400).json({
-          refreshedTokenMessage: res.locals.refreshedTokenMessage,
-          message: "User or transaction not found",
-        });
       }
     }
   } catch (error) {
@@ -998,23 +1020,30 @@ export const deleteTransactions = async (req, res) => {
       });
     } else {
       for (const id of ids) {
-        let transaction = await transactions.find({ _id: id });
-        if (!transaction) {
-          transaction=[];
-        }
-          if (!id || id === "" || !transaction.length > 0) {
+        if (!id || id === "") {
+          return res.status(400).json({
+            refreshedTokenMessage: res.locals.refreshedTokenMessage,
+            message: "Invalid ID:" + id,
+          });
+        } else {
+          let transaction = await transactions.find({ _id: id });
+          if (!transaction) {
+            transaction = [];
+          }
+          if (!transaction.length > 0) {
             return res.status(400).json({
               refreshedTokenMessage: res.locals.refreshedTokenMessage,
               message: "Invalid ID:" + id,
             });
           }
+        }
       }
       const adminAuth = verifyAuth(req, res, { authType: "Admin" });
       ///if the user is an Admin ok, otherwise unauthorized
       if (adminAuth.authorized) {
         const data = await transactions.deleteMany({ _id: { $in: ids } });
         return res.status(200).json({
-          data: data,
+          data: { ...data, message: "Transactions deleted" },
           refreshedTokenMessage: res.locals.refreshedTokenMessage,
           message: "Transactions deleted",
         });

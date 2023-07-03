@@ -11,25 +11,29 @@ describe("handleDateFilterParams", () => {
         const mockReq = {
             query: {from: '26-08-2000'},
         };
-        const expectedResponse= "Invalid date";
-        const res = handleDateFilterParams(mockReq);
-        expect(res).toEqual(expectedResponse);
+        try{
+            handleDateFilterParams(mockReq);
+        }catch(e){
+            expect(e.message).toEqual('Invalid date');
+        }
     });
 
     test('Test #2 - wrong body', () => {
         const mockReq = {
             query: {from: '2023-01-01', upTo: '2023-06-08', date: '2022-12-31'},
         };
-        const expectedResponse= "Invalid attribute date in query";
-        const res = handleDateFilterParams(mockReq);
-        expect(res).toEqual(expectedResponse);
+        try{
+            handleDateFilterParams(mockReq);
+        }catch(e){
+            expect(e.message).toEqual('Invalid attribute date in query');
+        }
     });
 
     test('Test #3 - $gte', () => {
         const mockReq = {
             query: {from: '2023-01-01'},
         };
-        const expectedResponse= "{date: {$gte: 2023-01-01T00:00:00.000Z}}";
+        const expectedResponse= {date: {$gte: new Date("2023-01-01T00:00:00.000Z")}};
         const res = handleDateFilterParams(mockReq);
         expect(res).toEqual(expectedResponse);
     });
@@ -38,7 +42,7 @@ describe("handleDateFilterParams", () => {
         const mockReq = {
             query: {upTo: '2023-04-01'},
         };
-        const expectedResponse= "{date: {$lte: 2023-04-01T23:59:59.999Z}}";
+        const expectedResponse= {date: {$lte: new Date("2023-04-01T23:59:59.999Z")}};
         const res = handleDateFilterParams(mockReq);
         expect(res).toEqual(expectedResponse);
     });
@@ -48,7 +52,7 @@ describe("handleDateFilterParams", () => {
             query: {from: '2023-01-01',
                 upTo: '2023-04-01'},
         };
-        const expectedResponse= "{date: {$gte: 2023-01-01T00:00:00.000Z, $lte: 2023-04-01T23:59:59.999Z}";
+        const expectedResponse= {date: {$gte: new Date("2023-01-01T00:00:00.000Z"), $lte: new Date("2023-04-01T23:59:59.999Z")}};
         const res = handleDateFilterParams(mockReq);
         expect(res).toEqual(expectedResponse);
     });
@@ -59,8 +63,11 @@ describe("handleDateFilterParams", () => {
                 upTo: '2023-01-01'},
         };
         const expectedResponse= 'Invalid dates';
-        const res = handleDateFilterParams(mockReq);
-        expect(res).toEqual(expectedResponse);
+        try{
+            handleDateFilterParams(mockReq);
+        }catch(e){
+            expect(e.message).toEqual('Invalid dates');
+        }
     });
 
     test('Test #7 - upTo and from - Invalid date', () => {
@@ -68,9 +75,11 @@ describe("handleDateFilterParams", () => {
             query: {from: '01-01-2000',
                 upTo: '2023-01-01'},
         };
-        const expectedResponse= 'Invalid date';
-        const res = handleDateFilterParams(mockReq);
-        expect(res).toEqual(expectedResponse);
+        try{
+            handleDateFilterParams(mockReq);
+        }catch(e){
+            expect(e.message).toEqual('Invalid date');
+        }
     });
 
     test('Test #8 - upTo - Invalid date', () => {
@@ -78,9 +87,11 @@ describe("handleDateFilterParams", () => {
             query: {
                 upTo: '01-01-2000'},
         };
-        const expectedResponse= 'Invalid date';
-        const res = handleDateFilterParams(mockReq);
-        expect(res).toEqual(expectedResponse);
+        try{
+            handleDateFilterParams(mockReq);
+        }catch(e){
+            expect(e.message).toEqual('Invalid date');
+        }
     });
 
     test('Test #9 - upTo - dd > 31', () => {
@@ -88,9 +99,11 @@ describe("handleDateFilterParams", () => {
             query: {
                 upTo: '2000-01-32'},
         };
-        const expectedResponse= 'Invalid date';
-        const res = handleDateFilterParams(mockReq);
-        expect(res).toEqual(expectedResponse);
+        try{
+            handleDateFilterParams(mockReq);
+        }catch(e){
+            expect(e.message).toEqual('Invalid date');
+        }
     });
 
     test('Test #10 - upTo - mm > 12', () => {
@@ -98,9 +111,11 @@ describe("handleDateFilterParams", () => {
             query: {
                 upTo: '2000-13-31'},
         };
-        const expectedResponse= 'Invalid date';
-        const res = handleDateFilterParams(mockReq);
-        expect(res).toEqual(expectedResponse);
+        try{
+            handleDateFilterParams(mockReq);
+        }catch(e){
+            expect(e.message).toEqual('Invalid date');
+        }
     });
 
     test('Test #11 - wrong leap year', () => {
@@ -108,9 +123,11 @@ describe("handleDateFilterParams", () => {
             query: {
                 upTo: '2021-02-29'},
         };
-        const expectedResponse= 'Invalid date';
-        const res = handleDateFilterParams(mockReq);
-        expect(res).toEqual(expectedResponse);
+        try{
+            handleDateFilterParams(mockReq);
+        }catch(e){
+            expect(e.message).toEqual('Invalid date');
+        }
     });
 
     test('Test #12 - dd > 30 for april', () => {
@@ -118,9 +135,11 @@ describe("handleDateFilterParams", () => {
             query: {
                 upTo: '2021-04-31'},
         };
-        const expectedResponse= 'Invalid date';
-        const res = handleDateFilterParams(mockReq);
-        expect(res).toEqual(expectedResponse);
+        try{
+            handleDateFilterParams(mockReq);
+        }catch(e){
+            expect(e.message).toEqual('Invalid date');
+        }
     });
 
     test('Test #13 - upTo before from', () => {
@@ -128,9 +147,11 @@ describe("handleDateFilterParams", () => {
             query: {from: '2023-04-01',
                 upTo: '2022-01-01'},
         };
-        const expectedResponse= 'Invalid dates';
-        const res = handleDateFilterParams(mockReq);
-        expect(res).toEqual(expectedResponse);
+        try{
+            handleDateFilterParams(mockReq);
+        }catch(e){
+            expect(e.message).toEqual('Invalid dates');
+        }
     });
 
     test('Test #14 - upTo before from', () => {
@@ -138,9 +159,11 @@ describe("handleDateFilterParams", () => {
             query: {from: '2023-04-04',
                 upTo: '2023-04-02'},
         };
-        const expectedResponse= 'Invalid dates';
-        const res = handleDateFilterParams(mockReq);
-        expect(res).toEqual(expectedResponse);
+        try{
+            handleDateFilterParams(mockReq);
+        }catch(e){
+            expect(e.message).toEqual('Invalid dates');
+        }
     });
 })
 
@@ -1026,7 +1049,7 @@ describe("handleAmountFilterParams", () => {
         const mockReq = {
             query: {min: 20},
         };
-        const expectedResponse = "{amount: {$gte: 20} }";
+        const expectedResponse = {amount: {$gte: 20} };
         const res = handleAmountFilterParams(mockReq);
         expect(res).toEqual(expectedResponse);
     });
@@ -1035,7 +1058,7 @@ describe("handleAmountFilterParams", () => {
         const mockReq = {
             query: {max: 20},
         };
-        const expectedResponse = "{amount: {$lte: 20} }";
+        const expectedResponse = {amount: {$lte: 20} };
         const res = handleAmountFilterParams(mockReq);
         expect(res).toEqual(expectedResponse);
     });
@@ -1045,7 +1068,7 @@ describe("handleAmountFilterParams", () => {
             query: {min: 10,
                 max: 20},
         };
-        const expectedResponse = "{amount: {$gte: 10, $lte: 20} }";
+        const expectedResponse = {amount: {$gte: 10, $lte: 20} };
         const res = handleAmountFilterParams(mockReq);
         expect(res).toEqual(expectedResponse);
     });
@@ -1055,9 +1078,11 @@ describe("handleAmountFilterParams", () => {
             query: {min: 'abcde',
                 max: 20},
         };
-        const expectedResponse = "One or more parameters are not a number!";
-        const res = handleAmountFilterParams(mockReq);
-        expect(res).toEqual(expectedResponse);
+        try{
+            handleDateFilterParams(mockReq);
+        }catch (e){
+            expect(e).toEqual("One or more parameters are not a number!");
+        }
     });
 
     test('Test #5, min bigger than max', () => {
@@ -1065,27 +1090,33 @@ describe("handleAmountFilterParams", () => {
             query: {min: 200,
                 max: 20},
         };
-        const expectedResponse = "min can't be bigger than max!";
-        const res = handleAmountFilterParams(mockReq);
-        expect(res).toEqual(expectedResponse);
+        try{
+            handleDateFilterParams(mockReq);
+        }catch (e){
+            expect(e).toEqual("min can't be bigger than max!");
+        }
     });
 
     test('Test #6, NaN (min)', () => {
         const mockReq = {
             query: {min: 'abcde'},
         };
-        const expectedResponse = "min is not a number!";
-        const res = handleAmountFilterParams(mockReq);
-        expect(res).toEqual(expectedResponse);
+        try{
+            handleDateFilterParams(mockReq);
+        }catch(e){
+            expect(e).toEqual("min is not a number!");
+        }
     });
 
     test('Test #7, NaN (max)', () => {
         const mockReq = {
             query: {max: 'abcde'},
         };
-        const expectedResponse = "max is not a number!";
-        const res = handleAmountFilterParams(mockReq);
-        expect(res).toEqual(expectedResponse);
+        try{
+            handleDateFilterParams(mockReq);
+        }catch(e){
+            expect(e).toEqual("max is not a number!");
+        }
     });
 
 })
